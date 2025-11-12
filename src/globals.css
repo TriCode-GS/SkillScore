@@ -3,3 +3,5 @@
 :root { 
     scroll-behavior: smooth; 
 }
+
+@custom-variant dark (&:where(.dark, .dark *));

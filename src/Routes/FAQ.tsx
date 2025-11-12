@@ -49,32 +49,32 @@ const FAQ = ({ onNavigate }: FAQProps) => {
   return (
     <div className="min-h-screen flex flex-col">
       <Cabecalho onNavigate={onNavigate} />
-      <main className="flex-grow bg-white">
+      <main className="flex-grow bg-white dark:bg-gray-900">
         <section className="container mx-auto px-4 py-8 sm:py-12 md:py-16">
           <div className="max-w-4xl mx-auto">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-8 sm:mb-12 text-center px-4">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-8 sm:mb-12 text-center px-4">
               Perguntas Frequentes
             </h1>
             <div className="space-y-4 sm:space-y-6">
               {faqs.map((faq, index) => (
                 <div 
                   key={index}
-                  className="bg-white border-2 border-indigo-200 rounded-lg p-4 sm:p-6 shadow-md hover:shadow-lg transition-shadow"
+                  className="bg-white dark:bg-gray-800 border-2 border-indigo-200 dark:border-indigo-800 rounded-lg p-4 sm:p-6 shadow-md hover:shadow-lg transition-shadow"
                 >
-                  <h2 className="text-lg sm:text-xl font-bold text-indigo-600 mb-2 sm:mb-3">
+                  <h2 className="text-lg sm:text-xl font-bold text-indigo-600 dark:text-indigo-400 mb-2 sm:mb-3">
                     {faq.pergunta}
                   </h2>
-                  <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
+                  <p className="text-sm sm:text-base text-gray-700 dark:text-gray-300 leading-relaxed">
                     {faq.resposta}
                   </p>
                 </div>
               ))}
             </div>
-            <div className="mt-8 sm:mt-12 bg-indigo-50 border-2 border-indigo-200 rounded-lg p-6 sm:p-8 text-center">
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">
+            <div className="mt-8 sm:mt-12 bg-indigo-50 dark:bg-gray-800 border-2 border-indigo-200 dark:border-indigo-800 rounded-lg p-6 sm:p-8 text-center">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4">
                 Ainda tem dúvidas?
               </h2>
-              <p className="text-sm sm:text-base text-gray-700 mb-4 sm:mb-6">
+              <p className="text-sm sm:text-base text-gray-700 dark:text-gray-300 mb-4 sm:mb-6">
                 Entre em contato conosco para mais informações sobre nossos planos e serviços.
               </p>
             </div>

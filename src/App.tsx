@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { ThemeProvider } from './Contexto/TemaContexto'
 import Home from './Routes/Home'
 import Sobre from './Routes/Sobre'
 import Integrantes from './Routes/Integrantes'
@@ -24,7 +25,11 @@ function App() {
     }
   }
 
-  return renderizarPagina()
+  return (
+    <ThemeProvider>
+      {renderizarPagina()}
+    </ThemeProvider>
+  )
 }
 
 export default App

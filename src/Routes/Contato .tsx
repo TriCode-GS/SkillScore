@@ -1,7 +1,7 @@
 import Cabecalho from '../Components/Cabecalho/Cabecalho'
 import Rodape from '../Components/Rodape/Rodape'
 import Botao from '../Components/Botao/Botao'
-import iconWhatsApp from '../assets/img/Redes Sociais/WhatsApp.png'
+import iconWhatsApp from '../assets/img/RedesSociais/WhatsApp.png'
 
 interface ContatoProps {
   onNavigate?: (pagina: string) => void
@@ -12,19 +12,19 @@ const Contato = ({ onNavigate }: ContatoProps) => {
   return (
     <div className="min-h-screen flex flex-col">
       <Cabecalho onNavigate={onNavigate} />
-      <main className="flex-grow bg-gray-50">
+      <main className="flex-grow bg-gray-50 dark:bg-gray-900">
         <section className="container mx-auto px-4 py-8 sm:py-12 md:py-16">
           <div className="max-w-4xl mx-auto">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4 sm:mb-6 text-center px-4">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6 text-center px-4">
               Entre em Contato
             </h1>
 
             <div className="max-w-2xl mx-auto mb-6 sm:mb-8">
-              <div className="bg-indigo-50 border-2 border-indigo-200 rounded-lg p-6">
-                <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4">
+              <div className="bg-indigo-50 dark:bg-gray-800 border-2 border-indigo-200 dark:border-indigo-800 rounded-lg p-6">
+                <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4">
                   Precisa de Ajuda?
                 </h3>
-                <p className="text-sm sm:text-base text-gray-700 mb-4">
+                <p className="text-sm sm:text-base text-gray-700 dark:text-gray-300 mb-4">
                   Consulte nossa página de FAQ para respostas rápidas às dúvidas mais comuns.
                 </p>
                 <Botao
@@ -42,32 +42,32 @@ const Contato = ({ onNavigate }: ContatoProps) => {
             </div>
 
             <div className="max-w-2xl mx-auto mb-6 sm:mb-8">
-              <div className="bg-white rounded-lg shadow-md p-6">
-                <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+                <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4">
                   Informações de Contato
                 </h3>
                 <div className="space-y-3 sm:space-y-4">
                   <div>
-                    <h4 className="text-sm sm:text-base font-semibold text-indigo-600 mb-1">
+                    <h4 className="text-sm sm:text-base font-semibold text-indigo-600 dark:text-indigo-400 mb-1">
                       Empresa
                     </h4>
-                    <p className="text-sm sm:text-base text-gray-700">
+                    <p className="text-sm sm:text-base text-gray-700 dark:text-gray-300">
                       TriCode
                     </p>
                   </div>
                   <div>
-                    <h4 className="text-sm sm:text-base font-semibold text-indigo-600 mb-1">
+                    <h4 className="text-sm sm:text-base font-semibold text-indigo-600 dark:text-indigo-400 mb-1">
                       Localização
                     </h4>
-                    <p className="text-sm sm:text-base text-gray-700">
+                    <p className="text-sm sm:text-base text-gray-700 dark:text-gray-300">
                       São Paulo, Brasil
                     </p>
                   </div>
                   <div>
-                    <h4 className="text-sm sm:text-base font-semibold text-indigo-600 mb-1">
+                    <h4 className="text-sm sm:text-base font-semibold text-indigo-600 dark:text-indigo-400 mb-1">
                       Horário de Atendimento
                     </h4>
-                    <p className="text-sm sm:text-base text-gray-700">
+                    <p className="text-sm sm:text-base text-gray-700 dark:text-gray-300">
                       Segunda a Sexta<br />
                       08h às 18h
                     </p>
@@ -76,7 +76,7 @@ const Contato = ({ onNavigate }: ContatoProps) => {
               </div>
             </div>
 
-            <p className="text-base sm:text-lg text-gray-600 mb-6 sm:mb-8 text-center px-4">
+            <p className="text-base sm:text-lg text-gray-600 dark:text-gray-300 mb-6 sm:mb-8 text-center px-4">
               Ainda tem alguma dúvida ou sugestão? Estamos aqui para ajudar!
             </p>
 
