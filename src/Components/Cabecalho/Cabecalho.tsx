@@ -24,8 +24,12 @@ const Cabecalho = ({ onNavigate }: CabecalhoProps) => {
             onClick={(e) => handleClick(e, 'home')}
             className="text-xl sm:text-2xl font-bold text-indigo-600"
           >
-            SkillScore
-          </a>
+            <img 
+              src="/LogoSkillScore.png" 
+              alt="SkillScore" 
+              className="h-8 sm:h-10 w-auto"
+            />
+            </a>
           <div className="hidden md:flex items-center gap-6">
             <a 
               href="/" 
