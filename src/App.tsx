@@ -4,7 +4,8 @@ import Home from './Routes/Home'
 import Sobre from './Routes/Sobre'
 import Integrantes from './Routes/Integrantes'
 import FAQ from './Routes/FAQ'
-import Contato from './Routes/Contato '
+import Contato from './Routes/Contato'
+import Login from './Routes/Login'
 
 function App() {
   const [paginaAtual, setPaginaAtual] = useState('home')
@@ -19,6 +20,8 @@ function App() {
         return <FAQ onNavigate={setPaginaAtual} />
       case 'contato':
         return <Contato onNavigate={setPaginaAtual} />
+      case 'login':
+        return <Login onNavigate={setPaginaAtual} />
       case 'home':
       default:
         return <Home onNavigate={setPaginaAtual} />
