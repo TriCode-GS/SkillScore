@@ -29,7 +29,7 @@ const Cabecalho = ({ onNavigate }: CabecalhoProps) => {
               alt="SkillScore" 
               className="h-8 sm:h-10 w-auto"
             />
-            </a>
+          </a>
           <div className="hidden md:flex items-center gap-6">
             <a 
               href="/" 
@@ -58,6 +58,13 @@ const Cabecalho = ({ onNavigate }: CabecalhoProps) => {
               className="text-gray-700 hover:text-indigo-600 transition-colors"
             >
               FAQ
+            </a>
+            <a 
+              href="/contato" 
+              onClick={(e) => handleClick(e, 'contato')}
+              className="text-gray-700 hover:text-indigo-600 transition-colors"
+            >
+              Contato
             </a>
           </div>
           <button
@@ -101,9 +108,16 @@ const Cabecalho = ({ onNavigate }: CabecalhoProps) => {
               <a 
                 href="/faq" 
                 onClick={(e) => handleClick(e, 'faq')}
-                className="px-4 py-4 text-gray-700 hover:text-white hover:bg-indigo-600 active:bg-indigo-700 active:text-white transition-all duration-200 font-medium"
+                className="px-4 py-4 text-gray-700 hover:text-white hover:bg-indigo-600 active:bg-indigo-700 active:text-white transition-all duration-200 font-medium border-b-2 border-gray-200"
               >
                 FAQ
+              </a>
+              <a 
+                href="/contato" 
+                onClick={(e) => handleClick(e, 'contato')}
+                className="px-4 py-4 text-gray-700 hover:text-white hover:bg-indigo-600 active:bg-indigo-700 active:text-white transition-all duration-200 font-medium"
+              >
+                Contato
               </a>
             </div>
           </div>

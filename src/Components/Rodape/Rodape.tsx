@@ -33,7 +33,7 @@ const Rodape = ({ onNavigate }: RodapeProps) => {
                   onClick={(e) => handleClick(e, 'home')}
                   className="text-gray-400 hover:text-indigo-400 transition-colors"
                 >
-                Home
+                  Home
                 </a>
               </li>
               <li>
@@ -42,7 +42,7 @@ const Rodape = ({ onNavigate }: RodapeProps) => {
                   onClick={(e) => handleClick(e, 'sobre')}
                   className="text-gray-400 hover:text-indigo-400 transition-colors"
                 >
-                Sobre
+                  Sobre
                 </a>
               </li>
               <li>
@@ -51,7 +51,7 @@ const Rodape = ({ onNavigate }: RodapeProps) => {
                   onClick={(e) => handleClick(e, 'integrantes')}
                   className="text-gray-400 hover:text-indigo-400 transition-colors"
                 >
-                Integrantes
+                  Integrantes
                 </a>
               </li>
               <li>
@@ -61,6 +61,15 @@ const Rodape = ({ onNavigate }: RodapeProps) => {
                   className="text-gray-400 hover:text-indigo-400 transition-colors"
                 >
                   FAQ
+                </a>
+              </li>
+              <li>
+                <a 
+                  href="/contato" 
+                  onClick={(e) => handleClick(e, 'contato')}
+                  className="text-gray-400 hover:text-indigo-400 transition-colors"
+                >
+                  Contato
                 </a>
               </li>
             </ul>
