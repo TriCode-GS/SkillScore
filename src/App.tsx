@@ -2,6 +2,7 @@ import { useState } from 'react'
 import Home from './Routes/Home'
 import Sobre from './Routes/Sobre'
 import Integrantes from './Routes/Integrantes'
+import FAQ from './Routes/FAQ'
 
 function App() {
  const [paginaAtual, setPaginaAtual] = useState('home')
@@ -12,6 +13,8 @@ function App() {
         return <Sobre onNavigate={setPaginaAtual} />
       case 'integrantes':
         return <Integrantes onNavigate={setPaginaAtual} />
+      case 'faq':
+        return <FAQ onNavigate={setPaginaAtual} />
       case 'home':
       default:
         return <Home onNavigate={setPaginaAtual} />

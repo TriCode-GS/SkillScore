@@ -54,6 +54,15 @@ const Rodape = ({ onNavigate }: RodapeProps) => {
                 Integrantes
                 </a>
               </li>
+              <li>
+                <a 
+                  href="/faq" 
+                  onClick={(e) => handleClick(e, 'faq')}
+                  className="text-gray-400 hover:text-indigo-400 transition-colors"
+                >
+                  FAQ
+                </a>
+              </li>
             </ul>
           </div>
           
