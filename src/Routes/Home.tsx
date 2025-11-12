@@ -226,7 +226,7 @@ const Home = ({ onNavigate }: HomeProps) => {
           </div>
         </section>
       </main>
-      <Rodape />
+      <Rodape onNavigate={onNavigate} />
     </div>
   )
 }

@@ -34,7 +34,7 @@ const Sobre = ({ onNavigate }: SobreProps) => {
           </div>
         </section>
       </main>
-      <Rodape />
+      <Rodape onNavigate={onNavigate} />
     </div>
   )
 }

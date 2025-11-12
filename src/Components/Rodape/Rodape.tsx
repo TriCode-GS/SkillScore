@@ -1,4 +1,16 @@
-const Rodape = () => {
+interface RodapeProps {
+  onNavigate?: (pagina: string) => void
+}
+
+const Rodape = ({ onNavigate }: RodapeProps) => {
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>, pagina: string) => {
+    e.preventDefault()
+    if (onNavigate) {
+      onNavigate(pagina)
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
   return (
     <footer className="bg-gray-900 text-white">
       <div className="container mx-auto px-4 py-8 sm:py-10 md:py-12">
@@ -16,23 +28,30 @@ const Rodape = () => {
             <h4 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Links Rápidos</h4>
             <ul className="space-y-2">
               <li>
-                <a href="/" className="text-gray-400 hover:text-indigo-400 transition-colors">
-                  Home
+                <a 
+                  href="/" 
+                  onClick={(e) => handleClick(e, 'home')}
+                  className="text-gray-400 hover:text-indigo-400 transition-colors"
+                >
+                Home
                 </a>
               </li>
               <li>
-                <a href="/sobre" className="text-gray-400 hover:text-indigo-400 transition-colors">
-                  Sobre
+                <a 
+                  href="/sobre" 
+                  onClick={(e) => handleClick(e, 'sobre')}
+                  className="text-gray-400 hover:text-indigo-400 transition-colors"
+                >
+                Sobre
                 </a>
               </li>
               <li>
-                <a href="/integrantes" className="text-gray-400 hover:text-indigo-400 transition-colors">
-                  Integrantes
-                </a>
-              </li>
-              <li>
-                <a href="/faq" className="text-gray-400 hover:text-indigo-400 transition-colors">
-                  FAQ
+                <a 
+                  href="/integrantes" 
+                  onClick={(e) => handleClick(e, 'integrantes')}
+                  className="text-gray-400 hover:text-indigo-400 transition-colors"
+                >
+                Integrantes
                 </a>
               </li>
             </ul>
