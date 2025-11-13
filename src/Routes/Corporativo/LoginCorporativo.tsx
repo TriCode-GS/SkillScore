@@ -3,18 +3,36 @@ import Cabecalho from '../../Components/Cabecalho/Cabecalho'
 import Rodape from '../../Components/Rodape/Rodape'
 import Botao from '../../Components/Botao/Botao'
 
-interface LoginProps {
+interface LoginCorporativoProps {
   onNavigate?: (pagina: string) => void
 }
 
-const Login = ({ onNavigate }: LoginProps) => {
-  const [email, setEmail] = useState('')
+const LoginCorporativo = ({ onNavigate }: LoginCorporativoProps) => {
+  const [cnpj, setCnpj] = useState('')
+  const [razaoSocial, setRazaoSocial] = useState('')
   const [senha, setSenha] = useState('')
   const [lembrarMe, setLembrarMe] = useState(false)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    console.log('Login:', { email, senha })
+    console.log('Login Corporativo:', { cnpj, razaoSocial, senha })
+  }
+
+  const formatCNPJ = (value: string) => {
+    const numbers = value.replace(/\D/g, '')
+    if (numbers.length <= 14) {
+      return numbers
+        .replace(/^(\d{2})(\d)/, '$1.$2')
+        .replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3')
+        .replace(/\.(\d{3})(\d)/, '.$1/$2')
+        .replace(/(\d{4})(\d)/, '$1-$2')
+    }
+    return value
+  }
+
+  const handleCNPJChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatCNPJ(e.target.value)
+    setCnpj(formatted)
   }
 
   const getCheckboxClasses = () => {
@@ -38,28 +56,47 @@ const Login = ({ onNavigate }: LoginProps) => {
           <div className="max-w-md mx-auto">
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 sm:p-8 border-2 border-indigo-200 dark:border-indigo-800">
               <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2 sm:mb-4 text-center">
-                Login
+                Login Corporativo
               </h1>
               <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-6 sm:mb-8 text-center">
-                Entre com suas credenciais para acessar sua conta
+                Acesso para empresas e organizações
               </p>
               
               <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
                 <div>
                   <label 
-                    htmlFor="email" 
+                    htmlFor="cnpj" 
                     className="block text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2"
                   >
-                    Email
+                    CNPJ
                   </label>
                   <input
-                    type="email"
-                    id="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    type="text"
+                    id="cnpj"
+                    value={cnpj}
+                    onChange={handleCNPJChange}
+                    required
+                    maxLength={18}
+                    className="w-full px-4 py-2 sm:py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm sm:text-base"
+                    placeholder="00.000.000/0000-00"
+                  />
+                </div>
+                
+                <div>
+                  <label 
+                    htmlFor="razaoSocial" 
+                    className="block text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2"
+                  >
+                    Razão Social
+                  </label>
+                  <input
+                    type="text"
+                    id="razaoSocial"
+                    value={razaoSocial}
+                    onChange={(e) => setRazaoSocial(e.target.value)}
                     required
                     className="w-full px-4 py-2 sm:py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm sm:text-base"
-                    placeholder="seu@email.com"
+                    placeholder="Nome da empresa"
                   />
                 </div>
                 
@@ -81,7 +118,7 @@ const Login = ({ onNavigate }: LoginProps) => {
                   />
                 </div>
                 
-                <div className="flex items-center justify-between">
+                <div className="flex items-center">
                   <label className="flex items-center cursor-pointer group">
                     <div className="relative">
                       <input
@@ -105,12 +142,6 @@ const Login = ({ onNavigate }: LoginProps) => {
                       Lembrar-me
                     </span>
                   </label>
-                  <a
-                    href="#"
-                    className="text-sm sm:text-base text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
-                  >
-                    Esqueceu a senha?
-                  </a>
                 </div>
                 
                 <Botao
@@ -123,30 +154,13 @@ const Login = ({ onNavigate }: LoginProps) => {
                 </Botao>
               </form>
               
-              <div className="mt-6 sm:mt-8 space-y-4 text-center">
-                <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
-                  Não tem uma conta?{' '}
-                  <a
-                    href="#"
-                    className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-semibold transition-colors"
-                  >
-                    Cadastre-se
-                  </a>
-                </p>
-                <div className="pt-4 border-t border-gray-200 dark:border-gray-700 space-y-3">
-                  <button
-                    onClick={() => onNavigate?.('loginCorporativo')}
-                    className="w-full px-4 py-2.5 text-sm sm:text-base font-semibold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-900/30 border-2 border-indigo-300 dark:border-indigo-700 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-900/50 hover:border-indigo-400 dark:hover:border-indigo-600 transition-all duration-200"
-                  >
-                    Login Corporativo
-                  </button>
-                  <button
-                    onClick={() => onNavigate?.('loginAdmin')}
-                    className="text-sm sm:text-base text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-semibold transition-colors"
-                  >
-                    Acesso Administrador
-                  </button>
-                </div>
+              <div className="mt-6 sm:mt-8 text-center">
+                <button
+                  onClick={() => onNavigate?.('login')}
+                  className="text-sm sm:text-base text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-semibold transition-colors"
+                >
+                  Voltar para login de usuário
+                </button>
               </div>
             </div>
           </div>
@@ -157,5 +171,5 @@ const Login = ({ onNavigate }: LoginProps) => {
   )
 }
 
-export default Login
+export default LoginCorporativo
 

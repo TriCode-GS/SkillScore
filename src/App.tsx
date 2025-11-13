@@ -7,6 +7,7 @@ import FAQ from './Routes/Usuario/FAQ'
 import Contato from './Routes/Usuario/Contato'
 import Login from './Routes/Usuario/Login'
 import LoginAdmin from './Routes/Admin/LoginAdmin'
+import LoginCorporativo from './Routes/Corporativo/LoginCorporativo'
 
 function App() {
   const [paginaAtual, setPaginaAtual] = useState('home')
@@ -25,6 +26,8 @@ function App() {
         return <Login onNavigate={setPaginaAtual} />
       case 'loginAdmin':
         return <LoginAdmin onNavigate={setPaginaAtual} />
+      case 'loginCorporativo':
+        return <LoginCorporativo onNavigate={setPaginaAtual} />
       case 'home':
       default:
         return <Home onNavigate={setPaginaAtual} />
