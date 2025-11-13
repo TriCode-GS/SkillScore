@@ -1,21 +1,20 @@
 import { useState } from 'react'
-import Cabecalho from '../Components/Cabecalho/Cabecalho'
-import Rodape from '../Components/Rodape/Rodape'
-import Botao from '../Components/Botao/Botao'
+import Cabecalho from '../../Components/Cabecalho/Cabecalho'
+import Rodape from '../../Components/Rodape/Rodape'
+import Botao from '../../Components/Botao/Botao'
 
-interface LoginProps {
+interface LoginAdminProps {
   onNavigate?: (pagina: string) => void
 }
 
-const Login = ({ onNavigate }: LoginProps) => {
+const LoginAdmin = ({ onNavigate }: LoginAdminProps) => {
   const [email, setEmail] = useState('')
   const [senha, setSenha] = useState('')
   const [lembrarMe, setLembrarMe] = useState(false)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    // Aqui você pode adicionar a lógica de autenticação
-    console.log('Login:', { email, senha })
+    console.log('Login Admin:', { email, senha })
   }
 
   const getCheckboxClasses = () => {
@@ -39,10 +38,10 @@ const Login = ({ onNavigate }: LoginProps) => {
           <div className="max-w-md mx-auto">
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 sm:p-8 border-2 border-indigo-200 dark:border-indigo-800">
               <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2 sm:mb-4 text-center">
-                Login
+                Login Administrador
               </h1>
               <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-6 sm:mb-8 text-center">
-                Entre com suas credenciais para acessar sua conta
+                Acesso restrito ao painel administrativo
               </p>
               
               <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
@@ -60,7 +59,7 @@ const Login = ({ onNavigate }: LoginProps) => {
                     onChange={(e) => setEmail(e.target.value)}
                     required
                     className="w-full px-4 py-2 sm:py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm sm:text-base"
-                    placeholder="seu@email.com"
+                    placeholder="admin@email.com"
                   />
                 </div>
                 
@@ -82,7 +81,7 @@ const Login = ({ onNavigate }: LoginProps) => {
                   />
                 </div>
                 
-                <div className="flex items-center justify-between">
+                <div className="flex items-center">
                   <label className="flex items-center cursor-pointer group">
                     <div className="relative">
                       <input
@@ -106,12 +105,6 @@ const Login = ({ onNavigate }: LoginProps) => {
                       Lembrar-me
                     </span>
                   </label>
-                  <a
-                    href="#"
-                    className="text-sm sm:text-base text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
-                  >
-                    Esqueceu a senha?
-                  </a>
                 </div>
                 
                 <Botao
@@ -125,15 +118,12 @@ const Login = ({ onNavigate }: LoginProps) => {
               </form>
               
               <div className="mt-6 sm:mt-8 text-center">
-                <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
-                  Não tem uma conta?{' '}
-                  <a
-                    href="#"
-                    className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-semibold transition-colors"
-                  >
-                    Cadastre-se
-                  </a>
-                </p>
+                <button
+                  onClick={() => onNavigate?.('login')}
+                  className="text-sm sm:text-base text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-semibold transition-colors"
+                >
+                  Voltar para login de usuário
+                </button>
               </div>
             </div>
           </div>
@@ -144,5 +134,5 @@ const Login = ({ onNavigate }: LoginProps) => {
   )
 }
 
-export default Login
+export default LoginAdmin
 

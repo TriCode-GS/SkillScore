@@ -1,6 +1,6 @@
-import Cabecalho from '../Components/Cabecalho/Cabecalho'
-import Rodape from '../Components/Rodape/Rodape'
-import Botao from '../Components/Botao/Botao'
+import Cabecalho from '../../Components/Cabecalho/Cabecalho'
+import Rodape from '../../Components/Rodape/Rodape'
+import Botao from '../../Components/Botao/Botao'
 
 interface HomeProps {
   onNavigate?: (pagina: string) => void

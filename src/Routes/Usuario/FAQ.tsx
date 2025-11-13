@@ -1,5 +1,5 @@
-import Cabecalho from '../Components/Cabecalho/Cabecalho'
-import Rodape from '../Components/Rodape/Rodape'
+import Cabecalho from '../../Components/Cabecalho/Cabecalho'
+import Rodape from '../../Components/Rodape/Rodape'
 
 interface FAQProps {
   onNavigate?: (pagina: string) => void

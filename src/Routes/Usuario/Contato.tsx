@@ -1,7 +1,7 @@
-import Cabecalho from '../Components/Cabecalho/Cabecalho'
-import Rodape from '../Components/Rodape/Rodape'
-import Botao from '../Components/Botao/Botao'
-import iconWhatsApp from '../assets/img/RedesSociais/WhatsApp.png'
+import Cabecalho from '../../Components/Cabecalho/Cabecalho'
+import Rodape from '../../Components/Rodape/Rodape'
+import Botao from '../../Components/Botao/Botao'
+import iconWhatsApp from '../../assets/img/RedesSociais/WhatsApp.png'
 
 interface ContatoProps {
   onNavigate?: (pagina: string) => void
@@ -28,13 +28,13 @@ const Contato = ({ onNavigate }: ContatoProps) => {
                   Consulte nossa página de FAQ para respostas rápidas às dúvidas mais comuns.
                 </p>
                 <Botao
-                  variant="secondary"
+                  variant="outline"
                   size="md"
                   onClick={() => {
                     onNavigate?.('faq')
                     window.scrollTo({ top: 0, behavior: 'smooth' })
                   }}
-                  className="w-full"
+                  className="w-full bg-transparent"
                 >
                   Ver FAQ
                 </Botao>
