@@ -28,13 +28,13 @@ const Contato = ({ onNavigate }: ContatoProps) => {
                   Consulte nossa página de FAQ para respostas rápidas às dúvidas mais comuns.
                 </p>
                 <Botao
-                  variant="secondary"
+                  variant="outline"
                   size="md"
                   onClick={() => {
                     onNavigate?.('faq')
                     window.scrollTo({ top: 0, behavior: 'smooth' })
                   }}
-                  className="w-full"
+                  className="w-full bg-transparent"
                 >
                   Ver FAQ
                 </Botao>
