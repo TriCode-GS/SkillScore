@@ -1,12 +1,12 @@
-import Cabecalho from '../Components/Cabecalho/Cabecalho'
-import Rodape from '../Components/Rodape/Rodape'
-import { useTheme } from '../Contexto/TemaContexto'
-import fotoLucas from '../assets/img/Integrantes/LucasSilvaGastãoPinheiro.jpg'
-import fotoGeovanne from '../assets/img/Integrantes/GeovanneConeglianPassos.png'
-import fotoGuilherme from '../assets/img/Integrantes/GuilhermeSoaresdeAlmeida.jpg'
-import iconGithubBlack from '../assets/img/RedesSociais/GithubBlack.png'
-import iconGithubWhite from '../assets/img/RedesSociais/GithubWhite.png'
-import iconLinkedin from '../assets/img/RedesSociais/linkedin.png'
+import Cabecalho from '../../Components/Cabecalho/Cabecalho'
+import Rodape from '../../Components/Rodape/Rodape'
+import { useTheme } from '../../Contexto/TemaContexto'
+import fotoLucas from '../../assets/img/Integrantes/LucasSilvaGastãoPinheiro.jpg'
+import fotoGeovanne from '../../assets/img/Integrantes/GeovanneConeglianPassos.png'
+import fotoGuilherme from '../../assets/img/Integrantes/GuilhermeSoaresdeAlmeida.jpg'
+import iconGithubBlack from '../../assets/img/RedesSociais/GithubBlack.png'
+import iconGithubWhite from '../../assets/img/RedesSociais/GithubWhite.png'
+import iconLinkedin from '../../assets/img/RedesSociais/linkedin.png'
 
 interface IntegrantesProps {
   onNavigate?: (pagina: string) => void

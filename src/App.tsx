@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { ThemeProvider } from './Contexto/TemaContexto'
-import Home from './Routes/Home'
-import Sobre from './Routes/Sobre'
-import Integrantes from './Routes/Integrantes'
-import FAQ from './Routes/FAQ'
-import Contato from './Routes/Contato'
-import Login from './Routes/Login'
+import Home from './Routes/Usuario/Home'
+import Sobre from './Routes/Usuario/Sobre'
+import Integrantes from './Routes/Usuario/Integrantes'
+import FAQ from './Routes/Usuario/FAQ'
+import Contato from './Routes/Usuario/Contato'
+import Login from './Routes/Usuario/Login'
+import LoginAdmin from './Routes/Admin/LoginAdmin'
 
 function App() {
   const [paginaAtual, setPaginaAtual] = useState('home')
@@ -22,6 +23,8 @@ function App() {
         return <Contato onNavigate={setPaginaAtual} />
       case 'login':
         return <Login onNavigate={setPaginaAtual} />
+      case 'loginAdmin':
+        return <LoginAdmin onNavigate={setPaginaAtual} />
       case 'home':
       default:
         return <Home onNavigate={setPaginaAtual} />

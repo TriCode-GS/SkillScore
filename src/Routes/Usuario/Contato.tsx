@@ -1,7 +1,7 @@
-import Cabecalho from '../Components/Cabecalho/Cabecalho'
-import Rodape from '../Components/Rodape/Rodape'
-import Botao from '../Components/Botao/Botao'
-import iconWhatsApp from '../assets/img/RedesSociais/WhatsApp.png'
+import Cabecalho from '../../Components/Cabecalho/Cabecalho'
+import Rodape from '../../Components/Rodape/Rodape'
+import Botao from '../../Components/Botao/Botao'
+import iconWhatsApp from '../../assets/img/RedesSociais/WhatsApp.png'
 
 interface ContatoProps {
   onNavigate?: (pagina: string) => void

@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import Cabecalho from '../Components/Cabecalho/Cabecalho'
-import Rodape from '../Components/Rodape/Rodape'
-import Botao from '../Components/Botao/Botao'
+import Cabecalho from '../../Components/Cabecalho/Cabecalho'
+import Rodape from '../../Components/Rodape/Rodape'
+import Botao from '../../Components/Botao/Botao'
 
 interface LoginProps {
   onNavigate?: (pagina: string) => void
@@ -14,7 +14,6 @@ const Login = ({ onNavigate }: LoginProps) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    // Aqui você pode adicionar a lógica de autenticação
     console.log('Login:', { email, senha })
   }
 
@@ -124,7 +123,7 @@ const Login = ({ onNavigate }: LoginProps) => {
                 </Botao>
               </form>
               
-              <div className="mt-6 sm:mt-8 text-center">
+              <div className="mt-6 sm:mt-8 space-y-4 text-center">
                 <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
                   Não tem uma conta?{' '}
                   <a
@@ -134,6 +133,14 @@ const Login = ({ onNavigate }: LoginProps) => {
                     Cadastre-se
                   </a>
                 </p>
+                <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+                  <button
+                    onClick={() => onNavigate?.('loginAdmin')}
+                    className="text-sm sm:text-base text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-semibold transition-colors"
+                  >
+                    Acesso Administrador
+                  </button>
+                </div>
               </div>
             </div>
           </div>
