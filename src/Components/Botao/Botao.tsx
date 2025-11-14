@@ -1,10 +1,11 @@
 interface BotaoProps {
   children: React.ReactNode
-  variant?: 'primary' | 'secondary' | 'outline'
+  variant?: 'primary' | 'secondary' | 'outline' | 'azul'
   size?: 'sm' | 'md' | 'lg'
   onClick?: () => void
   type?: 'button' | 'submit' | 'reset'
   className?: string
+  isActive?: boolean
 }
 
 const Botao = ({ 
@@ -13,14 +14,18 @@ const Botao = ({
   size = 'md',
   onClick,
   type = 'button',
-  className = ''
+  className = '',
+  isActive = false
 }: BotaoProps) => {
   const baseStyles = 'font-semibold rounded-lg transition-colors'
   
   const variantStyles = {
     primary: 'bg-indigo-600 text-white hover:bg-indigo-700',
     secondary: 'bg-white text-indigo-600 border-2 border-indigo-600 hover:bg-indigo-50',
-    outline: 'bg-transparent text-indigo-600 border-2 border-indigo-600 hover:bg-indigo-50'
+    outline: 'bg-transparent text-indigo-600 border-2 border-indigo-600 hover:bg-indigo-50',
+    azul: isActive 
+      ? 'bg-[#4169E1] text-white border-2 border-[#4169E1]'
+      : 'bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 text-[#4169E1]'
   }
   
   const sizeStyles = {
@@ -43,3 +48,4 @@ const Botao = ({
 }
 
 export default Botao
+

@@ -1,5 +1,7 @@
+import { useState, useEffect } from 'react'
 import Cabecalho from '../../Components/Cabecalho/Cabecalho'
 import Rodape from '../../Components/Rodape/Rodape'
+import Botao from '../../Components/Botao/Botao'
 
 interface FAQProps {
   onNavigate?: (pagina: string) => void
@@ -46,6 +48,30 @@ const faqs: PerguntaResposta[] = [
 ]
 
 const FAQ = ({ onNavigate }: FAQProps) => {
+  const [botaoClicado, setBotaoClicado] = useState<'sim' | 'nao' | null>(null)
+  const [mostrarMensagem, setMostrarMensagem] = useState(false)
+
+  const handleSim = () => {
+    setBotaoClicado('sim')
+    setMostrarMensagem(true)
+  }
+
+  useEffect(() => {
+    if (mostrarMensagem) {
+      const timer = setTimeout(() => {
+        setMostrarMensagem(false)
+        setBotaoClicado(null)
+      }, 5000)
+      return () => clearTimeout(timer)
+    }
+  }, [mostrarMensagem])
+
+  const handleNao = () => {
+    setBotaoClicado('nao')
+    onNavigate?.('contato')
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
   return (
     <div className="min-h-screen flex flex-col">
       <Cabecalho onNavigate={onNavigate} />
@@ -74,9 +100,32 @@ const FAQ = ({ onNavigate }: FAQProps) => {
               <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4">
                 Ainda tem dúvidas?
               </h2>
-              <p className="text-sm sm:text-base text-gray-700 dark:text-gray-300 mb-4 sm:mb-6">
-                Entre em contato conosco para mais informações sobre nossos planos e serviços.
-              </p>
+              {mostrarMensagem ? (
+                <div className="mb-4 sm:mb-6">
+                  <p className="text-sm sm:text-base text-gray-700 dark:text-gray-300">
+                    Que bom que conseguimos responder suas dúvidas!
+                  </p>
+                </div>
+              ) : (
+                <div className="flex gap-4 justify-center">
+                  <Botao
+                    variant="azul"
+                    size="md"
+                    onClick={handleSim}
+                    isActive={botaoClicado === 'sim'}
+                  >
+                    Sim
+                  </Botao>
+                  <Botao
+                    variant="azul"
+                    size="md"
+                    onClick={handleNao}
+                    isActive={botaoClicado === 'nao'}
+                  >
+                    Não
+                  </Botao>
+                </div>
+              )}
             </div>
           </div>
         </section>
