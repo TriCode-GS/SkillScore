@@ -126,12 +126,15 @@ const Login = ({ onNavigate }: LoginProps) => {
               <div className="mt-6 sm:mt-8 space-y-4 text-center">
                 <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
                   Não tem uma conta?{' '}
-                  <a
-                    href="#"
+                  <button
+                    onClick={() => {
+                      onNavigate?.('cadastro')
+                      window.scrollTo({ top: 0, behavior: 'smooth' })
+                    }}
                     className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-semibold transition-colors"
                   >
                     Cadastre-se
-                  </a>
+                  </button>
                 </p>
                 <div className="pt-4 border-t border-gray-200 dark:border-gray-700 space-y-3">
                   <button

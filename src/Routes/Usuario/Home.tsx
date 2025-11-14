@@ -20,7 +20,14 @@ const Home = ({ onNavigate }: HomeProps) => {
               Transforme seu desenvolvimento profissional em uma jornada gamificada e progressiva
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center px-4">
-              <Botao variant="primary" size="md">
+              <Botao 
+                variant="primary" 
+                size="md"
+                onClick={() => {
+                  onNavigate?.('login')
+                  window.scrollTo({ top: 0, behavior: 'smooth' })
+                }}
+              >
                 Começar Agora
               </Botao>
               <Botao 
@@ -227,7 +234,14 @@ const Home = ({ onNavigate }: HomeProps) => {
             <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-300 mb-6 sm:mb-8">
               Transforme o aprendizado em uma experiência gamificada e mensurável
             </p>
-            <Botao variant="primary" size="lg">
+            <Botao 
+              variant="primary" 
+              size="lg"
+              onClick={() => {
+                onNavigate?.('cadastro')
+                window.scrollTo({ top: 0, behavior: 'smooth' })
+              }}
+            >
               Criar Conta Gratuita
             </Botao>
           </div>

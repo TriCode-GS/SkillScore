@@ -6,6 +6,7 @@ import Integrantes from './Routes/Usuario/Integrantes'
 import FAQ from './Routes/Usuario/FAQ'
 import Contato from './Routes/Usuario/Contato'
 import Login from './Routes/Usuario/Login'
+import Cadastro from './Routes/Usuario/Cadastro'
 import LoginAdmin from './Routes/Admin/LoginAdmin'
 import LoginCorporativo from './Routes/Corporativo/LoginCorporativo'
 
@@ -24,6 +25,8 @@ function App() {
         return <Contato onNavigate={setPaginaAtual} />
       case 'login':
         return <Login onNavigate={setPaginaAtual} />
+      case 'cadastro':
+        return <Cadastro onNavigate={setPaginaAtual} />
       case 'loginAdmin':
         return <LoginAdmin onNavigate={setPaginaAtual} />
       case 'loginCorporativo':
