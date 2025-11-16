@@ -12,7 +12,6 @@ interface LoginProps {
 const Login = ({ onNavigate }: LoginProps) => {
   const [email, setEmail] = useState('')
   const [senha, setSenha] = useState('')
-  const [lembrarMe, setLembrarMe] = useState(false)
   const [erroLogin, setErroLogin] = useState('')
   const [carregando, setCarregando] = useState(false)
   const { login } = useAuth()
@@ -20,17 +19,33 @@ const Login = ({ onNavigate }: LoginProps) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setErroLogin('')
+    
+    const emailTrimmed = email.trim()
+    const senhaTrimmed = senha.trim()
+    
+    if (!emailTrimmed) {
+      setErroLogin('Email é obrigatório')
+      return
+    }
+    
+    if (!senhaTrimmed) {
+      setErroLogin('Senha é obrigatória')
+      return
+    }
+    
     setCarregando(true)
 
     try {
-      const response = await autenticarLogin({ email, senha }) as { id?: string; nome?: string; email?: string }
+      const response = await autenticarLogin({ email: emailTrimmed, senha: senhaTrimmed }) as any
       
-      login({
-        id: response.id,
-        nome: response.nome,
-        email: response.email || email
-      })
-
+      const userData = {
+        id: response.id?.toString() || response.idUsuario?.toString(),
+        nome: response.nome || response.nomeUsuario || emailTrimmed.split('@')[0],
+        email: response.email || emailTrimmed
+      }
+      
+      login(userData)
+      
       setCarregando(false)
       
       if (onNavigate) {
@@ -41,19 +56,6 @@ const Login = ({ onNavigate }: LoginProps) => {
       setCarregando(false)
       setErroLogin(error instanceof Error ? error.message : 'Erro ao fazer login. Tente novamente.')
     }
-  }
-
-  const getCheckboxClasses = () => {
-    const baseClasses = 'w-5 h-5 border-2 rounded-md transition-all duration-200 flex items-center justify-center'
-    if (lembrarMe) {
-      return `${baseClasses} bg-indigo-600 border-indigo-600 dark:bg-indigo-500 dark:border-indigo-500`
-    }
-    return `${baseClasses} border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 group-hover:border-indigo-500 dark:group-hover:border-indigo-400`
-  }
-
-  const getCheckIconClasses = () => {
-    const baseClasses = 'w-3.5 h-3.5 text-white transition-opacity duration-200'
-    return lembrarMe ? `${baseClasses} opacity-100` : `${baseClasses} opacity-0`
   }
 
   return (
@@ -115,30 +117,7 @@ const Login = ({ onNavigate }: LoginProps) => {
                   />
                 </div>
                 
-                <div className="flex items-center justify-between">
-                  <label className="flex items-center cursor-pointer group">
-                    <div className="relative">
-                      <input
-                        type="checkbox"
-                        checked={lembrarMe}
-                        onChange={(e) => setLembrarMe(e.target.checked)}
-                        className="sr-only"
-                      />
-                      <div className={getCheckboxClasses()}>
-                        <svg 
-                          className={getCheckIconClasses()}
-                          fill="none" 
-                          stroke="currentColor" 
-                          viewBox="0 0 24 24"
-                        >
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                        </svg>
-                      </div>
-                    </div>
-                    <span className="ml-3 text-sm sm:text-base text-gray-700 dark:text-gray-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                      Lembrar-me
-                    </span>
-                  </label>
+                <div className="flex items-center justify-end">
                   <a
                     href="#"
                     className="text-sm sm:text-base text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"

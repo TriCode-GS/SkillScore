@@ -13,8 +13,11 @@ const HomeFree = ({ onNavigate }: HomeFreeProps) => {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      onNavigate?.('login')
-      window.scrollTo({ top: 0, behavior: 'smooth' })
+      const timer = setTimeout(() => {
+        onNavigate?.('login')
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+      }, 100)
+      return () => clearTimeout(timer)
     }
   }, [isAuthenticated, onNavigate])
 
@@ -25,7 +28,13 @@ const HomeFree = ({ onNavigate }: HomeFreeProps) => {
   }
 
   if (!isAuthenticated) {
-    return null
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+        <div className="text-center">
+          <p className="text-gray-600 dark:text-gray-400">Carregando...</p>
+        </div>
+      </div>
+    )
   }
 
   return (

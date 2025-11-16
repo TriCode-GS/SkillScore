@@ -45,6 +45,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const login = (userData: User) => {
     setUser(userData)
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('user', JSON.stringify(userData))
+    }
   }
 
   const logout = () => {

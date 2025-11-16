@@ -232,7 +232,7 @@ export async function autenticarLogin(credentials: LoginCredentials): Promise<Lo
     throw new Error(`URL inválida: ${baseUrl}/logins/autenticar`)
   }
 
-  url.searchParams.set('login', credentials.email)
+  url.searchParams.set('email', credentials.email)
   url.searchParams.set('senha', credentials.senha)
 
   let res: Response
