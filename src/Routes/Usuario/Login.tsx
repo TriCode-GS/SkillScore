@@ -2,6 +2,8 @@ import { useState } from 'react'
 import Cabecalho from '../../Components/Cabecalho/Cabecalho'
 import Rodape from '../../Components/Rodape/Rodape'
 import Botao from '../../Components/Botao/Botao'
+import { useAuth } from '../../Contexto/AutenticacaoContexto'
+import { autenticarLogin } from '../../Types/AutenticacaoLogin'
 
 interface LoginProps {
   onNavigate?: (pagina: string) => void
@@ -11,10 +13,34 @@ const Login = ({ onNavigate }: LoginProps) => {
   const [email, setEmail] = useState('')
   const [senha, setSenha] = useState('')
   const [lembrarMe, setLembrarMe] = useState(false)
+  const [erroLogin, setErroLogin] = useState('')
+  const [carregando, setCarregando] = useState(false)
+  const { login } = useAuth()
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    console.log('Login:', { email, senha })
+    setErroLogin('')
+    setCarregando(true)
+
+    try {
+      const response = await autenticarLogin({ email, senha }) as { id?: string; nome?: string; email?: string }
+      
+      login({
+        id: response.id,
+        nome: response.nome,
+        email: response.email || email
+      })
+
+      setCarregando(false)
+      
+      if (onNavigate) {
+        onNavigate('homeFree')
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+      }
+    } catch (error) {
+      setCarregando(false)
+      setErroLogin(error instanceof Error ? error.message : 'Erro ao fazer login. Tente novamente.')
+    }
   }
 
   const getCheckboxClasses = () => {
@@ -45,6 +71,14 @@ const Login = ({ onNavigate }: LoginProps) => {
               </p>
               
               <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+                {erroLogin && (
+                  <div className="p-4 bg-red-50 dark:bg-red-900/20 border-2 border-red-300 dark:border-red-700 rounded-lg">
+                    <p className="text-sm text-red-600 dark:text-red-400 font-semibold">
+                      {erroLogin}
+                    </p>
+                  </div>
+                )}
+                
                 <div>
                   <label 
                     htmlFor="email" 
@@ -118,8 +152,9 @@ const Login = ({ onNavigate }: LoginProps) => {
                   variant="primary"
                   size="md"
                   className="w-full"
+                  disabled={carregando}
                 >
-                  Entrar
+                  {carregando ? 'Entrando...' : 'Entrar'}
                 </Botao>
               </form>
               

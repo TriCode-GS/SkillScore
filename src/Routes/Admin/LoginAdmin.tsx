@@ -14,7 +14,6 @@ const LoginAdmin = ({ onNavigate }: LoginAdminProps) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    console.log('Login Admin:', { email, senha })
   }
 
   const getCheckboxClasses = () => {

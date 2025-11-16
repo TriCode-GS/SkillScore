@@ -6,6 +6,7 @@ interface BotaoProps {
   type?: 'button' | 'submit' | 'reset'
   className?: string
   isActive?: boolean
+  disabled?: boolean
 }
 
 const Botao = ({ 
@@ -15,17 +16,26 @@ const Botao = ({
   onClick,
   type = 'button',
   className = '',
-  isActive = false
+  isActive = false,
+  disabled = false
 }: BotaoProps) => {
   const baseStyles = 'font-semibold rounded-lg transition-colors'
   
   const variantStyles = {
-    primary: 'bg-indigo-600 text-white hover:bg-indigo-700',
-    secondary: 'bg-white text-indigo-600 border-2 border-indigo-600 hover:bg-indigo-50',
-    outline: 'bg-transparent text-indigo-600 border-2 border-indigo-600 hover:bg-indigo-50',
-    azul: isActive 
-      ? 'bg-[#4169E1] text-white border-2 border-[#4169E1]'
-      : 'bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 text-[#4169E1]'
+    primary: disabled 
+      ? 'bg-gray-400 dark:bg-gray-600 text-white cursor-not-allowed'
+      : 'bg-indigo-600 text-white hover:bg-indigo-700',
+    secondary: disabled
+      ? 'bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 border-2 border-gray-300 dark:border-gray-600 cursor-not-allowed'
+      : 'bg-white text-indigo-600 border-2 border-indigo-600 hover:bg-indigo-50',
+    outline: disabled
+      ? 'bg-transparent text-gray-400 dark:text-gray-500 border-2 border-gray-300 dark:border-gray-600 cursor-not-allowed'
+      : 'bg-transparent text-indigo-600 border-2 border-indigo-600 hover:bg-indigo-50',
+    azul: disabled
+      ? 'bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 border-2 border-gray-300 dark:border-gray-600 cursor-not-allowed'
+      : isActive 
+        ? 'bg-[#4169E1] text-white border-2 border-[#4169E1]'
+        : 'bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 text-[#4169E1]'
   }
   
   const sizeStyles = {
@@ -41,6 +51,7 @@ const Botao = ({
       type={type}
       onClick={onClick}
       className={combinedStyles}
+      disabled={disabled}
     >
       {children}
     </button>

@@ -69,17 +69,14 @@ const LoginCorporativo = ({ onNavigate }: LoginCorporativoProps) => {
 
   const handleSubmitAdmin = (e: React.FormEvent) => {
     e.preventDefault()
-    console.log('Login Administrador da Empresa:', { cnpj, razaoSocial, senhaAdmin })
   }
 
   const handleSubmitGestor = (e: React.FormEvent) => {
     e.preventDefault()
-    console.log('Login Gestor:', { empresaGestor, departamento, emailGestor, senhaGestor })
   }
 
   const handleSubmitFuncionario = (e: React.FormEvent) => {
     e.preventDefault()
-    console.log('Login Funcionário:', { empresaFuncionario, departamentoFuncionario, emailFuncionario, senhaFuncionario })
   }
 
   const renderMenuSelecao = () => (

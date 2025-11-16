@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { ThemeProvider } from './Contexto/TemaContexto'
+import { AuthProvider } from './Contexto/AutenticacaoContexto'
 import Home from './Routes/Usuario/Home'
 import Sobre from './Routes/Usuario/Sobre'
 import Integrantes from './Routes/Usuario/Integrantes'
@@ -7,6 +8,7 @@ import FAQ from './Routes/Usuario/FAQ'
 import Contato from './Routes/Usuario/Contato'
 import Login from './Routes/Usuario/Login'
 import Cadastro from './Routes/Usuario/Cadastro'
+import HomeFree from './Routes/Usuario/HomeFree'
 import LoginAdmin from './Routes/Admin/LoginAdmin'
 import LoginCorporativo from './Routes/Corporativo/LoginCorporativo'
 
@@ -27,6 +29,8 @@ function App() {
         return <Login onNavigate={setPaginaAtual} />
       case 'cadastro':
         return <Cadastro onNavigate={setPaginaAtual} />
+      case 'homeFree':
+        return <HomeFree onNavigate={setPaginaAtual} />
       case 'loginAdmin':
         return <LoginAdmin onNavigate={setPaginaAtual} />
       case 'loginCorporativo':
@@ -39,7 +43,9 @@ function App() {
 
   return (
     <ThemeProvider>
-      {renderizarPagina()}
+      <AuthProvider>
+        {renderizarPagina()}
+      </AuthProvider>
     </ThemeProvider>
   )
 }

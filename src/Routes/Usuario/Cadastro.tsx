@@ -2,6 +2,7 @@ import { useState } from 'react'
 import Cabecalho from '../../Components/Cabecalho/Cabecalho'
 import Rodape from '../../Components/Rodape/Rodape'
 import Botao from '../../Components/Botao/Botao'
+import { cadastrarUsuario } from '../../Types/AutenticacaoLogin'
 
 interface CadastroProps {
   onNavigate?: (pagina: string) => void
@@ -17,6 +18,8 @@ const Cadastro = ({ onNavigate }: CadastroProps) => {
   const [erroTermos, setErroTermos] = useState(false)
   const [erroSenha, setErroSenha] = useState(false)
   const [erroValidacoesSenha, setErroValidacoesSenha] = useState(false)
+  const [erroApi, setErroApi] = useState('')
+  const [carregando, setCarregando] = useState(false)
   
   const [validacoesSenha, setValidacoesSenha] = useState({
     maxCaracteres: false,
@@ -27,11 +30,17 @@ const Cadastro = ({ onNavigate }: CadastroProps) => {
     semInfoPessoal: true
   })
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
     setErroTermos(false)
     setErroSenha(false)
+    setErroApi('')
+    
+    if (!nome || nome.trim() === '') {
+      setErroApi('Nome completo é obrigatório')
+      return
+    }
     
     if (!aceitarTermos) {
       setErroTermos(true)
@@ -57,8 +66,32 @@ const Cadastro = ({ onNavigate }: CadastroProps) => {
     }
     
     setErroValidacoesSenha(false)
+    setCarregando(true)
     
-    console.log('Cadastro:', { nome, email, senha })
+    try {
+      const dadosCadastro = {
+        nome_usuario: nome.trim(),
+        email: email.trim(),
+        senha,
+        tipo_usuario: 'USUARIO',
+        id_empresa: null,
+        area_atuacao: null,
+        competencias: null,
+        nivel_senioridade: null
+      }
+      
+      await cadastrarUsuario(dadosCadastro)
+      
+      setCarregando(false)
+      
+      if (onNavigate) {
+        onNavigate('login')
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+      }
+    } catch (error) {
+      setCarregando(false)
+      setErroApi(error instanceof Error ? error.message : 'Erro ao cadastrar usuário. Tente novamente.')
+    }
   }
 
   const getCheckboxClasses = () => {
@@ -115,6 +148,14 @@ const Cadastro = ({ onNavigate }: CadastroProps) => {
               </p>
               
               <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+                {erroApi && (
+                  <div className="p-4 bg-red-50 dark:bg-red-900/20 border-2 border-red-300 dark:border-red-700 rounded-lg">
+                    <p className="text-sm text-red-600 dark:text-red-400 font-semibold">
+                      {erroApi}
+                    </p>
+                  </div>
+                )}
+                
                 <div>
                   <label 
                     htmlFor="nome" 
@@ -379,8 +420,9 @@ const Cadastro = ({ onNavigate }: CadastroProps) => {
                   variant="primary"
                   size="md"
                   className="w-full"
+                  disabled={carregando}
                 >
-                  Criar Conta
+                  {carregando ? 'Cadastrando...' : 'Criar Conta'}
                 </Botao>
               </form>
               
