@@ -3,7 +3,9 @@ import type { ReactNode } from 'react'
 
 interface User {
   id?: string
+  idUsuario?: number
   nome?: string
+  nomeUsuario?: string
   email?: string
 }
 

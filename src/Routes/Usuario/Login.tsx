@@ -3,7 +3,7 @@ import Cabecalho from '../../Components/Cabecalho/Cabecalho'
 import Rodape from '../../Components/Rodape/Rodape'
 import Botao from '../../Components/Botao/Botao'
 import { useAuth } from '../../Contexto/AutenticacaoContexto'
-import { autenticarLogin } from '../../Types/AutenticacaoLogin'
+import { autenticarLogin, buscarUsuarioPorId } from '../../Types/AutenticacaoLogin'
 
 interface LoginProps {
   onNavigate?: (pagina: string) => void
@@ -38,9 +38,21 @@ const Login = ({ onNavigate }: LoginProps) => {
     try {
       const response = await autenticarLogin({ email: emailTrimmed, senha: senhaTrimmed }) as any
       
+      const idUsuarioNum = response.idUsuario || response.id_usuario || parseInt(response.id?.toString() || '0')
+      
+      let nomeUsuarioCompleto = response.nomeUsuario || response.nome || emailTrimmed.split('@')[0]
+      
+      try {
+        const usuarioCompleto = await buscarUsuarioPorId(idUsuarioNum)
+        nomeUsuarioCompleto = usuarioCompleto.nomeUsuario
+      } catch (error) {
+      }
+      
       const userData = {
-        id: response.id?.toString() || response.idUsuario?.toString(),
-        nome: response.nome || response.nomeUsuario || emailTrimmed.split('@')[0],
+        id: idUsuarioNum.toString(),
+        idUsuario: idUsuarioNum,
+        nome: nomeUsuarioCompleto,
+        nomeUsuario: nomeUsuarioCompleto,
         email: response.email || emailTrimmed
       }
       
