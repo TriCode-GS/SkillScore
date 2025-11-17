@@ -73,7 +73,13 @@ const HomeAdmin = ({ onNavigate }: HomeAdminProps) => {
                 </p>
               </button>
 
-              <button className="p-6 bg-white dark:bg-gray-800 rounded-lg border-2 border-gray-200 dark:border-gray-600 hover:border-indigo-400 dark:hover:border-indigo-600 hover:shadow-lg transition-all duration-200 text-left">
+              <button 
+                onClick={() => {
+                  onNavigate?.('gerenciarEmpresas')
+                  window.scrollTo({ top: 0, behavior: 'smooth' })
+                }}
+                className="p-6 bg-white dark:bg-gray-800 rounded-lg border-2 border-gray-200 dark:border-gray-600 hover:border-indigo-400 dark:hover:border-indigo-600 hover:shadow-lg transition-all duration-200 text-left"
+              >
                 <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-2">
                   Gerenciar Empresas
                 </h3>

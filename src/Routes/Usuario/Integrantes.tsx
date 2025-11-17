@@ -64,7 +64,7 @@ const Integrantes = ({ onNavigate }: IntegrantesProps) => {
               {integrantes.map((integrante, index) => (
                 <div 
                   key={index}
-                  className="bg-white dark:bg-gray-800 border-2 border-indigo-200 dark:border-indigo-800 rounded-lg p-6 shadow-md hover:shadow-lg transition-shadow"
+                  className={`bg-white dark:bg-gray-800 border-2 border-indigo-200 dark:border-indigo-800 rounded-lg p-6 shadow-md hover:shadow-lg transition-shadow ${index === 2 ? 'sm:col-span-2 lg:col-span-1 sm:max-w-md sm:mx-auto' : ''}`}
                 >
                   <div className="flex flex-col items-center text-center">
                     <div className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 bg-indigo-100 dark:bg-indigo-900 rounded-full flex items-center justify-center mb-4 overflow-hidden">

@@ -72,7 +72,7 @@ const Home = ({ onNavigate }: HomeProps) => {
                   Avance por fases, desbloqueie novas etapas e visualize seu progresso de forma contínua
                 </p>
               </div>
-              <div className="bg-white dark:bg-gray-900 p-4 sm:p-6 rounded-lg shadow-md">
+              <div className="bg-white dark:bg-gray-900 p-4 sm:p-6 rounded-lg shadow-md sm:col-span-2 lg:col-span-1 sm:max-w-md sm:mx-auto">
                 <div className="w-12 h-12 sm:w-16 sm:h-16 bg-indigo-100 dark:bg-indigo-900 rounded-full flex items-center justify-center mb-3 sm:mb-4 mx-auto">
                   <span className="text-xl sm:text-2xl font-bold text-indigo-600 dark:text-indigo-400">3</span>
                 </div>
@@ -154,7 +154,7 @@ const Home = ({ onNavigate }: HomeProps) => {
                 </ul>
               </div>
 
-              <div className="border-2 border-indigo-200 dark:border-indigo-800 rounded-lg p-6 sm:p-8 hover:shadow-lg transition-shadow bg-white dark:bg-gray-800">
+              <div className="border-2 border-indigo-200 dark:border-indigo-800 rounded-lg p-6 sm:p-8 hover:shadow-lg transition-shadow bg-white dark:bg-gray-800 md:col-span-2 lg:col-span-1 md:max-w-md md:mx-auto">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center mb-4">
                   <div className="w-14 h-10 sm:w-16 sm:h-12 bg-indigo-600 rounded-lg flex items-center justify-center mb-2 sm:mb-0 sm:mr-4">
                     <span className="text-base sm:text-xl font-bold text-white">B2B</span>
@@ -216,7 +216,7 @@ const Home = ({ onNavigate }: HomeProps) => {
                   Aprendizado transformado em uma jornada motivadora e progressiva
                 </p>
               </div>
-              <div>
+              <div className="sm:col-span-2 lg:col-span-1 sm:max-w-md sm:mx-auto">
                 <h3 className="text-lg sm:text-xl font-semibold mb-2 sm:mb-3">Dashboard Analítico</h3>
                 <p className="text-sm sm:text-base text-indigo-100">
                   Acompanhe métricas e indicadores de desenvolvimento
