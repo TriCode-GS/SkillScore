@@ -77,6 +77,21 @@ const Cabecalho = ({ onNavigate, isHomeFree = false, onLogout }: CabecalhoProps)
               </div>
               <div className="hidden md:flex items-center gap-3">
                 <button
+                  onClick={() => onNavigate?.('trilhas')}
+                  className="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors px-3 py-1.5 rounded-lg hover:bg-indigo-50 dark:hover:bg-gray-800"
+                >
+                  Minhas Trilhas
+                </button>
+                <button
+                  onClick={() => {
+                    onNavigate?.('homeFree')
+                    window.scrollTo({ top: 0, behavior: 'smooth' })
+                  }}
+                  className="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors px-3 py-1.5 rounded-lg hover:bg-indigo-50 dark:hover:bg-gray-800"
+                >
+                  Home
+                </button>
+                <button
                   onClick={toggleTheme}
                   className="text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors p-2 rounded-lg hover:bg-indigo-50 dark:hover:bg-gray-800"
                   aria-label="Alternar tema"
@@ -90,12 +105,6 @@ const Cabecalho = ({ onNavigate, isHomeFree = false, onLogout }: CabecalhoProps)
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                     </svg>
                   )}
-                </button>
-                <button
-                  onClick={() => onNavigate?.('trilhas')}
-                  className="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors px-3 py-1.5 rounded-lg hover:bg-indigo-50 dark:hover:bg-gray-800"
-                >
-                  Minhas Trilhas
                 </button>
                 <button
                   onClick={() => onNavigate?.('progresso')}

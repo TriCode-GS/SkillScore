@@ -8,7 +8,8 @@ import FAQ from './Routes/Usuario/FAQ'
 import Contato from './Routes/Usuario/Contato'
 import Login from './Routes/Usuario/Login'
 import Cadastro from './Routes/Usuario/Cadastro'
-import HomeFree from './Routes/Usuario/HomeFree'
+import HomeFree from './Routes/UsuarioFree/HomeFree'
+import Trilhas from './Routes/UsuarioFree/Trilhas'
 import LoginAdmin from './Routes/Admin/LoginAdmin'
 import LoginCorporativo from './Routes/Corporativo/LoginCorporativo'
 
@@ -29,12 +30,14 @@ function App() {
         return <Login onNavigate={setPaginaAtual} />
       case 'cadastro':
         return <Cadastro onNavigate={setPaginaAtual} />
-      case 'homeFree':
-        return <HomeFree onNavigate={setPaginaAtual} />
-      case 'loginAdmin':
-        return <LoginAdmin onNavigate={setPaginaAtual} />
-      case 'loginCorporativo':
-        return <LoginCorporativo onNavigate={setPaginaAtual} />
+          case 'homeFree':
+            return <HomeFree onNavigate={setPaginaAtual} />
+          case 'trilhas':
+            return <Trilhas onNavigate={setPaginaAtual} />
+          case 'loginAdmin':
+            return <LoginAdmin onNavigate={setPaginaAtual} />
+          case 'loginCorporativo':
+            return <LoginCorporativo onNavigate={setPaginaAtual} />
       case 'home':
       default:
         return <Home onNavigate={setPaginaAtual} />
