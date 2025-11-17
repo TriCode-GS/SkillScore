@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react'
-import { useForm, Controller } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 import { useAuth } from '../../Contexto/AutenticacaoContexto'
 import Cabecalho from '../../Components/Cabecalho/Cabecalho'
 import Botao from '../../Components/Botao/Botao'
-import ListaSelecao from '../../Components/ListaSelecao/ListaSelecao'
-import { criarUsuario, atualizarUsuario, listarUsuarios, excluirUsuario, criarLogin, type UsuarioResponse, type LoginData, getBaseUrl } from '../../Types/AutenticacaoLogin'
+import { criarUsuario, atualizarUsuario, listarUsuarios, excluirUsuario, criarLogin, atualizarLogin, type UsuarioResponse, type LoginData, type LoginUpdateData, getBaseUrl } from '../../Types/AutenticacaoLogin'
 
 interface GerenciarAdministradoresProps {
   onNavigate?: (pagina: string) => void
@@ -19,34 +18,52 @@ interface AdministradorFormData {
 
 interface AdministradorEdicaoFormData {
   nomeUsuario: string
-  tipoUsuario: string
-  areaAtuacao: string
-  nivelSenioridade: string
-  competencias: string
-  idEmpresa: string
-}
-
-interface EmpresaOption {
-  idEmpresa: number
-  nomeEmpresa: string
+  email: string
+  senha: string
+  confirmarSenha: string
 }
 
 const GerenciarAdministradores = ({ onNavigate }: GerenciarAdministradoresProps) => {
   const { user, isAuthenticated } = useAuth()
-  const [administradores, setAdministradores] = useState<(UsuarioResponse & { nomeEmpresa?: string; email?: string })[]>([])
+  const [administradores, setAdministradores] = useState<(UsuarioResponse & { nomeEmpresa?: string; email?: string; idLogin?: number })[]>([])
   const [carregando, setCarregando] = useState(false)
+  const [carregandoEdicao, setCarregandoEdicao] = useState(false)
+  const [carregandoCadastro, setCarregandoCadastro] = useState(false)
   const [erro, setErro] = useState('')
   const [erroSenha, setErroSenha] = useState(false)
   const [erroValidacoesSenha, setErroValidacoesSenha] = useState(false)
-  const [empresas, setEmpresas] = useState<EmpresaOption[]>([])
-  const [carregandoEmpresas, setCarregandoEmpresas] = useState(false)
   const [mostrarModalCadastro, setMostrarModalCadastro] = useState(false)
   const [mostrarModalEdicao, setMostrarModalEdicao] = useState(false)
   const [mostrarModalExclusao, setMostrarModalExclusao] = useState(false)
   const [administradorSelecionado, setAdministradorSelecionado] = useState<UsuarioResponse | null>(null)
 
   const { register: registerCadastro, handleSubmit: handleSubmitCadastro, reset: resetCadastro, watch, formState: { errors: errorsCadastro } } = useForm<AdministradorFormData>()
-  const { register: registerEdicao, handleSubmit: handleSubmitEdicao, reset: resetEdicao, control: controlEdicao, formState: { errors: errorsEdicao } } = useForm<AdministradorEdicaoFormData>()
+  const { register: registerEdicao, handleSubmit: handleSubmitEdicao, reset: resetEdicao, watch: watchEdicao, formState: { errors: errorsEdicao } } = useForm<AdministradorEdicaoFormData>()
+
+  const senhaEdicao = watchEdicao('senha', '')
+  const confirmarSenhaEdicao = watchEdicao('confirmarSenha', '')
+
+  useEffect(() => {
+    if (senhaEdicao && confirmarSenhaEdicao && senhaEdicao !== confirmarSenhaEdicao) {
+      setErroSenha(true)
+    } else {
+      setErroSenha(false)
+    }
+  }, [senhaEdicao, confirmarSenhaEdicao])
+
+  const validarSenhaEdicao = (senhaAtual: string) => {
+    const temConteudo = senhaAtual.length > 0
+    return {
+      maxCaracteres: temConteudo && senhaAtual.length >= 8 && senhaAtual.length <= 16,
+      maiusculasMinusculas: temConteudo && /[a-z]/.test(senhaAtual) && /[A-Z]/.test(senhaAtual),
+      temNumero: temConteudo && /\d/.test(senhaAtual),
+      temCaractereEspecial: temConteudo && /[!@#$%&*]/.test(senhaAtual),
+      semEspacos: temConteudo && !/\s/.test(senhaAtual),
+      semInfoPessoal: true
+    }
+  }
+
+  const validacoesSenhaEdicao = validarSenhaEdicao(senhaEdicao)
 
   const senha = watch('senha', '')
   const confirmarSenha = watch('confirmarSenha', '')
@@ -95,34 +112,7 @@ const GerenciarAdministradores = ({ onNavigate }: GerenciarAdministradoresProps)
       return () => clearTimeout(timer)
     }
     carregarAdministradores()
-    carregarEmpresas()
   }, [isAuthenticated, user, onNavigate])
-
-  const carregarEmpresas = async () => {
-    setCarregandoEmpresas(true)
-    try {
-      const baseUrl = getBaseUrl()
-      const urlString = `${baseUrl}/empresas`
-      const res = await fetch(urlString, {
-        method: 'GET',
-        headers: { 'Accept': 'application/json' },
-        mode: 'cors',
-      })
-      
-      if (res.ok) {
-        const empresasListadas = await res.json() as any[]
-        const empresasFormatadas = empresasListadas.map((e: any) => ({
-          idEmpresa: e.idEmpresa || e.id_empresa,
-          nomeEmpresa: e.nomeEmpresa || e.nome_empresa || e.razaoSocial || '-'
-        }))
-        setEmpresas(empresasFormatadas)
-      }
-    } catch (error) {
-      setEmpresas([])
-    } finally {
-      setCarregandoEmpresas(false)
-    }
-  }
 
   const carregarAdministradores = async () => {
     setCarregando(true)
@@ -156,7 +146,8 @@ const GerenciarAdministradores = ({ onNavigate }: GerenciarAdministradoresProps)
           })
           
           const email = login?.email || '-'
-          return { ...administrador, email }
+          const idLogin = login?.idLogin || login?.id_login
+          return { ...administrador, email, idLogin }
         })
         
         setAdministradores(administradoresComEmail)
@@ -195,6 +186,8 @@ const GerenciarAdministradores = ({ onNavigate }: GerenciarAdministradoresProps)
       return
     }
     
+    setCarregandoCadastro(true)
+    
     try {
       const usuarioData: any = {
         nomeUsuario: data.nomeUsuario.trim(),
@@ -223,24 +216,24 @@ const GerenciarAdministradores = ({ onNavigate }: GerenciarAdministradoresProps)
       await criarLogin(loginData)
       
       resetCadastro()
-      setMostrarModalCadastro(false)
       setErro('')
       await carregarAdministradores()
+      setMostrarModalCadastro(false)
     } catch (error) {
       const mensagemErro = error instanceof Error ? error.message : 'Erro ao cadastrar administrador'
       setErro(mensagemErro)
+    } finally {
+      setCarregandoCadastro(false)
     }
   }
 
-  const abrirModalEdicao = (administrador: UsuarioResponse) => {
+  const abrirModalEdicao = (administrador: UsuarioResponse & { email?: string }) => {
     setAdministradorSelecionado(administrador)
     resetEdicao({
       nomeUsuario: administrador.nomeUsuario || '',
-      tipoUsuario: administrador.tipoUsuario || '',
-      areaAtuacao: administrador.areaAtuacao || '',
-      nivelSenioridade: administrador.nivelSenioridade || '',
-      competencias: administrador.competencias || '',
-      idEmpresa: administrador.idEmpresa?.toString() || ''
+      email: administrador.email || '',
+      senha: '',
+      confirmarSenha: ''
     })
     setMostrarModalEdicao(true)
   }
@@ -249,32 +242,78 @@ const GerenciarAdministradores = ({ onNavigate }: GerenciarAdministradoresProps)
     if (!administradorSelecionado) return
     
     setErro('')
+    setErroSenha(false)
+    setErroValidacoesSenha(false)
+    
+    if (data.senha && data.senha !== data.confirmarSenha) {
+      setErroSenha(true)
+      setErro('As senhas não coincidem')
+      return
+    }
+    
+    if (data.senha && data.senha.trim() !== '') {
+      const todasValidacoesSenha = 
+        validacoesSenhaEdicao.maxCaracteres &&
+        validacoesSenhaEdicao.maiusculasMinusculas &&
+        validacoesSenhaEdicao.temNumero &&
+        validacoesSenhaEdicao.temCaractereEspecial &&
+        validacoesSenhaEdicao.semEspacos &&
+        validacoesSenhaEdicao.semInfoPessoal
+      
+      if (!todasValidacoesSenha) {
+        setErroValidacoesSenha(true)
+        setErro('Você precisa atender a todos os requisitos de senha para atualizar')
+        return
+      }
+    }
+    
+    setCarregandoEdicao(true)
     
     try {
+      const tipoUsuarioAtual = administradorSelecionado.tipoUsuario || 'ADMINISTRADOR EMP'
+      
       const usuarioData: any = {
         nomeUsuario: data.nomeUsuario.trim(),
         nome_usuario: data.nomeUsuario.trim(),
-        tipoUsuario: data.tipoUsuario.trim(),
-        tipo_usuario: data.tipoUsuario.trim(),
-        areaAtuacao: data.areaAtuacao?.trim() || null,
-        area_atuacao: data.areaAtuacao?.trim() || null,
-        nivelSenioridade: data.nivelSenioridade?.trim() || null,
-        nivel_senioridade: data.nivelSenioridade?.trim() || null,
-        competencias: data.competencias?.trim() || null,
-        idEmpresa: data.idEmpresa && data.idEmpresa !== '' ? parseInt(data.idEmpresa, 10) : null,
-        id_empresa: data.idEmpresa && data.idEmpresa !== '' ? parseInt(data.idEmpresa, 10) : null
+        tipoUsuario: tipoUsuarioAtual,
+        tipo_usuario: tipoUsuarioAtual,
+        areaAtuacao: administradorSelecionado.areaAtuacao || null,
+        area_atuacao: administradorSelecionado.areaAtuacao || null,
+        nivelSenioridade: administradorSelecionado.nivelSenioridade || null,
+        nivel_senioridade: administradorSelecionado.nivelSenioridade || null,
+        competencias: administradorSelecionado.competencias || null,
+        idEmpresa: administradorSelecionado.idEmpresa || null,
+        id_empresa: administradorSelecionado.idEmpresa || null
       }
       
       await atualizarUsuario(administradorSelecionado.idUsuario, usuarioData)
       
+      const adminComLogin = administradorSelecionado as UsuarioResponse & { idLogin?: number }
+      if (adminComLogin.idLogin) {
+        const loginUpdateData: LoginUpdateData = {
+          idUsuario: administradorSelecionado.idUsuario,
+          tipoLogin: 'ADMINISTRADOR EMP'
+        }
+        if (data.email && data.email.trim() !== '') {
+          loginUpdateData.email = data.email.trim()
+        }
+        if (data.senha && data.senha.trim() !== '') {
+          loginUpdateData.senha = data.senha
+        }
+        
+        await atualizarLogin(adminComLogin.idLogin, loginUpdateData)
+      }
+      
       resetEdicao()
-      setMostrarModalEdicao(false)
-      setAdministradorSelecionado(null)
       setErro('')
       await carregarAdministradores()
+      setMostrarModalEdicao(false)
+      setAdministradorSelecionado(null)
     } catch (error) {
       const mensagemErro = error instanceof Error ? error.message : 'Erro ao editar administrador'
       setErro(mensagemErro)
+    } finally {
+      setCarregandoEdicao(false)
     }
   }
 
@@ -405,37 +444,43 @@ const GerenciarAdministradores = ({ onNavigate }: GerenciarAdministradoresProps)
                     <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                       <thead className="bg-gray-50 dark:bg-gray-700">
                         <tr>
-                          <th className="px-3 sm:px-4 md:px-5 lg:px-6 py-2.5 sm:py-3 md:py-3.5 lg:py-4 text-left text-xs sm:text-sm md:text-base font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap">Nome do Administrador</th>
-                          <th className="px-3 sm:px-4 md:px-5 lg:px-6 py-2.5 sm:py-3 md:py-3.5 lg:py-4 text-left text-xs sm:text-sm md:text-base font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap">Email</th>
-                          <th className="px-3 sm:px-4 md:px-5 lg:px-6 py-2.5 sm:py-3 md:py-3.5 lg:py-4 text-right text-xs sm:text-sm md:text-base font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap">Ações</th>
+                          <th className="px-3 sm:px-4 md:px-5 lg:px-6 py-2.5 sm:py-3 md:py-3.5 lg:py-4 text-center text-xs sm:text-sm md:text-base font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap">Nome do Administrador</th>
+                          <th className="px-3 sm:px-4 md:px-5 lg:px-6 py-2.5 sm:py-3 md:py-3.5 lg:py-4 text-center text-xs sm:text-sm md:text-base font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap">Email</th>
+                          <th className="px-3 sm:px-4 md:px-5 lg:px-6 py-2.5 sm:py-3 md:py-3.5 lg:py-4 text-center text-xs sm:text-sm md:text-base font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap">Ações</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800">
                         {administradores.map((administrador) => (
                           <tr key={administrador.idUsuario} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                            <td className="px-3 sm:px-4 md:px-5 lg:px-6 py-2.5 sm:py-3 md:py-3.5 lg:py-4 text-xs sm:text-sm md:text-base text-gray-900 dark:text-white break-words">
+                            <td className="px-3 sm:px-4 md:px-5 lg:px-6 py-2.5 sm:py-3 md:py-3.5 lg:py-4 text-center text-xs sm:text-sm md:text-base text-gray-900 dark:text-white break-words">
                               <div className="truncate md:whitespace-normal" title={administrador.nomeUsuario || '-'}>
                                 {administrador.nomeUsuario || '-'}
                               </div>
                             </td>
-                            <td className="px-3 sm:px-4 md:px-5 lg:px-6 py-2.5 sm:py-3 md:py-3.5 lg:py-4 text-xs sm:text-sm md:text-base text-gray-600 dark:text-gray-400 break-words">
+                            <td className="px-3 sm:px-4 md:px-5 lg:px-6 py-2.5 sm:py-3 md:py-3.5 lg:py-4 text-center text-xs sm:text-sm md:text-base text-gray-600 dark:text-gray-400 break-words">
                               <div className="truncate md:whitespace-normal" title={administrador.email || '-'}>
                                 {administrador.email || '-'}
                               </div>
                             </td>
-                            <td className="px-3 sm:px-4 md:px-5 lg:px-6 py-2.5 sm:py-3 md:py-3.5 lg:py-4 text-right">
-                              <div className="flex flex-col sm:flex-row justify-end gap-1.5 sm:gap-2 md:gap-2.5">
+                            <td className="px-3 sm:px-4 md:px-5 lg:px-6 py-2.5 sm:py-3 md:py-3.5 lg:py-4 text-center">
+                              <div className="flex flex-col sm:flex-row justify-center gap-1.5 sm:gap-2 md:gap-2.5">
                                 <button
                                   onClick={() => abrirModalEdicao(administrador)}
-                                  className="px-2.5 sm:px-3 md:px-4 lg:px-5 py-1 sm:py-1.5 md:py-2 text-xs sm:text-sm md:text-base font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-colors whitespace-nowrap"
+                                  className="p-2 sm:p-2.5 md:p-3 text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-colors"
+                                  aria-label="Editar"
                                 >
-                                  Editar
+                                  <svg className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                  </svg>
                                 </button>
                                 <button
                                   onClick={() => abrirModalExclusao(administrador)}
-                                  className="px-2.5 sm:px-3 md:px-4 lg:px-5 py-1 sm:py-1.5 md:py-2 text-xs sm:text-sm md:text-base font-semibold text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors whitespace-nowrap"
+                                  className="p-2 sm:p-2.5 md:p-3 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
+                                  aria-label="Excluir"
                                 >
-                                  Excluir
+                                  <svg className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                  </svg>
                                 </button>
                               </div>
                             </td>
@@ -460,13 +505,16 @@ const GerenciarAdministradores = ({ onNavigate }: GerenciarAdministradoresProps)
               </h2>
               <button
                 onClick={() => {
-                  setMostrarModalCadastro(false)
-                  resetCadastro()
-                  setErro('')
-                  setErroSenha(false)
-                  setErroValidacoesSenha(false)
+                  if (!carregandoCadastro) {
+                    setMostrarModalCadastro(false)
+                    resetCadastro()
+                    setErro('')
+                    setErroSenha(false)
+                    setErroValidacoesSenha(false)
+                  }
                 }}
-                className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
+                disabled={carregandoCadastro}
+                className={`text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors ${carregandoCadastro ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -706,12 +754,15 @@ const GerenciarAdministradores = ({ onNavigate }: GerenciarAdministradoresProps)
                   variant="secondary"
                   size="md"
                   className="flex-1 w-full sm:w-auto"
+                  disabled={carregandoCadastro}
                   onClick={() => {
-                    setMostrarModalCadastro(false)
-                    resetCadastro()
-                    setErro('')
-                    setErroSenha(false)
-                    setErroValidacoesSenha(false)
+                    if (!carregandoCadastro) {
+                      setMostrarModalCadastro(false)
+                      resetCadastro()
+                      setErro('')
+                      setErroSenha(false)
+                      setErroValidacoesSenha(false)
+                    }
                   }}
                 >
                   Cancelar
@@ -721,9 +772,10 @@ const GerenciarAdministradores = ({ onNavigate }: GerenciarAdministradoresProps)
                   variant="primary"
                   size="md"
                   className="flex-1 w-full sm:w-auto"
+                  disabled={carregandoCadastro}
                   onClick={handleSubmitCadastro(onSubmitCadastro)}
                 >
-                  Cadastrar
+                  {carregandoCadastro ? 'Cadastrando...' : 'Cadastrar'}
                 </Botao>
               </div>
             </div>
@@ -740,11 +792,17 @@ const GerenciarAdministradores = ({ onNavigate }: GerenciarAdministradoresProps)
               </h2>
               <button
                 onClick={() => {
-                  setMostrarModalEdicao(false)
-                  setAdministradorSelecionado(null)
-                  resetEdicao()
+                  if (!carregandoEdicao) {
+                    setMostrarModalEdicao(false)
+                    setAdministradorSelecionado(null)
+                    resetEdicao()
+                    setErro('')
+                    setErroSenha(false)
+                    setErroValidacoesSenha(false)
+                  }
                 }}
-                className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
+                disabled={carregandoEdicao}
+                className={`text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors ${carregandoEdicao ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -780,111 +838,215 @@ const GerenciarAdministradores = ({ onNavigate }: GerenciarAdministradoresProps)
 
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    Tipo de Administrador *
+                    Email *
                   </label>
-                  <Controller
-                    name="tipoUsuario"
-                    control={controlEdicao}
-                    rules={{ required: 'Tipo de administrador é obrigatório' }}
-                    render={({ field }) => (
-                      <ListaSelecao
-                        options={['ADMINISTRADOR', 'ADMINISTRADOR EMP']}
-                        value={field.value || ''}
-                        onChange={field.onChange}
-                        placeholder="Selecione o tipo"
-                        label="Tipo de Administrador *"
-                        required
-                        id="tipoUsuario"
-                      />
-                    )}
+                  <input
+                    type="email"
+                    {...registerEdicao('email', { 
+                      required: 'Email é obrigatório',
+                      pattern: {
+                        value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                        message: 'Email inválido'
+                      }
+                    })}
+                    className="w-full px-4 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                    placeholder="email@exemplo.com"
                   />
-                  {errorsEdicao.tipoUsuario && (
+                  {errorsEdicao.email && (
                     <p className="mt-1 text-xs text-red-600 dark:text-red-400">
-                      {errorsEdicao.tipoUsuario.message}
+                      {errorsEdicao.email.message}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <div className={`mb-4 p-4 rounded-lg border ${
+                    erroValidacoesSenha 
+                      ? 'bg-red-50 dark:bg-red-900/20 border-red-300 dark:border-red-700' 
+                      : 'bg-gray-50 dark:bg-gray-700/50 border-gray-200 dark:border-gray-600'
+                  }`}>
+                    <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                      Instruções para Criação da Senha
+                    </p>
+                    {erroValidacoesSenha && (
+                      <p className="mb-3 text-sm text-red-600 dark:text-red-400 font-semibold">
+                        Você precisa atender a todos os requisitos de senha para atualizar
+                      </p>
+                    )}
+                    <div className="space-y-2">
+                      <div className="flex items-start">
+                        <div className={getCheckboxInstrucaoClasses(validacoesSenhaEdicao.maxCaracteres)}>
+                          <svg 
+                            className={getCheckIconInstrucaoClasses(validacoesSenhaEdicao.maxCaracteres)}
+                            fill="none" 
+                            stroke="currentColor" 
+                            viewBox="0 0 24 24"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                          </svg>
+                        </div>
+                        <span className="ml-3 text-xs sm:text-sm text-gray-700 dark:text-gray-300">
+                          A senha deve ter entre 8 e 16 caracteres
+                        </span>
+                      </div>
+                      
+                      <div className="flex items-start">
+                        <div className={getCheckboxInstrucaoClasses(validacoesSenhaEdicao.maiusculasMinusculas)}>
+                          <svg 
+                            className={getCheckIconInstrucaoClasses(validacoesSenhaEdicao.maiusculasMinusculas)}
+                            fill="none" 
+                            stroke="currentColor" 
+                            viewBox="0 0 24 24"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                          </svg>
+                        </div>
+                        <span className="ml-3 text-xs sm:text-sm text-gray-700 dark:text-gray-300">
+                          Utilize letras maiúsculas e minúsculas
+                        </span>
+                      </div>
+                      
+                      <div className="flex items-start">
+                        <div className={getCheckboxInstrucaoClasses(validacoesSenhaEdicao.temNumero)}>
+                          <svg 
+                            className={getCheckIconInstrucaoClasses(validacoesSenhaEdicao.temNumero)}
+                            fill="none" 
+                            stroke="currentColor" 
+                            viewBox="0 0 24 24"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                          </svg>
+                        </div>
+                        <span className="ml-3 text-xs sm:text-sm text-gray-700 dark:text-gray-300">
+                          Inclua pelo menos um número
+                        </span>
+                      </div>
+                      
+                      <div className="flex items-start">
+                        <div className={getCheckboxInstrucaoClasses(validacoesSenhaEdicao.temCaractereEspecial)}>
+                          <svg 
+                            className={getCheckIconInstrucaoClasses(validacoesSenhaEdicao.temCaractereEspecial)}
+                            fill="none" 
+                            stroke="currentColor" 
+                            viewBox="0 0 24 24"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                          </svg>
+                        </div>
+                        <span className="ml-3 text-xs sm:text-sm text-gray-700 dark:text-gray-300">
+                          Inclua pelo menos um caractere especial (! @ # $ % & * …)
+                        </span>
+                      </div>
+                      
+                      <div className="flex items-start">
+                        <div className={getCheckboxInstrucaoClasses(validacoesSenhaEdicao.semEspacos)}>
+                          <svg 
+                            className={getCheckIconInstrucaoClasses(validacoesSenhaEdicao.semEspacos)}
+                            fill="none" 
+                            stroke="currentColor" 
+                            viewBox="0 0 24 24"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                          </svg>
+                        </div>
+                        <span className="ml-3 text-xs sm:text-sm text-gray-700 dark:text-gray-300">
+                          Não utilize espaços
+                        </span>
+                      </div>
+                      
+                      <div className="flex items-start">
+                        <div className={getCheckboxInstrucaoClasses(validacoesSenhaEdicao.semInfoPessoal)}>
+                          <svg 
+                            className={getCheckIconInstrucaoClasses(validacoesSenhaEdicao.semInfoPessoal)}
+                            fill="none" 
+                            stroke="currentColor" 
+                            viewBox="0 0 24 24"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                          </svg>
+                        </div>
+                        <span className="ml-3 text-xs sm:text-sm text-gray-700 dark:text-gray-300">
+                          Evite informações pessoais, como nome ou data de nascimento (Opcional)
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Senha (deixe em branco para não alterar)
+                  </label>
+                  
+                  <input
+                    type="password"
+                    {...registerEdicao('senha', {
+                      maxLength: {
+                        value: 16,
+                        message: 'A senha deve ter no máximo 16 caracteres'
+                      },
+                      minLength: {
+                        value: 8,
+                        message: 'A senha deve ter no mínimo 8 caracteres'
+                      },
+                      validate: (value) => {
+                        if (value && value.trim() !== '') {
+                          const senhaAtual = value
+                          const validacoes = validarSenhaEdicao(senhaAtual)
+                          return (validacoes.maxCaracteres &&
+                            validacoes.maiusculasMinusculas &&
+                            validacoes.temNumero &&
+                            validacoes.temCaractereEspecial &&
+                            validacoes.semEspacos &&
+                            validacoes.semInfoPessoal) || 'Senha não atende aos requisitos'
+                        }
+                        return true
+                      },
+                      onChange: () => {
+                        setErroValidacoesSenha(false)
+                      }
+                    })}
+                    maxLength={16}
+                    className="w-full px-4 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                    placeholder="••••••••"
+                  />
+                  {errorsEdicao.senha && (
+                    <p className="mt-1 text-xs text-red-600 dark:text-red-400">
+                      {errorsEdicao.senha.message}
                     </p>
                   )}
                 </div>
 
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    Área de Atuação
+                    Confirmar Senha
                   </label>
                   <input
-                    type="text"
-                    {...registerEdicao('areaAtuacao')}
-                    className="w-full px-4 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
-                    placeholder="Ex: Desenvolvimento, Marketing..."
+                    type="password"
+                    {...registerEdicao('confirmarSenha', {
+                      validate: (value) => {
+                        const senha = watchEdicao('senha')
+                        if (senha && senha.trim() !== '') {
+                          return value === senha || 'As senhas não coincidem'
+                        }
+                        return true
+                      }
+                    })}
+                    maxLength={16}
+                    className={`w-full px-4 py-2 border-2 rounded-lg focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm ${
+                      erroSenha 
+                        ? 'border-red-500 dark:border-red-500 focus:border-red-500 dark:focus:border-red-500' 
+                        : 'border-gray-300 dark:border-gray-600 focus:border-indigo-600 dark:focus:border-indigo-400'
+                    }`}
+                    placeholder="••••••••"
                   />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    Nível de Senioridade
-                  </label>
-                  <Controller
-                    name="nivelSenioridade"
-                    control={controlEdicao}
-                    render={({ field }) => (
-                      <ListaSelecao
-                        options={['JUNIOR', 'PLENO', 'SENIOR', 'ESPECIALISTA']}
-                        value={field.value || ''}
-                        onChange={field.onChange}
-                        placeholder="Selecione o nível"
-                        label="Nível de Senioridade"
-                        id="nivelSenioridade"
-                      />
-                    )}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    Competências
-                  </label>
-                  <textarea
-                    {...registerEdicao('competencias')}
-                    className="w-full px-4 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
-                    placeholder="Liste as competências do administrador"
-                    rows={3}
-                  />
-                </div>
-
-                <div>
-                  {carregandoEmpresas ? (
-                    <>
-                      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                        Empresa
-                      </label>
-                      <div className="w-full px-4 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400 text-sm">
-                        Carregando empresas...
-                      </div>
-                    </>
-                  ) : (
-                    <Controller
-                      name="idEmpresa"
-                      control={controlEdicao}
-                      render={({ field }) => {
-                        const opcoesEmpresas = empresas.map(e => e.nomeEmpresa)
-                        
-                        const nomeSelecionado = field.value 
-                          ? empresas.find(e => e.idEmpresa.toString() === field.value)?.nomeEmpresa || ''
-                          : ''
-                        
-                        return (
-                          <ListaSelecao
-                            options={opcoesEmpresas}
-                            value={nomeSelecionado}
-                            onChange={(nomeSelecionado) => {
-                              const empresaSelecionada = empresas.find(e => e.nomeEmpresa === nomeSelecionado)
-                              field.onChange(empresaSelecionada ? empresaSelecionada.idEmpresa.toString() : '')
-                            }}
-                            placeholder="Selecione uma empresa (opcional)"
-                            label="Empresa"
-                            id="idEmpresa"
-                          />
-                        )
-                      }}
-                    />
+                  {erroSenha && confirmarSenhaEdicao && (
+                    <p className="mt-1 text-xs text-red-600 dark:text-red-400">
+                      As senhas não coincidem
+                    </p>
+                  )}
+                  {errorsEdicao.confirmarSenha && !erroSenha && (
+                    <p className="mt-1 text-xs text-red-600 dark:text-red-400">
+                      {errorsEdicao.confirmarSenha.message}
+                    </p>
                   )}
                 </div>
               </form>
@@ -897,10 +1059,16 @@ const GerenciarAdministradores = ({ onNavigate }: GerenciarAdministradoresProps)
                   variant="secondary"
                   size="md"
                   className="flex-1 w-full sm:w-auto"
+                  disabled={carregandoEdicao}
                   onClick={() => {
-                    setMostrarModalEdicao(false)
-                    setAdministradorSelecionado(null)
-                    resetEdicao()
+                    if (!carregandoEdicao) {
+                      setMostrarModalEdicao(false)
+                      setAdministradorSelecionado(null)
+                      resetEdicao()
+                      setErro('')
+                      setErroSenha(false)
+                      setErroValidacoesSenha(false)
+                    }
                   }}
                 >
                   Cancelar
@@ -910,9 +1078,10 @@ const GerenciarAdministradores = ({ onNavigate }: GerenciarAdministradoresProps)
                   variant="primary"
                   size="md"
                   className="flex-1 w-full sm:w-auto"
+                  disabled={carregandoEdicao}
                   onClick={handleSubmitEdicao(onSubmitEdicao)}
                 >
-                  Salvar
+                  {carregandoEdicao ? 'Salvando...' : 'Salvar'}
                 </Botao>
               </div>
             </div>
