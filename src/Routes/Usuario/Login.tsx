@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useForm } from 'react-hook-form'
 import Cabecalho from '../../Components/Cabecalho/Cabecalho'
 import Rodape from '../../Components/Rodape/Rodape'
 import Botao from '../../Components/Botao/Botao'
@@ -9,29 +10,23 @@ interface LoginProps {
   onNavigate?: (pagina: string) => void
 }
 
+interface LoginFormData {
+  email: string
+  senha: string
+}
+
 const Login = ({ onNavigate }: LoginProps) => {
-  const [email, setEmail] = useState('')
-  const [senha, setSenha] = useState('')
   const [erroLogin, setErroLogin] = useState('')
   const [carregando, setCarregando] = useState(false)
   const { login } = useAuth()
+  
+  const { register, handleSubmit, formState: { errors } } = useForm<LoginFormData>()
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const onSubmit = async (data: LoginFormData) => {
     setErroLogin('')
     
-    const emailTrimmed = email.trim()
-    const senhaTrimmed = senha.trim()
-    
-    if (!emailTrimmed) {
-      setErroLogin('Email é obrigatório')
-      return
-    }
-    
-    if (!senhaTrimmed) {
-      setErroLogin('Senha é obrigatória')
-      return
-    }
+    const emailTrimmed = data.email.trim()
+    const senhaTrimmed = data.senha.trim()
     
     setCarregando(true)
 
@@ -84,7 +79,7 @@ const Login = ({ onNavigate }: LoginProps) => {
                 Entre com suas credenciais para acessar sua conta
               </p>
               
-              <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
                 {erroLogin && (
                   <div className="p-4 bg-red-50 dark:bg-red-900/20 border-2 border-red-300 dark:border-red-700 rounded-lg">
                     <p className="text-sm text-red-600 dark:text-red-400 font-semibold">
@@ -103,12 +98,21 @@ const Login = ({ onNavigate }: LoginProps) => {
                   <input
                     type="email"
                     id="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
+                    {...register('email', {
+                      required: 'Email é obrigatório',
+                      pattern: {
+                        value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                        message: 'Email inválido'
+                      }
+                    })}
                     className="w-full px-4 py-2 sm:py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm sm:text-base"
                     placeholder="seu@email.com"
                   />
+                  {errors.email && (
+                    <p className="mt-2 text-sm text-red-600 dark:text-red-400">
+                      {errors.email.message}
+                    </p>
+                  )}
                 </div>
                 
                 <div>
@@ -121,12 +125,17 @@ const Login = ({ onNavigate }: LoginProps) => {
                   <input
                     type="password"
                     id="senha"
-                    value={senha}
-                    onChange={(e) => setSenha(e.target.value)}
-                    required
+                    {...register('senha', {
+                      required: 'Senha é obrigatória'
+                    })}
                     className="w-full px-4 py-2 sm:py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm sm:text-base"
                     placeholder="••••••••"
                   />
+                  {errors.senha && (
+                    <p className="mt-2 text-sm text-red-600 dark:text-red-400">
+                      {errors.senha.message}
+                    </p>
+                  )}
                 </div>
                 
                 <div className="flex items-center justify-end">
@@ -190,4 +199,3 @@ const Login = ({ onNavigate }: LoginProps) => {
 }
 
 export default Login
-

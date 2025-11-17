@@ -1,32 +1,66 @@
 import { useState } from 'react'
+import { useForm } from 'react-hook-form'
 import Cabecalho from '../../Components/Cabecalho/Cabecalho'
 import Rodape from '../../Components/Rodape/Rodape'
 import Botao from '../../Components/Botao/Botao'
+import { useAuth } from '../../Contexto/AutenticacaoContexto'
 
 interface LoginAdminProps {
   onNavigate?: (pagina: string) => void
 }
 
+interface LoginAdminFormData {
+  email: string
+  senha: string
+}
+
 const LoginAdmin = ({ onNavigate }: LoginAdminProps) => {
-  const [email, setEmail] = useState('')
-  const [senha, setSenha] = useState('')
-  const [lembrarMe, setLembrarMe] = useState(false)
+  const [erroLogin, setErroLogin] = useState('')
+  const [carregando, setCarregando] = useState(false)
+  const { login } = useAuth()
+  
+  const { register, handleSubmit, formState: { errors } } = useForm<LoginAdminFormData>()
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-  }
+  const onSubmit = async (data: LoginAdminFormData) => {
+    setErroLogin('')
+    setCarregando(true)
 
-  const getCheckboxClasses = () => {
-    const baseClasses = 'w-5 h-5 border-2 rounded-md transition-all duration-200 flex items-center justify-center'
-    if (lembrarMe) {
-      return `${baseClasses} bg-indigo-600 border-indigo-600 dark:bg-indigo-500 dark:border-indigo-500`
+    try {
+      const emailTrimmed = data.email.trim()
+      const senhaTrimmed = data.senha.trim()
+
+      if (!emailTrimmed) {
+        setErroLogin('Email é obrigatório')
+        setCarregando(false)
+        return
+      }
+
+      if (!senhaTrimmed) {
+        setErroLogin('Senha é obrigatória')
+        setCarregando(false)
+        return
+      }
+
+      const adminData = {
+        email: emailTrimmed,
+        nome: emailTrimmed.split('@')[0],
+        nomeUsuario: emailTrimmed.split('@')[0],
+        isAdmin: true,
+        tipoUsuario: 'ADMINISTRADOR'
+      }
+      
+      login(adminData)
+      
+      setCarregando(false)
+      
+      if (onNavigate) {
+        onNavigate('homeAdmin')
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+      }
+    } catch (error) {
+      setCarregando(false)
+      setErroLogin(error instanceof Error ? error.message : 'Erro ao fazer login. Tente novamente.')
     }
-    return `${baseClasses} border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 group-hover:border-indigo-500 dark:group-hover:border-indigo-400`
-  }
-
-  const getCheckIconClasses = () => {
-    const baseClasses = 'w-3.5 h-3.5 text-white transition-opacity duration-200'
-    return lembrarMe ? `${baseClasses} opacity-100` : `${baseClasses} opacity-0`
   }
 
   return (
@@ -43,7 +77,14 @@ const LoginAdmin = ({ onNavigate }: LoginAdminProps) => {
                 Acesso restrito ao painel administrativo
               </p>
               
-              <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
+                {erroLogin && (
+                  <div className="p-4 bg-red-50 dark:bg-red-900/20 border-2 border-red-300 dark:border-red-700 rounded-lg">
+                    <p className="text-sm text-red-600 dark:text-red-400 font-semibold">
+                      {erroLogin}
+                    </p>
+                  </div>
+                )}
                 <div>
                   <label 
                     htmlFor="email" 
@@ -54,12 +95,21 @@ const LoginAdmin = ({ onNavigate }: LoginAdminProps) => {
                   <input
                     type="email"
                     id="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
+                    {...register('email', {
+                      required: 'Email é obrigatório',
+                      pattern: {
+                        value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                        message: 'Email inválido'
+                      }
+                    })}
                     className="w-full px-4 py-2 sm:py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm sm:text-base"
                     placeholder="admin@email.com"
                   />
+                  {errors.email && (
+                    <p className="mt-2 text-sm text-red-600 dark:text-red-400">
+                      {errors.email.message}
+                    </p>
+                  )}
                 </div>
                 
                 <div>
@@ -72,38 +122,17 @@ const LoginAdmin = ({ onNavigate }: LoginAdminProps) => {
                   <input
                     type="password"
                     id="senha"
-                    value={senha}
-                    onChange={(e) => setSenha(e.target.value)}
-                    required
+                    {...register('senha', {
+                      required: 'Senha é obrigatória'
+                    })}
                     className="w-full px-4 py-2 sm:py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm sm:text-base"
                     placeholder="••••••••"
                   />
-                </div>
-                
-                <div className="flex items-center">
-                  <label className="flex items-center cursor-pointer group">
-                    <div className="relative">
-                      <input
-                        type="checkbox"
-                        checked={lembrarMe}
-                        onChange={(e) => setLembrarMe(e.target.checked)}
-                        className="sr-only"
-                      />
-                      <div className={getCheckboxClasses()}>
-                        <svg 
-                          className={getCheckIconClasses()}
-                          fill="none" 
-                          stroke="currentColor" 
-                          viewBox="0 0 24 24"
-                        >
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                        </svg>
-                      </div>
-                    </div>
-                    <span className="ml-3 text-sm sm:text-base text-gray-700 dark:text-gray-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                      Lembrar-me
-                    </span>
-                  </label>
+                  {errors.senha && (
+                    <p className="mt-2 text-sm text-red-600 dark:text-red-400">
+                      {errors.senha.message}
+                    </p>
+                  )}
                 </div>
                 
                 <Botao
@@ -111,8 +140,9 @@ const LoginAdmin = ({ onNavigate }: LoginAdminProps) => {
                   variant="primary"
                   size="md"
                   className="w-full"
+                  disabled={carregando}
                 >
-                  Entrar
+                  {carregando ? 'Entrando...' : 'Entrar'}
                 </Botao>
               </form>
               
@@ -134,4 +164,3 @@ const LoginAdmin = ({ onNavigate }: LoginAdminProps) => {
 }
 
 export default LoginAdmin
-

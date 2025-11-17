@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useForm, Controller } from 'react-hook-form'
 import Cabecalho from '../../Components/Cabecalho/Cabecalho'
 import Rodape from '../../Components/Rodape/Rodape'
 import Botao from '../../Components/Botao/Botao'
@@ -8,12 +9,15 @@ interface CadastroProps {
   onNavigate?: (pagina: string) => void
 }
 
+interface CadastroFormData {
+  nome: string
+  email: string
+  senha: string
+  confirmarSenha: string
+  aceitarTermos: boolean
+}
+
 const Cadastro = ({ onNavigate }: CadastroProps) => {
-  const [nome, setNome] = useState('')
-  const [email, setEmail] = useState('')
-  const [senha, setSenha] = useState('')
-  const [confirmarSenha, setConfirmarSenha] = useState('')
-  const [aceitarTermos, setAceitarTermos] = useState(false)
   const [mostrarTermos, setMostrarTermos] = useState(false)
   const [erroTermos, setErroTermos] = useState(false)
   const [erroSenha, setErroSenha] = useState(false)
@@ -21,78 +25,37 @@ const Cadastro = ({ onNavigate }: CadastroProps) => {
   const [erroApi, setErroApi] = useState('')
   const [carregando, setCarregando] = useState(false)
   
-  const [validacoesSenha, setValidacoesSenha] = useState({
-    maxCaracteres: false,
-    maiusculasMinusculas: false,
-    temNumero: false,
-    temCaractereEspecial: false,
-    semEspacos: false,
-    semInfoPessoal: true
+  const { register, handleSubmit, watch, control, formState: { errors } } = useForm<CadastroFormData>({
+    defaultValues: {
+      aceitarTermos: false
+    }
   })
+  
+  const senha = watch('senha', '')
+  const confirmarSenha = watch('confirmarSenha', '')
+  const aceitarTermos = watch('aceitarTermos', false)
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
-    setErroTermos(false)
-    setErroSenha(false)
-    setErroApi('')
-    
-    if (!nome || nome.trim() === '') {
-      setErroApi('Nome completo é obrigatório')
-      return
-    }
-    
-    if (!aceitarTermos) {
-      setErroTermos(true)
-      return
-    }
-    
-    if (senha !== confirmarSenha) {
+  useEffect(() => {
+    if (senha && confirmarSenha && senha !== confirmarSenha) {
       setErroSenha(true)
-      return
+    } else {
+      setErroSenha(false)
     }
-    
-    const todasValidacoesSenha = 
-      validacoesSenha.maxCaracteres &&
-      validacoesSenha.maiusculasMinusculas &&
-      validacoesSenha.temNumero &&
-      validacoesSenha.temCaractereEspecial &&
-      validacoesSenha.semEspacos &&
-      validacoesSenha.semInfoPessoal
-    
-    if (!todasValidacoesSenha) {
-      setErroValidacoesSenha(true)
-      return
-    }
-    
-    setErroValidacoesSenha(false)
-    setCarregando(true)
-    
-    try {
-      const dadosCadastro = {
-        nome_usuario: nome.trim(),
-        email: email.trim(),
-        senha,
-        tipo_usuario: 'USUARIO',
-        id_empresa: null,
-        area_atuacao: null,
-        competencias: null,
-        nivel_senioridade: null
-      }
-      
-      await cadastrarUsuario(dadosCadastro)
-      
-      setCarregando(false)
-      
-      if (onNavigate) {
-        onNavigate('login')
-        window.scrollTo({ top: 0, behavior: 'smooth' })
-      }
-    } catch (error) {
-      setCarregando(false)
-      setErroApi(error instanceof Error ? error.message : 'Erro ao cadastrar usuário. Tente novamente.')
+  }, [senha, confirmarSenha])
+
+  const validarSenha = (senhaAtual: string) => {
+    const temConteudo = senhaAtual.length > 0
+    return {
+      maxCaracteres: temConteudo && senhaAtual.length >= 8 && senhaAtual.length <= 16,
+      maiusculasMinusculas: temConteudo && /[a-z]/.test(senhaAtual) && /[A-Z]/.test(senhaAtual),
+      temNumero: temConteudo && /\d/.test(senhaAtual),
+      temCaractereEspecial: temConteudo && /[!@#$%&*]/.test(senhaAtual),
+      semEspacos: temConteudo && !/\s/.test(senhaAtual),
+      semInfoPessoal: true
     }
   }
+
+  const validacoesSenha = validarSenha(senha)
 
   const getCheckboxClasses = () => {
     const baseClasses = 'w-5 h-5 border-2 rounded-md transition-all duration-200 flex items-center justify-center'
@@ -120,17 +83,66 @@ const Cadastro = ({ onNavigate }: CadastroProps) => {
     return validado ? `${baseClasses} opacity-100` : `${baseClasses} opacity-0`
   }
 
-  const validarSenha = (senhaAtual: string) => {
-    const temConteudo = senhaAtual.length > 0
-    const validacoes = {
-      maxCaracteres: temConteudo && senhaAtual.length >= 8 && senhaAtual.length <= 16,
-      maiusculasMinusculas: temConteudo && /[a-z]/.test(senhaAtual) && /[A-Z]/.test(senhaAtual),
-      temNumero: temConteudo && /\d/.test(senhaAtual),
-      temCaractereEspecial: temConteudo && /[!@#$%&*]/.test(senhaAtual),
-      semEspacos: temConteudo && !/\s/.test(senhaAtual),
-      semInfoPessoal: true
+  const onSubmit = async (data: CadastroFormData) => {
+    setErroTermos(false)
+    setErroSenha(false)
+    setErroApi('')
+    
+    if (!data.nome || data.nome.trim() === '') {
+      setErroApi('Nome completo é obrigatório')
+      return
     }
-    setValidacoesSenha(validacoes)
+    
+    if (!data.aceitarTermos) {
+      setErroTermos(true)
+      return
+    }
+    
+    if (data.senha !== data.confirmarSenha) {
+      setErroSenha(true)
+      return
+    }
+    
+    const todasValidacoesSenha = 
+      validacoesSenha.maxCaracteres &&
+      validacoesSenha.maiusculasMinusculas &&
+      validacoesSenha.temNumero &&
+      validacoesSenha.temCaractereEspecial &&
+      validacoesSenha.semEspacos &&
+      validacoesSenha.semInfoPessoal
+    
+    if (!todasValidacoesSenha) {
+      setErroValidacoesSenha(true)
+      return
+    }
+    
+    setErroValidacoesSenha(false)
+    setCarregando(true)
+    
+    try {
+      const dadosCadastro = {
+        nome_usuario: data.nome.trim(),
+        email: data.email.trim(),
+        senha: data.senha,
+        tipo_usuario: 'USUARIO',
+        id_empresa: null,
+        area_atuacao: null,
+        competencias: null,
+        nivel_senioridade: null
+      }
+      
+      await cadastrarUsuario(dadosCadastro)
+      
+      setCarregando(false)
+      
+      if (onNavigate) {
+        onNavigate('login')
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+      }
+    } catch (error) {
+      setCarregando(false)
+      setErroApi(error instanceof Error ? error.message : 'Erro ao cadastrar usuário. Tente novamente.')
+    }
   }
 
   return (
@@ -147,7 +159,7 @@ const Cadastro = ({ onNavigate }: CadastroProps) => {
                 Preencha os dados abaixo para criar sua conta
               </p>
               
-              <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
                 {erroApi && (
                   <div className="p-4 bg-red-50 dark:bg-red-900/20 border-2 border-red-300 dark:border-red-700 rounded-lg">
                     <p className="text-sm text-red-600 dark:text-red-400 font-semibold">
@@ -166,12 +178,18 @@ const Cadastro = ({ onNavigate }: CadastroProps) => {
                   <input
                     type="text"
                     id="nome"
-                    value={nome}
-                    onChange={(e) => setNome(e.target.value)}
-                    required
+                    {...register('nome', {
+                      required: 'Nome completo é obrigatório',
+                      validate: (value) => value.trim() !== '' || 'Nome completo é obrigatório'
+                    })}
                     className="w-full px-4 py-2 sm:py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm sm:text-base"
                     placeholder="Seu nome completo"
                   />
+                  {errors.nome && (
+                    <p className="mt-2 text-sm text-red-600 dark:text-red-400">
+                      {errors.nome.message}
+                    </p>
+                  )}
                 </div>
                 
                 <div>
@@ -184,12 +202,21 @@ const Cadastro = ({ onNavigate }: CadastroProps) => {
                   <input
                     type="email"
                     id="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
+                    {...register('email', {
+                      required: 'Email é obrigatório',
+                      pattern: {
+                        value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                        message: 'Email inválido'
+                      }
+                    })}
                     className="w-full px-4 py-2 sm:py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm sm:text-base"
                     placeholder="seu@email.com"
                   />
+                  {errors.email && (
+                    <p className="mt-2 text-sm text-red-600 dark:text-red-400">
+                      {errors.email.message}
+                    </p>
+                  )}
                 </div>
                 
                 <div>
@@ -315,23 +342,29 @@ const Cadastro = ({ onNavigate }: CadastroProps) => {
                   <input
                     type="password"
                     id="senha"
-                    value={senha}
-                    maxLength={16}
-                    onChange={(e) => {
-                      const novaSenha = e.target.value
-                      setSenha(novaSenha)
-                      validarSenha(novaSenha)
-                      setErroValidacoesSenha(false)
-                      if (confirmarSenha && novaSenha !== confirmarSenha) {
-                        setErroSenha(true)
-                      } else {
-                        setErroSenha(false)
+                    {...register('senha', {
+                      required: 'Senha é obrigatória',
+                      maxLength: {
+                        value: 16,
+                        message: 'A senha deve ter no máximo 16 caracteres'
+                      },
+                      minLength: {
+                        value: 8,
+                        message: 'A senha deve ter no mínimo 8 caracteres'
+                      },
+                      onChange: () => {
+                        setErroValidacoesSenha(false)
                       }
-                    }}
-                    required
+                    })}
+                    maxLength={16}
                     className="w-full px-4 py-2 sm:py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm sm:text-base"
                     placeholder="••••••••"
                   />
+                  {errors.senha && (
+                    <p className="mt-2 text-sm text-red-600 dark:text-red-400">
+                      {errors.senha.message}
+                    </p>
+                  )}
                 </div>
                 
                 <div>
@@ -344,17 +377,11 @@ const Cadastro = ({ onNavigate }: CadastroProps) => {
                   <input
                     type="password"
                     id="confirmarSenha"
-                    value={confirmarSenha}
+                    {...register('confirmarSenha', {
+                      required: 'Confirmação de senha é obrigatória',
+                      validate: (value) => value === senha || 'As senhas não coincidem'
+                    })}
                     maxLength={16}
-                    onChange={(e) => {
-                      setConfirmarSenha(e.target.value)
-                      if (senha && e.target.value !== senha) {
-                        setErroSenha(true)
-                      } else {
-                        setErroSenha(false)
-                      }
-                    }}
-                    required
                     className={`w-full px-4 py-2 sm:py-3 border-2 rounded-lg focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm sm:text-base ${
                       erroSenha 
                         ? 'border-red-500 dark:border-red-500 focus:border-red-500 dark:focus:border-red-500' 
@@ -367,33 +394,45 @@ const Cadastro = ({ onNavigate }: CadastroProps) => {
                       As senhas não coincidem
                     </p>
                   )}
+                  {errors.confirmarSenha && !erroSenha && (
+                    <p className="mt-2 text-sm text-red-600 dark:text-red-400">
+                      {errors.confirmarSenha.message}
+                    </p>
+                  )}
                 </div>
                 
                 <div className="flex items-start">
                   <div className="flex items-start w-full">
-                    <label className="cursor-pointer group">
-                      <div className="relative mt-1">
-                        <input
-                          type="checkbox"
-                          checked={aceitarTermos}
-                          onChange={(e) => {
-                            setAceitarTermos(e.target.checked)
-                            setErroTermos(false)
-                          }}
-                          className="sr-only"
-                        />
-                        <div className={`${getCheckboxClasses()} ${erroTermos ? 'border-red-500 dark:border-red-500' : ''}`}>
-                          <svg 
-                            className={getCheckIconClasses()}
-                            fill="none" 
-                            stroke="currentColor" 
-                            viewBox="0 0 24 24"
-                          >
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                          </svg>
-                        </div>
-                      </div>
-                    </label>
+                    <Controller
+                      name="aceitarTermos"
+                      control={control}
+                      rules={{ required: 'Você precisa aceitar os termos de uso' }}
+                      render={({ field }) => (
+                        <label className="cursor-pointer group">
+                          <div className="relative mt-1">
+                            <input
+                              type="checkbox"
+                              checked={field.value}
+                              onChange={(e) => {
+                                field.onChange(e.target.checked)
+                                setErroTermos(false)
+                              }}
+                              className="sr-only"
+                            />
+                            <div className={`${getCheckboxClasses()} ${erroTermos ? 'border-red-500 dark:border-red-500' : ''}`}>
+                              <svg 
+                                className={getCheckIconClasses()}
+                                fill="none" 
+                                stroke="currentColor" 
+                                viewBox="0 0 24 24"
+                              >
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                              </svg>
+                            </div>
+                          </div>
+                        </label>
+                      )}
+                    />
                     <div className="ml-3 flex-1">
                       <span className="text-sm sm:text-base text-gray-700 dark:text-gray-300">
                         Aceito os{' '}
@@ -409,6 +448,11 @@ const Cadastro = ({ onNavigate }: CadastroProps) => {
                       {erroTermos && (
                         <p className="mt-2 text-sm text-red-600 dark:text-red-400">
                           Você precisa aceitar os termos de uso para criar uma conta
+                        </p>
+                      )}
+                      {errors.aceitarTermos && !erroTermos && (
+                        <p className="mt-2 text-sm text-red-600 dark:text-red-400">
+                          {errors.aceitarTermos.message}
                         </p>
                       )}
                     </div>
@@ -636,4 +680,3 @@ const Cadastro = ({ onNavigate }: CadastroProps) => {
 }
 
 export default Cadastro
-

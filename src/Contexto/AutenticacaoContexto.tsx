@@ -7,6 +7,8 @@ interface User {
   nome?: string
   nomeUsuario?: string
   email?: string
+  tipoUsuario?: string
+  isAdmin?: boolean
 }
 
 interface AutenticacaoContextoType {
