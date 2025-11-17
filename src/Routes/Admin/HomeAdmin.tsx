@@ -64,12 +64,18 @@ const HomeAdmin = ({ onNavigate }: HomeAdminProps) => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-              <button className="p-6 bg-white dark:bg-gray-800 rounded-lg border-2 border-gray-200 dark:border-gray-600 hover:border-indigo-400 dark:hover:border-indigo-600 hover:shadow-lg transition-all duration-200 text-left">
+              <button 
+                onClick={() => {
+                  onNavigate?.('gerenciarAdministradores')
+                  window.scrollTo({ top: 0, behavior: 'smooth' })
+                }}
+                className="p-6 bg-white dark:bg-gray-800 rounded-lg border-2 border-gray-200 dark:border-gray-600 hover:border-indigo-400 dark:hover:border-indigo-600 hover:shadow-lg transition-all duration-200 text-left"
+              >
                 <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                  Gerenciar Usuários
+                  Gerenciar Administradores
                 </h3>
                 <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
-                  Visualize e gerencie todos os usuários da plataforma
+                  Visualize e gerencie todos os administradores da plataforma
                 </p>
               </button>
 

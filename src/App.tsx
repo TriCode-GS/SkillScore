@@ -13,6 +13,7 @@ import Trilhas from './Routes/UsuarioFree/Trilhas'
 import LoginAdmin from './Routes/Admin/LoginAdmin'
 import HomeAdmin from './Routes/Admin/HomeAdmin'
 import GerenciarEmpresas from './Routes/Admin/GerenciarEmpresas'
+import GerenciarAdministradores from './Routes/Admin/GerenciarAdministradores'
 import LoginCorporativo from './Routes/Corporativo/LoginCorporativo'
 
 function App() {
@@ -42,6 +43,8 @@ function App() {
             return <HomeAdmin onNavigate={setPaginaAtual} />
           case 'gerenciarEmpresas':
             return <GerenciarEmpresas onNavigate={setPaginaAtual} />
+          case 'gerenciarAdministradores':
+            return <GerenciarAdministradores onNavigate={setPaginaAtual} />
           case 'loginCorporativo':
             return <LoginCorporativo onNavigate={setPaginaAtual} />
       case 'home':

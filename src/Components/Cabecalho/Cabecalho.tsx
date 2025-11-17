@@ -105,9 +105,13 @@ const Cabecalho = ({ onNavigate, isHomeFree = false, isHomeAdmin = false, onLogo
                   Home
                 </button>
                 <button
+                  onClick={() => {
+                    onNavigate?.('gerenciarAdministradores')
+                    window.scrollTo({ top: 0, behavior: 'smooth' })
+                  }}
                   className="text-sm lg:text-base font-semibold text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors px-3 lg:px-4 py-2 rounded-lg hover:bg-indigo-50 dark:hover:bg-gray-800 whitespace-nowrap"
                 >
-                  Gerenciar Usuários
+                  Gerenciar Administradores
                 </button>
                 <button
                   onClick={() => {
@@ -392,9 +396,14 @@ const Cabecalho = ({ onNavigate, isHomeFree = false, isHomeAdmin = false, onLogo
                 Home
               </button>
               <button
+                onClick={() => {
+                  onNavigate?.('gerenciarAdministradores')
+                  window.scrollTo({ top: 0, behavior: 'smooth' })
+                  setMenuAberto(false)
+                }}
                 className="px-4 py-4 text-left text-gray-700 dark:text-gray-300 hover:text-white hover:bg-indigo-600 dark:hover:bg-indigo-600 active:bg-indigo-700 active:text-white transition-all duration-200 font-medium border-b-2 border-gray-200 dark:border-gray-700"
               >
-                Gerenciar Usuários
+                Gerenciar Administradores
               </button>
               <button
                 onClick={() => {
