@@ -125,6 +125,7 @@ const Cadastro = ({ onNavigate }: CadastroProps) => {
         email: data.email.trim(),
         senha: data.senha,
         tipo_usuario: 'USUARIO',
+        tipo_login: 'USUARIO',
         id_empresa: null,
         area_atuacao: null,
         competencias: null,

@@ -4,6 +4,7 @@ import Cabecalho from '../../Components/Cabecalho/Cabecalho'
 import Rodape from '../../Components/Rodape/Rodape'
 import Botao from '../../Components/Botao/Botao'
 import { useAuth } from '../../Contexto/AutenticacaoContexto'
+import { autenticarAdministrador } from '../../Types/AutenticacaoLogin'
 
 interface LoginAdminProps {
   onNavigate?: (pagina: string) => void
@@ -41,10 +42,14 @@ const LoginAdmin = ({ onNavigate }: LoginAdminProps) => {
         return
       }
 
+      const response = await autenticarAdministrador({ email: emailTrimmed, senha: senhaTrimmed }) as any
+      
       const adminData = {
-        email: emailTrimmed,
-        nome: emailTrimmed.split('@')[0],
-        nomeUsuario: emailTrimmed.split('@')[0],
+        id: response.idUsuario?.toString() || response.id_usuario?.toString() || '',
+        idUsuario: response.idUsuario || response.id_usuario || 0,
+        email: response.email || emailTrimmed,
+        nome: response.nomeUsuario || response.nome || emailTrimmed.split('@')[0],
+        nomeUsuario: response.nomeUsuario || response.nome || emailTrimmed.split('@')[0],
         isAdmin: true,
         tipoUsuario: 'ADMINISTRADOR'
       }

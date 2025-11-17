@@ -4,7 +4,7 @@ import Cabecalho from '../../Components/Cabecalho/Cabecalho'
 import Rodape from '../../Components/Rodape/Rodape'
 import Botao from '../../Components/Botao/Botao'
 import { useAuth } from '../../Contexto/AutenticacaoContexto'
-import { autenticarLogin, buscarUsuarioPorId } from '../../Types/AutenticacaoLogin'
+import { autenticarUsuario, buscarUsuarioPorId } from '../../Types/AutenticacaoLogin'
 
 interface LoginProps {
   onNavigate?: (pagina: string) => void
@@ -31,7 +31,7 @@ const Login = ({ onNavigate }: LoginProps) => {
     setCarregando(true)
 
     try {
-      const response = await autenticarLogin({ email: emailTrimmed, senha: senhaTrimmed }) as any
+      const response = await autenticarUsuario({ email: emailTrimmed, senha: senhaTrimmed }) as any
       
       const idUsuarioNum = response.idUsuario || response.id_usuario || parseInt(response.id?.toString() || '0')
       

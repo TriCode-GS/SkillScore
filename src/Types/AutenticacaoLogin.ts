@@ -8,9 +8,10 @@ export type UsuarioData = {
 }
 
 export type LoginData = {
-  id_usuario: number
+  idUsuario: number
   email: string
   senha: string
+  tipoLogin: string
 }
 
 export type CadastroCredentials = {
@@ -18,6 +19,7 @@ export type CadastroCredentials = {
   email: string
   senha: string
   tipo_usuario: string
+  tipo_login: string
   id_empresa: number | null
   area_atuacao: string | null
   competencias: string | null
@@ -212,6 +214,10 @@ export async function cadastrarUsuario(credentials: CadastroCredentials): Promis
     throw new Error('Tipo de usuário é obrigatório')
   }
   
+  if (!credentials.tipo_login || credentials.tipo_login.trim() === '') {
+    throw new Error('Tipo de login é obrigatório')
+  }
+  
   const usuarioData: UsuarioData = {
     idEmpresa: credentials.id_empresa,
     nomeUsuario: credentials.nome_usuario.trim(),
@@ -224,9 +230,10 @@ export async function cadastrarUsuario(credentials: CadastroCredentials): Promis
   const usuarioCriado = await criarUsuario(usuarioData)
 
   const loginData: LoginData = {
-    id_usuario: usuarioCriado.id_usuario,
+    idUsuario: usuarioCriado.id_usuario,
     email: credentials.email.trim(),
-    senha: credentials.senha
+    senha: credentials.senha,
+    tipoLogin: credentials.tipo_login.trim()
   }
 
   return await criarLogin(loginData)
@@ -240,6 +247,128 @@ export async function autenticarLogin(credentials: LoginCredentials): Promise<Lo
     url = new URL(`${baseUrl}/logins/autenticar`)
   } catch (error) {
     throw new Error(`URL inválida: ${baseUrl}/logins/autenticar`)
+  }
+
+  url.searchParams.set('email', credentials.email)
+  url.searchParams.set('senha', credentials.senha)
+
+  let res: Response
+
+  try {
+    res = await fetch(url.toString(), {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+      },
+    })
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido'
+    throw new Error(`Não foi possível conectar à API (rede/CORS/servidor inativo). Detalhes: ${errorMessage}`)
+  }
+
+  if (!res.ok) {
+    let backendMessage: string | undefined
+
+    try {
+      const text = await res.text()
+      if (text && text.trim().length > 0) {
+        backendMessage = text.trim()
+      }
+    } catch (_) {}
+
+    if (!backendMessage) {
+      try {
+        const data = await res.clone().json() as unknown
+        if (typeof data === 'string') backendMessage = data
+        else if (data && typeof data === 'object') {
+          const anyData = data as { message?: string; error?: string; detalhe?: string }
+          backendMessage = anyData.message || anyData.error || anyData.detalhe
+        }
+      } catch (_) {}
+    }
+
+    if (!backendMessage && res.status === 401) {
+      backendMessage = 'Credenciais inválidas'
+    }
+
+    const statusText = res.statusText || 'Erro'
+    const message = backendMessage || `Falha na autenticação (status ${res.status} ${statusText})`
+
+    throw new Error(message)
+  }
+
+  return res.json()
+}
+
+export async function autenticarUsuario(credentials: LoginCredentials): Promise<LoginResponse> {
+  const baseUrl = getBaseUrl()
+  let url: URL
+  
+  try {
+    url = new URL(`${baseUrl}/logins/autenticar/usuario`)
+  } catch (error) {
+    throw new Error(`URL inválida: ${baseUrl}/logins/autenticar/usuario`)
+  }
+
+  url.searchParams.set('email', credentials.email)
+  url.searchParams.set('senha', credentials.senha)
+
+  let res: Response
+
+  try {
+    res = await fetch(url.toString(), {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+      },
+    })
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido'
+    throw new Error(`Não foi possível conectar à API (rede/CORS/servidor inativo). Detalhes: ${errorMessage}`)
+  }
+
+  if (!res.ok) {
+    let backendMessage: string | undefined
+
+    try {
+      const text = await res.text()
+      if (text && text.trim().length > 0) {
+        backendMessage = text.trim()
+      }
+    } catch (_) {}
+
+    if (!backendMessage) {
+      try {
+        const data = await res.clone().json() as unknown
+        if (typeof data === 'string') backendMessage = data
+        else if (data && typeof data === 'object') {
+          const anyData = data as { message?: string; error?: string; detalhe?: string }
+          backendMessage = anyData.message || anyData.error || anyData.detalhe
+        }
+      } catch (_) {}
+    }
+
+    if (!backendMessage && res.status === 401) {
+      backendMessage = 'Credenciais inválidas'
+    }
+
+    const statusText = res.statusText || 'Erro'
+    const message = backendMessage || `Falha na autenticação (status ${res.status} ${statusText})`
+
+    throw new Error(message)
+  }
+
+  return res.json()
+}
+
+export async function autenticarAdministrador(credentials: LoginCredentials): Promise<LoginResponse> {
+  const baseUrl = getBaseUrl()
+  let url: URL
+  
+  try {
+    url = new URL(`${baseUrl}/logins/autenticar/administrador`)
+  } catch (error) {
+    throw new Error(`URL inválida: ${baseUrl}/logins/autenticar/administrador`)
   }
 
   url.searchParams.set('email', credentials.email)
