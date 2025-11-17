@@ -11,6 +11,7 @@ import Cadastro from './Routes/Usuario/Cadastro'
 import HomeFree from './Routes/UsuarioFree/HomeFree'
 import Trilhas from './Routes/UsuarioFree/Trilhas'
 import LoginAdmin from './Routes/Admin/LoginAdmin'
+import HomeAdmin from './Routes/Admin/HomeAdmin'
 import LoginCorporativo from './Routes/Corporativo/LoginCorporativo'
 
 function App() {
@@ -36,6 +37,8 @@ function App() {
             return <Trilhas onNavigate={setPaginaAtual} />
           case 'loginAdmin':
             return <LoginAdmin onNavigate={setPaginaAtual} />
+          case 'homeAdmin':
+            return <HomeAdmin onNavigate={setPaginaAtual} />
           case 'loginCorporativo':
             return <LoginCorporativo onNavigate={setPaginaAtual} />
       case 'home':
