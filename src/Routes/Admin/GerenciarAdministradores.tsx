@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form'
 import { useAuth } from '../../Contexto/AutenticacaoContexto'
 import Cabecalho from '../../Components/Cabecalho/Cabecalho'
 import Botao from '../../Components/Botao/Botao'
-import { criarUsuario, atualizarUsuario, listarUsuarios, excluirUsuario, criarLogin, atualizarLogin, type UsuarioResponse, type LoginData, type LoginUpdateData, getBaseUrl } from '../../Types/AutenticacaoLogin'
+import { criarUsuario, atualizarUsuario, listarUsuarios, excluirUsuario, excluirLogin, criarLogin, atualizarLogin, type UsuarioResponse, type LoginData, type LoginUpdateData, getBaseUrl } from '../../Types/AutenticacaoLogin'
 
 interface GerenciarAdministradoresProps {
   onNavigate?: (pagina: string) => void
@@ -29,6 +29,7 @@ const GerenciarAdministradores = ({ onNavigate }: GerenciarAdministradoresProps)
   const [carregando, setCarregando] = useState(false)
   const [carregandoEdicao, setCarregandoEdicao] = useState(false)
   const [carregandoCadastro, setCarregandoCadastro] = useState(false)
+  const [carregandoExclusao, setCarregandoExclusao] = useState(false)
   const [erro, setErro] = useState('')
   const [erroSenha, setErroSenha] = useState(false)
   const [erroValidacoesSenha, setErroValidacoesSenha] = useState(false)
@@ -326,8 +327,15 @@ const GerenciarAdministradores = ({ onNavigate }: GerenciarAdministradoresProps)
     if (!administradorSelecionado) return
     
     setErro('')
+    setCarregandoExclusao(true)
     
     try {
+      const adminComLogin = administradorSelecionado as UsuarioResponse & { idLogin?: number }
+      
+      if (adminComLogin.idLogin) {
+        await excluirLogin(adminComLogin.idLogin)
+      }
+      
       await excluirUsuario(administradorSelecionado.idUsuario)
       setMostrarModalExclusao(false)
       setAdministradorSelecionado(null)
@@ -336,6 +344,8 @@ const GerenciarAdministradores = ({ onNavigate }: GerenciarAdministradoresProps)
     } catch (error) {
       const mensagemErro = error instanceof Error ? error.message : 'Erro ao excluir administrador'
       setErro(mensagemErro)
+    } finally {
+      setCarregandoExclusao(false)
     }
   }
 
@@ -1099,10 +1109,13 @@ const GerenciarAdministradores = ({ onNavigate }: GerenciarAdministradoresProps)
                 </h2>
                 <button
                   onClick={() => {
-                    setMostrarModalExclusao(false)
-                    setAdministradorSelecionado(null)
+                    if (!carregandoExclusao) {
+                      setMostrarModalExclusao(false)
+                      setAdministradorSelecionado(null)
+                    }
                   }}
-                  className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
+                  disabled={carregandoExclusao}
+                  className={`text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors ${carregandoExclusao ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -1110,7 +1123,7 @@ const GerenciarAdministradores = ({ onNavigate }: GerenciarAdministradoresProps)
                 </button>
               </div>
 
-              <p className="text-xs sm:text-sm md:text-base lg:text-lg text-gray-600 dark:text-gray-400 mb-4 sm:mb-5 md:mb-6 break-words">
+              <p className="text-xs sm:text-sm md:text-base lg:text-lg text-gray-600 dark:text-gray-400 mb-4 sm:mb-5 md:mb-6 break-words text-center">
                 Tem certeza que deseja excluir o administrador <strong className="break-words text-gray-900 dark:text-white">{administradorSelecionado.nomeUsuario}</strong>?
                 Esta ação não pode ser desfeita.
               </p>
@@ -1121,9 +1134,12 @@ const GerenciarAdministradores = ({ onNavigate }: GerenciarAdministradoresProps)
                   variant="secondary"
                   size="md"
                   className="flex-1 w-full sm:w-auto"
+                  disabled={carregandoExclusao}
                   onClick={() => {
-                    setMostrarModalExclusao(false)
-                    setAdministradorSelecionado(null)
+                    if (!carregandoExclusao) {
+                      setMostrarModalExclusao(false)
+                      setAdministradorSelecionado(null)
+                    }
                   }}
                 >
                   Cancelar
@@ -1133,9 +1149,10 @@ const GerenciarAdministradores = ({ onNavigate }: GerenciarAdministradoresProps)
                   variant="primary"
                   size="md"
                   className="flex-1 w-full sm:w-auto bg-red-600 hover:bg-red-700 dark:bg-red-600 dark:hover:bg-red-700"
+                  disabled={carregandoExclusao}
                   onClick={handleExcluir}
                 >
-                  Excluir
+                  {carregandoExclusao ? 'Deletando...' : 'Deletar'}
                 </Botao>
               </div>
             </div>
