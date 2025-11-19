@@ -15,6 +15,7 @@ import HomeAdmin from './Routes/Admin/HomeAdmin'
 import GerenciarEmpresas from './Routes/Admin/GerenciarEmpresas'
 import GerenciarAdministradores from './Routes/Admin/GerenciarAdministradores'
 import LoginCorporativo from './Routes/Corporativo/LoginCorporativo'
+import HomeAdministradorEmpresa from './Routes/Corporativo/AdministradorEmpresa/HomeAdministradorEmpresa'
 
 function App() {
   return (
@@ -39,6 +40,7 @@ function App() {
           <Route path="/admin/empresas/:id" element={<GerenciarEmpresas />} />
           <Route path="/admin/administradores" element={<GerenciarAdministradores />} />
           <Route path="/admin/administradores/:id" element={<GerenciarAdministradores />} />
+          <Route path="/admin-emp/home" element={<HomeAdministradorEmpresa />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AuthProvider>

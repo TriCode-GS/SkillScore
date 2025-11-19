@@ -7,7 +7,7 @@ import Rodape from '../../Components/Rodape/Rodape'
 import Botao from '../../Components/Botao/Botao'
 import ListaSelecao from '../../Components/ListaSelecao/ListaSelecao'
 import { buscarEmpresaPorCNPJ } from '../../Types/Empresa'
-import { autenticarAdministradorEmpresa } from '../../Types/AutenticacaoLogin'
+import { autenticarAdministradorEmpresa, buscarUsuarioPorId } from '../../Types/AutenticacaoLogin'
 
 type TipoLogin = 'menu' | 'admin' | 'gestor' | 'funcionario'
 
@@ -109,16 +109,39 @@ const LoginCorporativo = () => {
         })
         
         if (response) {
-          login({
-            idUsuario: response.idUsuario,
-            nomeUsuario: response.nomeUsuario,
-            email: data.email,
-            tipoUsuario: response.tipoUsuario,
-            isAdmin: false
-          })
+          const idUsuarioNum = response.idUsuario || 0
           
-          navigate('/admin/home')
-          window.scrollTo({ top: 0, behavior: 'smooth' })
+          let nomeUsuarioCompleto = response.nomeUsuario || response.nome
+          
+          if (!nomeUsuarioCompleto && idUsuarioNum > 0) {
+            try {
+              const usuarioCompleto = await buscarUsuarioPorId(idUsuarioNum)
+              nomeUsuarioCompleto = usuarioCompleto.nomeUsuario || nomeUsuarioCompleto
+            } catch (error) {
+            }
+          }
+          
+          if (!nomeUsuarioCompleto) {
+            const emailPart = data.email.split('@')[0]
+            const nomePart = emailPart.split('.')[0]
+            nomeUsuarioCompleto = nomePart.charAt(0).toUpperCase() + nomePart.slice(1).toLowerCase()
+          }
+          
+          const userData = {
+            idUsuario: idUsuarioNum,
+            nomeUsuario: nomeUsuarioCompleto,
+            nome: nomeUsuarioCompleto,
+            email: data.email,
+            tipoUsuario: response.tipoUsuario || 'ADMINISTRADOR EMP',
+            isAdmin: false
+          }
+          
+          login(userData)
+          
+          setTimeout(() => {
+            navigate('/admin-emp/home')
+            window.scrollTo({ top: 0, behavior: 'smooth' })
+          }, 200)
         }
       } catch (error) {
         const mensagemErro = error instanceof Error ? error.message : 'Erro ao autenticar'
