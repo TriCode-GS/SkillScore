@@ -44,6 +44,7 @@ const GerenciarEmpresas = () => {
   const [carregandoAssociacao, setCarregandoAssociacao] = useState(false)
   const [carregandoCadastro, setCarregandoCadastro] = useState(false)
   const [carregandoEdicao, setCarregandoEdicao] = useState(false)
+  const [carregandoExclusao, setCarregandoExclusao] = useState(false)
 
   const { register: registerCadastro, handleSubmit: handleSubmitCadastro, reset: resetCadastro, control: controlCadastro, formState: { errors: errorsCadastro } } = useForm<EmpresaFormData>()
   const { register: registerEdicao, handleSubmit: handleSubmitEdicao, reset: resetEdicao, formState: { errors: errorsEdicao } } = useForm<EmpresaFormData>()
@@ -285,13 +286,17 @@ const GerenciarEmpresas = () => {
     if (!empresaSelecionada?.idEmpresa) return
     
     setErro('')
+    setCarregandoExclusao(true)
+    
     try {
       await excluirEmpresa(empresaSelecionada.idEmpresa)
-      setMostrarModalExclusao(false)
       setEmpresaSelecionada(null)
       await carregarEmpresas()
+      setMostrarModalExclusao(false)
     } catch (error) {
       setErro(error instanceof Error ? error.message : 'Erro ao excluir empresa')
+    } finally {
+      setCarregandoExclusao(false)
     }
   }
 
@@ -755,10 +760,13 @@ const GerenciarEmpresas = () => {
                 </h2>
                 <button
                   onClick={() => {
-                    setMostrarModalExclusao(false)
-                    setEmpresaSelecionada(null)
+                    if (!carregandoExclusao) {
+                      setMostrarModalExclusao(false)
+                      setEmpresaSelecionada(null)
+                    }
                   }}
-                  className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
+                  disabled={carregandoExclusao}
+                  className={`text-gray-500 dark:text-gray-400 transition-colors ${carregandoExclusao ? 'opacity-50 cursor-not-allowed' : 'hover:text-gray-700 dark:hover:text-gray-200'}`}
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -778,9 +786,12 @@ const GerenciarEmpresas = () => {
                   size="md"
                   className="flex-1 w-full sm:w-auto"
                   onClick={() => {
-                    setMostrarModalExclusao(false)
-                    setEmpresaSelecionada(null)
+                    if (!carregandoExclusao) {
+                      setMostrarModalExclusao(false)
+                      setEmpresaSelecionada(null)
+                    }
                   }}
+                  disabled={carregandoExclusao}
                 >
                   Cancelar
                 </Botao>
@@ -790,8 +801,9 @@ const GerenciarEmpresas = () => {
                   size="md"
                   className="flex-1 w-full sm:w-auto bg-red-600 hover:bg-red-700 dark:bg-red-600 dark:hover:bg-red-700"
                   onClick={handleExcluir}
+                  disabled={carregandoExclusao}
                 >
-                  Excluir
+                  {carregandoExclusao ? 'Deletando...' : 'Deletar'}
                 </Botao>
               </div>
             </div>
