@@ -42,9 +42,11 @@ const GerenciarEmpresas = () => {
   const [administradoresDisponiveis, setAdministradoresDisponiveis] = useState<AdministradorOption[]>([])
   const [carregandoAdministradores, setCarregandoAdministradores] = useState(false)
   const [carregandoAssociacao, setCarregandoAssociacao] = useState(false)
+  const [carregandoCadastro, setCarregandoCadastro] = useState(false)
+  const [carregandoEdicao, setCarregandoEdicao] = useState(false)
 
   const { register: registerCadastro, handleSubmit: handleSubmitCadastro, reset: resetCadastro, control: controlCadastro, formState: { errors: errorsCadastro } } = useForm<EmpresaFormData>()
-  const { register: registerEdicao, handleSubmit: handleSubmitEdicao, reset: resetEdicao, control: controlEdicao, formState: { errors: errorsEdicao } } = useForm<EmpresaFormData>()
+  const { register: registerEdicao, handleSubmit: handleSubmitEdicao, reset: resetEdicao, formState: { errors: errorsEdicao } } = useForm<EmpresaFormData>()
   const { handleSubmit: handleSubmitAssociarAdmin, reset: resetAssociarAdmin, control: controlAssociarAdmin, formState: { errors: errorsAssociarAdmin } } = useForm<AssociarAdministradorFormData>()
 
   useEffect(() => {
@@ -228,6 +230,8 @@ const GerenciarEmpresas = () => {
       return
     }
     
+    setCarregandoCadastro(true)
+    
     try {
       const empresaData: EmpresaData = {
         nomeEmpresa: data.razaoSocial.trim(),
@@ -240,12 +244,14 @@ const GerenciarEmpresas = () => {
       await cadastrarEmpresa(empresaData)
       
       resetCadastro()
-      setMostrarModalCadastro(false)
       setErro('')
       await carregarEmpresas()
+      setMostrarModalCadastro(false)
     } catch (error) {
       const mensagemErro = error instanceof Error ? error.message : 'Erro ao cadastrar empresa'
       setErro(mensagemErro)
+    } finally {
+      setCarregandoCadastro(false)
     }
   }
 
@@ -253,22 +259,25 @@ const GerenciarEmpresas = () => {
     if (!empresaSelecionada?.idEmpresa) return
     
     setErro('')
+    setCarregandoEdicao(true)
     
     try {
       const empresaData: EmpresaData = {
         nomeEmpresa: data.razaoSocial.trim(),
-        cnpj: data.cnpj.replace(/\D/g, ''),
+        cnpj: empresaSelecionada.cnpj.replace(/\D/g, ''),
         setor: data.setor && data.setor.trim() ? data.setor.trim() : null,
         email: null,
         telefone: null
       }
       await editarEmpresa(empresaSelecionada.idEmpresa, empresaData)
       resetEdicao()
-      setMostrarModalEdicao(false)
       setEmpresaSelecionada(null)
       await carregarEmpresas()
+      setMostrarModalEdicao(false)
     } catch (error) {
       setErro(error instanceof Error ? error.message : 'Erro ao editar empresa')
+    } finally {
+      setCarregandoEdicao(false)
     }
   }
 
@@ -498,11 +507,14 @@ const GerenciarEmpresas = () => {
               </h2>
               <button
                 onClick={() => {
-                  setMostrarModalCadastro(false)
-                  resetCadastro()
-                  setErro('')
+                  if (!carregandoCadastro) {
+                    setMostrarModalCadastro(false)
+                    resetCadastro()
+                    setErro('')
+                  }
                 }}
-                className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
+                disabled={carregandoCadastro}
+                className={`text-gray-500 dark:text-gray-400 transition-colors ${carregandoCadastro ? 'opacity-50 cursor-not-allowed' : 'hover:text-gray-700 dark:hover:text-gray-200'}`}
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -526,7 +538,8 @@ const GerenciarEmpresas = () => {
                   <input
                     type="text"
                     {...registerCadastro('razaoSocial', { required: 'Razão Social é obrigatória' })}
-                    className="w-full px-4 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                    disabled={carregandoCadastro}
+                    className="w-full px-4 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                     placeholder="Nome da empresa"
                   />
                   {errorsCadastro.razaoSocial && (
@@ -559,7 +572,8 @@ const GerenciarEmpresas = () => {
                           field.onChange(formatted)
                         }}
                         maxLength={18}
-                        className="w-full px-4 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                        disabled={carregandoCadastro}
+                        className="w-full px-4 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                         placeholder="00.000.000/0000-00"
                       />
                     )}
@@ -578,7 +592,8 @@ const GerenciarEmpresas = () => {
                   <input
                     type="text"
                     {...registerCadastro('setor', { required: 'Setor de Atuação é obrigatório' })}
-                    className="w-full px-4 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                    disabled={carregandoCadastro}
+                    className="w-full px-4 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                     placeholder="Ex: Tecnologia, Saúde, Educação..."
                   />
                   {errorsCadastro.setor && (
@@ -599,10 +614,13 @@ const GerenciarEmpresas = () => {
                   size="md"
                   className="flex-1 w-full sm:w-auto"
                   onClick={() => {
-                    setMostrarModalCadastro(false)
-                    resetCadastro()
-                    setErro('')
+                    if (!carregandoCadastro) {
+                      setMostrarModalCadastro(false)
+                      resetCadastro()
+                      setErro('')
+                    }
                   }}
+                  disabled={carregandoCadastro}
                 >
                   Cancelar
                 </Botao>
@@ -612,8 +630,9 @@ const GerenciarEmpresas = () => {
                   size="md"
                   className="flex-1 w-full sm:w-auto"
                   onClick={handleSubmitCadastro(onSubmitCadastro)}
+                  disabled={carregandoCadastro}
                 >
-                  Cadastrar
+                  {carregandoCadastro ? 'Cadastrando...' : 'Cadastrar'}
                 </Botao>
               </div>
             </div>
@@ -630,11 +649,14 @@ const GerenciarEmpresas = () => {
               </h2>
               <button
                 onClick={() => {
-                  setMostrarModalEdicao(false)
-                  setEmpresaSelecionada(null)
-                  resetEdicao()
+                  if (!carregandoEdicao) {
+                    setMostrarModalEdicao(false)
+                    setEmpresaSelecionada(null)
+                    resetEdicao()
+                  }
                 }}
-                className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
+                disabled={carregandoEdicao}
+                className={`text-gray-500 dark:text-gray-400 transition-colors ${carregandoEdicao ? 'opacity-50 cursor-not-allowed' : 'hover:text-gray-700 dark:hover:text-gray-200'}`}
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -651,7 +673,8 @@ const GerenciarEmpresas = () => {
                   <input
                     type="text"
                     {...registerEdicao('razaoSocial', { required: 'Razão Social é obrigatória' })}
-                    className="w-full px-4 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                    disabled={carregandoEdicao}
+                    className="w-full px-4 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                     placeholder="Nome da empresa"
                   />
                   {errorsEdicao.razaoSocial && (
@@ -665,35 +688,12 @@ const GerenciarEmpresas = () => {
                   <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                     CNPJ *
                   </label>
-                  <Controller
-                    name="cnpj"
-                    control={controlEdicao}
-                    rules={{
-                      required: 'CNPJ é obrigatório',
-                      validate: (value) => {
-                        const numbers = value.replace(/\D/g, '')
-                        return numbers.length === 14 || 'CNPJ deve ter 14 dígitos'
-                      }
-                    }}
-                    render={({ field }) => (
-                      <input
-                        type="text"
-                        value={field.value || ''}
-                        onChange={(e) => {
-                          const formatted = formatCNPJ(e.target.value)
-                          field.onChange(formatted)
-                        }}
-                        maxLength={18}
-                        className="w-full px-4 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
-                        placeholder="00.000.000/0000-00"
-                      />
-                    )}
+                  <input
+                    type="text"
+                    value={formatCNPJ(empresaSelecionada.cnpj)}
+                    disabled
+                    className="w-full px-4 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 text-sm cursor-not-allowed"
                   />
-                  {errorsEdicao.cnpj && (
-                    <p className="mt-1 text-xs text-red-600 dark:text-red-400">
-                      {errorsEdicao.cnpj.message}
-                    </p>
-                  )}
                 </div>
 
                 <div>
@@ -703,7 +703,8 @@ const GerenciarEmpresas = () => {
                   <input
                     type="text"
                     {...registerEdicao('setor')}
-                    className="w-full px-4 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                    disabled={carregandoEdicao}
+                    className="w-full px-4 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                     placeholder="Ex: Tecnologia, Saúde, Educação..."
                   />
                 </div>
@@ -718,10 +719,13 @@ const GerenciarEmpresas = () => {
                   size="md"
                   className="flex-1 w-full sm:w-auto"
                   onClick={() => {
-                    setMostrarModalEdicao(false)
-                    setEmpresaSelecionada(null)
-                    resetEdicao()
+                    if (!carregandoEdicao) {
+                      setMostrarModalEdicao(false)
+                      setEmpresaSelecionada(null)
+                      resetEdicao()
+                    }
                   }}
+                  disabled={carregandoEdicao}
                 >
                   Cancelar
                 </Botao>
@@ -731,8 +735,9 @@ const GerenciarEmpresas = () => {
                   size="md"
                   className="flex-1 w-full sm:w-auto"
                   onClick={handleSubmitEdicao(onSubmitEdicao)}
+                  disabled={carregandoEdicao}
                 >
-                  Salvar
+                  {carregandoEdicao ? 'Salvando...' : 'Salvar'}
                 </Botao>
               </div>
             </div>
