@@ -70,6 +70,16 @@ const Cabecalho = ({ isHomeFree = false, isHomeAdmin = false, onLogout }: Cabeca
                 )}
               </div>
               <div className="hidden lg:flex items-center gap-3 lg:gap-4">
+                <Link
+                  to="/admin/login"
+                  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                  className="text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors p-2 lg:p-2.5 rounded-lg hover:bg-indigo-50 dark:hover:bg-gray-800"
+                  aria-label="Perfil"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                </Link>
                 <button
                   onClick={toggleTheme}
                   className="text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors p-2 lg:p-2.5 rounded-lg hover:bg-indigo-50 dark:hover:bg-gray-800"
@@ -106,16 +116,6 @@ const Cabecalho = ({ isHomeFree = false, isHomeAdmin = false, onLogout }: Cabeca
                 >
                   Gerenciar Empresas
                 </Link>
-                <button
-                  className="text-sm lg:text-base font-semibold text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors px-3 lg:px-4 py-2 rounded-lg hover:bg-indigo-50 dark:hover:bg-gray-800 whitespace-nowrap"
-                >
-                  Relatórios
-                </button>
-                <button
-                  className="text-sm lg:text-base font-semibold text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors px-3 lg:px-4 py-2 rounded-lg hover:bg-indigo-50 dark:hover:bg-gray-800 whitespace-nowrap"
-                >
-                  Configurações
-                </button>
               </div>
               <button
                 onClick={() => setMenuAberto(!menuAberto)}
@@ -344,6 +344,19 @@ const Cabecalho = ({ isHomeFree = false, isHomeAdmin = false, onLogout }: Cabeca
         {menuAberto && isHomeAdmin && (
           <div className="lg:hidden mt-4 border-t-2 border-gray-300 dark:border-gray-700 pt-4">
             <div className="flex flex-col bg-white dark:bg-gray-800 rounded-lg shadow-xl border-2 border-gray-200 dark:border-gray-700 overflow-hidden">
+              <Link
+                to="/admin/login"
+                onClick={() => {
+                  window.scrollTo({ top: 0, behavior: 'smooth' })
+                  setMenuAberto(false)
+                }}
+                className="px-4 py-4 border-b-2 border-gray-200 dark:border-gray-700 flex items-center justify-between text-gray-700 dark:text-gray-300 hover:text-white hover:bg-indigo-600 dark:hover:bg-indigo-600 active:bg-indigo-700 active:text-white transition-all duration-200 font-medium"
+              >
+                <span className="font-medium">Perfil</span>
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              </Link>
               <div className="px-4 py-4 border-b-2 border-gray-200 dark:border-gray-700 flex items-center justify-between">
                 <span className="text-gray-700 dark:text-gray-300 font-medium">Tema</span>
                 <button
@@ -388,20 +401,10 @@ const Cabecalho = ({ isHomeFree = false, isHomeAdmin = false, onLogout }: Cabeca
                   window.scrollTo({ top: 0, behavior: 'smooth' })
                   setMenuAberto(false)
                 }}
-                className="px-4 py-4 text-left text-gray-700 dark:text-gray-300 hover:text-white hover:bg-indigo-600 dark:hover:bg-indigo-600 active:bg-indigo-700 active:text-white transition-all duration-200 font-medium border-b-2 border-gray-200 dark:border-gray-700"
+                className="px-4 py-4 text-left text-gray-700 dark:text-gray-300 hover:text-white hover:bg-indigo-600 dark:hover:bg-indigo-600 active:bg-indigo-700 active:text-white transition-all duration-200 font-medium"
               >
                 Gerenciar Empresas
               </Link>
-              <button
-                className="px-4 py-4 text-left text-gray-700 dark:text-gray-300 hover:text-white hover:bg-indigo-600 dark:hover:bg-indigo-600 active:bg-indigo-700 active:text-white transition-all duration-200 font-medium border-b-2 border-gray-200 dark:border-gray-700"
-              >
-                Relatórios
-              </button>
-              <button
-                className="px-4 py-4 text-left text-gray-700 dark:text-gray-300 hover:text-white hover:bg-indigo-600 dark:hover:bg-indigo-600 active:bg-indigo-700 active:text-white transition-all duration-200 font-medium"
-              >
-                Configurações
-              </button>
             </div>
           </div>
         )}

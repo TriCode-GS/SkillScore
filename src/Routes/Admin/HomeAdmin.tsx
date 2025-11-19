@@ -24,7 +24,7 @@ const HomeAdmin = () => {
 
   const handleLogout = () => {
     logout()
-    navigate('/')
+    navigate('/admin/login')
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
@@ -91,23 +91,6 @@ const HomeAdmin = () => {
                 </p>
               </button>
 
-              <button className="p-6 bg-white dark:bg-gray-800 rounded-lg border-2 border-gray-200 dark:border-gray-600 hover:border-indigo-400 dark:hover:border-indigo-600 hover:shadow-lg transition-all duration-200 text-left">
-                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                  Relatórios e Estatísticas
-                </h3>
-                <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
-                  Visualize métricas e relatórios da plataforma
-                </p>
-              </button>
-
-              <button className="p-6 bg-white dark:bg-gray-800 rounded-lg border-2 border-gray-200 dark:border-gray-600 hover:border-indigo-400 dark:hover:border-indigo-600 hover:shadow-lg transition-all duration-200 text-left">
-                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                  Configurações do Sistema
-                </h3>
-                <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
-                  Configure parâmetros e preferências do sistema
-                </p>
-              </button>
             </div>
           </div>
         </section>

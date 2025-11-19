@@ -25,7 +25,7 @@ interface AdministradorOption {
 
 const GerenciarEmpresas = () => {
   const navigate = useNavigate()
-  const { user, isAuthenticated } = useAuth()
+  const { user, isAuthenticated, logout } = useAuth()
   
   const handleNavigate = (path: string) => {
     navigate(path)
@@ -316,7 +316,8 @@ const GerenciarEmpresas = () => {
   }
 
   const handleLogout = () => {
-    navigate('/')
+    logout()
+    navigate('/admin/login')
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 

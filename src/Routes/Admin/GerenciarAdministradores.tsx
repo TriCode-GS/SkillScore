@@ -22,7 +22,7 @@ interface AdministradorEdicaoFormData {
 
 const GerenciarAdministradores = () => {
   const navigate = useNavigate()
-  const { user, isAuthenticated } = useAuth()
+  const { user, isAuthenticated, logout } = useAuth()
   
   const handleNavigate = (path: string) => {
     navigate(path)
@@ -343,9 +343,8 @@ const GerenciarAdministradores = () => {
   }
 
   const handleLogout = () => {
-    const { logout } = useAuth()
     logout()
-    navigate('/')
+    navigate('/admin/login')
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
