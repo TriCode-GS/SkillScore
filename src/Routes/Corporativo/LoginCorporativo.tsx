@@ -1,13 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useForm, Controller } from 'react-hook-form'
+import { useNavigate } from 'react-router-dom'
 import Cabecalho from '../../Components/Cabecalho/Cabecalho'
 import Rodape from '../../Components/Rodape/Rodape'
 import Botao from '../../Components/Botao/Botao'
 import ListaSelecao from '../../Components/ListaSelecao/ListaSelecao'
-
-interface LoginCorporativoProps {
-  onNavigate?: (pagina: string) => void
-}
 
 type TipoLogin = 'menu' | 'admin' | 'gestor' | 'funcionario'
 
@@ -34,8 +31,14 @@ interface FuncionarioFormData {
   lembrarMe: boolean
 }
 
-const LoginCorporativo = ({ onNavigate }: LoginCorporativoProps) => {
+const LoginCorporativo = () => {
+  const navigate = useNavigate()
   const [tipoLogin, setTipoLogin] = useState<TipoLogin>('menu')
+  
+  const handleNavigate = (path: string) => {
+    navigate(path)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
   
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -609,7 +612,7 @@ const LoginCorporativo = ({ onNavigate }: LoginCorporativoProps) => {
       
       <div className="mt-6 sm:mt-8 text-center">
         <button
-          onClick={() => onNavigate?.('login')}
+          onClick={() => handleNavigate('/login')}
           className="text-sm sm:text-base text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-semibold transition-colors"
         >
           Voltar para login de usuário
@@ -620,7 +623,7 @@ const LoginCorporativo = ({ onNavigate }: LoginCorporativoProps) => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Cabecalho onNavigate={onNavigate} />
+      <Cabecalho />
       <main className="flex-grow bg-gray-50 dark:bg-gray-900 flex items-center justify-center py-8 sm:py-12 md:py-16">
         <section className="container mx-auto px-4">
           <div className="max-w-md mx-auto">
@@ -631,7 +634,7 @@ const LoginCorporativo = ({ onNavigate }: LoginCorporativoProps) => {
           </div>
         </section>
       </main>
-      <Rodape onNavigate={onNavigate} />
+      <Rodape />
     </div>
   )
 }

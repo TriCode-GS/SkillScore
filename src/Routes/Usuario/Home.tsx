@@ -1,15 +1,18 @@
+import { useNavigate } from 'react-router-dom'
 import Cabecalho from '../../Components/Cabecalho/Cabecalho'
 import Rodape from '../../Components/Rodape/Rodape'
 import Botao from '../../Components/Botao/Botao'
 
-interface HomeProps {
-  onNavigate?: (pagina: string) => void
-}
-
-const Home = ({ onNavigate }: HomeProps) => {
+const Home = () => {
+  const navigate = useNavigate()
+  
+  const handleNavigate = (path: string) => {
+    navigate(path)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
   return (
     <div className="min-h-screen flex flex-col">
-      <Cabecalho onNavigate={onNavigate} />
+      <Cabecalho />
       <main className="flex-grow bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
         <section className="container mx-auto px-4 py-8 sm:py-12 md:py-16 lg:py-20 xl:py-24">
           <div className="text-center max-w-4xl mx-auto">
@@ -23,20 +26,14 @@ const Home = ({ onNavigate }: HomeProps) => {
               <Botao 
                 variant="primary" 
                 size="md"
-                onClick={() => {
-                  onNavigate?.('login')
-                  window.scrollTo({ top: 0, behavior: 'smooth' })
-                }}
+                onClick={() => handleNavigate('/login')}
               >
                 Começar Agora
               </Botao>
               <Botao 
                 variant="secondary" 
                 size="md"
-                onClick={() => {
-                  onNavigate?.('sobre')
-                  window.scrollTo({ top: 0, behavior: 'smooth' })
-                }}
+                onClick={() => handleNavigate('/sobre')}
               >
                 Saiba Mais
               </Botao>
@@ -237,17 +234,14 @@ const Home = ({ onNavigate }: HomeProps) => {
             <Botao 
               variant="primary" 
               size="lg"
-              onClick={() => {
-                onNavigate?.('cadastro')
-                window.scrollTo({ top: 0, behavior: 'smooth' })
-              }}
+              onClick={() => handleNavigate('/cadastro')}
             >
               Criar Conta Gratuita
             </Botao>
           </div>
         </section>
       </main>
-      <Rodape onNavigate={onNavigate} />
+      <Rodape />
     </div>
   )
 }

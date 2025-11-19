@@ -1,27 +1,19 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useTheme } from '../../Contexto/TemaContexto'
 import { useAuth } from '../../Contexto/AutenticacaoContexto'
 import Botao from '../Botao/Botao'
 
 interface CabecalhoProps {
-  onNavigate?: (pagina: string) => void
   isHomeFree?: boolean
   isHomeAdmin?: boolean
   onLogout?: () => void
 }
 
-const Cabecalho = ({ onNavigate, isHomeFree = false, isHomeAdmin = false, onLogout }: CabecalhoProps) => {
+const Cabecalho = ({ isHomeFree = false, isHomeAdmin = false, onLogout }: CabecalhoProps) => {
   const [menuAberto, setMenuAberto] = useState(false)
   const { theme, toggleTheme } = useTheme()
   const { user } = useAuth()
-
-  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>, pagina: string) => {
-    e.preventDefault()
-    if (onNavigate) {
-      onNavigate(pagina)
-    }
-    setMenuAberto(false)
-  }
 
   const getPrimeiroNome = () => {
     if (user?.nomeUsuario) {
@@ -43,11 +35,9 @@ const Cabecalho = ({ onNavigate, isHomeFree = false, isHomeAdmin = false, onLogo
           {isHomeAdmin ? (
             <>
               <div className="flex items-center gap-2 sm:gap-3 md:gap-4 flex-1 min-w-0">
-                <a 
-                  href="/" 
-                  onClick={(e) => {
-                    e.preventDefault()
-                    onNavigate?.('homeAdmin')
+                <Link 
+                  to="/admin/home"
+                  onClick={() => {
                     window.scrollTo({ top: 0, behavior: 'smooth' })
                   }}
                   className="flex-shrink-0"
@@ -65,7 +55,7 @@ const Cabecalho = ({ onNavigate, isHomeFree = false, isHomeAdmin = false, onLogo
                       className="h-7 w-auto sm:h-8 md:h-9 lg:h-10"
                     />
                   )}
-                </a>
+                </Link>
                 <span className="text-xs sm:text-sm md:text-base font-semibold text-gray-700 dark:text-gray-300 truncate">
                   {getPrimeiroNome()}
                 </span>
@@ -80,6 +70,16 @@ const Cabecalho = ({ onNavigate, isHomeFree = false, isHomeAdmin = false, onLogo
                 )}
               </div>
               <div className="hidden lg:flex items-center gap-3 lg:gap-4">
+                <Link
+                  to="/admin/login"
+                  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                  className="text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors p-2 lg:p-2.5 rounded-lg hover:bg-indigo-50 dark:hover:bg-gray-800"
+                  aria-label="Perfil"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                </Link>
                 <button
                   onClick={toggleTheme}
                   className="text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors p-2 lg:p-2.5 rounded-lg hover:bg-indigo-50 dark:hover:bg-gray-800"
@@ -95,43 +95,27 @@ const Cabecalho = ({ onNavigate, isHomeFree = false, isHomeAdmin = false, onLogo
                     </svg>
                   )}
                 </button>
-                <button
-                  onClick={() => {
-                    onNavigate?.('homeAdmin')
-                    window.scrollTo({ top: 0, behavior: 'smooth' })
-                  }}
+                <Link
+                  to="/admin/home"
+                  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
                   className="text-sm lg:text-base font-semibold text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors px-3 lg:px-4 py-2 rounded-lg hover:bg-indigo-50 dark:hover:bg-gray-800 whitespace-nowrap"
                 >
                   Home
-                </button>
-                <button
-                  onClick={() => {
-                    onNavigate?.('gerenciarAdministradores')
-                    window.scrollTo({ top: 0, behavior: 'smooth' })
-                  }}
+                </Link>
+                <Link
+                  to="/admin/administradores"
+                  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
                   className="text-sm lg:text-base font-semibold text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors px-3 lg:px-4 py-2 rounded-lg hover:bg-indigo-50 dark:hover:bg-gray-800 whitespace-nowrap"
                 >
                   Gerenciar Administradores
-                </button>
-                <button
-                  onClick={() => {
-                    onNavigate?.('gerenciarEmpresas')
-                    window.scrollTo({ top: 0, behavior: 'smooth' })
-                  }}
+                </Link>
+                <Link
+                  to="/admin/empresas"
+                  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
                   className="text-sm lg:text-base font-semibold text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors px-3 lg:px-4 py-2 rounded-lg hover:bg-indigo-50 dark:hover:bg-gray-800 whitespace-nowrap"
                 >
                   Gerenciar Empresas
-                </button>
-                <button
-                  className="text-sm lg:text-base font-semibold text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors px-3 lg:px-4 py-2 rounded-lg hover:bg-indigo-50 dark:hover:bg-gray-800 whitespace-nowrap"
-                >
-                  Relatórios
-                </button>
-                <button
-                  className="text-sm lg:text-base font-semibold text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors px-3 lg:px-4 py-2 rounded-lg hover:bg-indigo-50 dark:hover:bg-gray-800 whitespace-nowrap"
-                >
-                  Configurações
-                </button>
+                </Link>
               </div>
               <button
                 onClick={() => setMenuAberto(!menuAberto)}
@@ -150,11 +134,9 @@ const Cabecalho = ({ onNavigate, isHomeFree = false, isHomeAdmin = false, onLogo
           ) : isHomeFree ? (
             <>
               <div className="flex items-center gap-2 sm:gap-3 md:gap-4 flex-1 min-w-0">
-                <a 
-                  href="/" 
-                  onClick={(e) => {
-                    e.preventDefault()
-                    onNavigate?.('homeFree')
+                <Link 
+                  to="/home-free"
+                  onClick={() => {
                     window.scrollTo({ top: 0, behavior: 'smooth' })
                   }}
                   className="flex-shrink-0"
@@ -172,7 +154,7 @@ const Cabecalho = ({ onNavigate, isHomeFree = false, isHomeAdmin = false, onLogo
                       className="h-7 w-auto sm:h-8 md:h-9 lg:h-10"
                     />
                   )}
-                </a>
+                </Link>
                 <span className="text-xs sm:text-sm md:text-base font-semibold text-gray-700 dark:text-gray-300 truncate">
                   {getPrimeiroNome()}
                 </span>
@@ -187,11 +169,9 @@ const Cabecalho = ({ onNavigate, isHomeFree = false, isHomeAdmin = false, onLogo
                 )}
               </div>
               <div className="hidden lg:flex items-center gap-3 lg:gap-4">
-                <a
-                  href="/login"
-                  onClick={(e) => {
-                    e.preventDefault()
-                    onNavigate?.('login')
+                <Link
+                  to="/login"
+                  onClick={() => {
                     window.scrollTo({ top: 0, behavior: 'smooth' })
                   }}
                   className="text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors p-2 lg:p-2.5 rounded-lg hover:bg-indigo-50 dark:hover:bg-gray-800"
@@ -200,7 +180,7 @@ const Cabecalho = ({ onNavigate, isHomeFree = false, isHomeAdmin = false, onLogo
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
-                </a>
+                </Link>
                 <button
                   onClick={toggleTheme}
                   className="text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors p-2 lg:p-2.5 rounded-lg hover:bg-indigo-50 dark:hover:bg-gray-800"
@@ -216,21 +196,20 @@ const Cabecalho = ({ onNavigate, isHomeFree = false, isHomeAdmin = false, onLogo
                     </svg>
                   )}
                 </button>
-                <button
-                  onClick={() => {
-                    onNavigate?.('homeFree')
-                    window.scrollTo({ top: 0, behavior: 'smooth' })
-                  }}
+                <Link
+                  to="/home-free"
+                  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
                   className="text-sm lg:text-base font-semibold text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors px-3 lg:px-4 py-2 rounded-lg hover:bg-indigo-50 dark:hover:bg-gray-800 whitespace-nowrap"
                 >
                   Home
-                </button>
-                <button
-                  onClick={() => onNavigate?.('trilhas')}
+                </Link>
+                <Link
+                  to="/trilhas"
+                  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
                   className="text-sm lg:text-base font-semibold text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors px-3 lg:px-4 py-2 rounded-lg hover:bg-indigo-50 dark:hover:bg-gray-800 whitespace-nowrap"
                 >
                   Minhas Trilhas
-                </button>
+                </Link>
                 <button
                   className="text-sm lg:text-base font-semibold text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors px-3 lg:px-4 py-2 rounded-lg hover:bg-indigo-50 dark:hover:bg-gray-800 whitespace-nowrap"
                 >
@@ -263,9 +242,8 @@ const Cabecalho = ({ onNavigate, isHomeFree = false, isHomeAdmin = false, onLogo
             </>
           ) : (
             <>
-              <a 
-                href="/" 
-                onClick={(e) => handleClick(e, 'home')}
+              <Link 
+                to="/"
                 className="flex-shrink-0"
               >
                 {theme === 'dark' ? (
@@ -279,21 +257,20 @@ const Cabecalho = ({ onNavigate, isHomeFree = false, isHomeAdmin = false, onLogo
                     src="/LogoSkillScoreBlack.png" 
                     alt="SkillScore" 
                     className="h-7 w-auto sm:h-8 md:h-9 lg:h-10"
-                  />
-                )}
-              </a>
+                    />
+                  )}
+              </Link>
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-2">
-                  <a
-                    href="/login"
-                    onClick={(e) => handleClick(e, 'login')}
+                  <Link
+                    to="/login"
                     className="hidden lg:block text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors p-2 rounded-lg hover:bg-indigo-50 dark:hover:bg-gray-800"
                     aria-label="Login"
                   >
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
-                  </a>
+                  </Link>
                   <button
                     onClick={toggleTheme}
                     className="hidden lg:block text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors p-2 rounded-lg hover:bg-indigo-50 dark:hover:bg-gray-800"
@@ -311,41 +288,41 @@ const Cabecalho = ({ onNavigate, isHomeFree = false, isHomeAdmin = false, onLogo
                   </button>
                 </div>
                 <div className="hidden lg:flex items-center gap-6">
-                  <a 
-                    href="/" 
-                    onClick={(e) => handleClick(e, 'home')}
+                  <Link 
+                    to="/"
+                    onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
                     className="text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors p-2 rounded-lg hover:bg-indigo-50 dark:hover:bg-gray-800"
                   >
                     Home
-                  </a>
-                  <a 
-                    href="/sobre" 
-                    onClick={(e) => handleClick(e, 'sobre')}
+                  </Link>
+                  <Link 
+                    to="/sobre"
+                    onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
                     className="text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors p-2 rounded-lg hover:bg-indigo-50 dark:hover:bg-gray-800"
                   >
                     Sobre
-                  </a>
-                  <a 
-                    href="/integrantes" 
-                    onClick={(e) => handleClick(e, 'integrantes')}
+                  </Link>
+                  <Link 
+                    to="/integrantes"
+                    onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
                     className="text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors p-2 rounded-lg hover:bg-indigo-50 dark:hover:bg-gray-800"
                   >
                     Integrantes
-                  </a>
-                  <a 
-                    href="/faq" 
-                    onClick={(e) => handleClick(e, 'faq')}
+                  </Link>
+                  <Link 
+                    to="/faq"
+                    onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
                     className="text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors p-2 rounded-lg hover:bg-indigo-50 dark:hover:bg-gray-800"
                   >
                     FAQ
-                  </a>
-                  <a 
-                    href="/contato" 
-                    onClick={(e) => handleClick(e, 'contato')}
+                  </Link>
+                  <Link 
+                    to="/contato"
+                    onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
                     className="text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors p-2 rounded-lg hover:bg-indigo-50 dark:hover:bg-gray-800"
                   >
                     Contato
-                  </a>
+                  </Link>
                 </div>
                 <button
                   onClick={() => setMenuAberto(!menuAberto)}
@@ -367,6 +344,19 @@ const Cabecalho = ({ onNavigate, isHomeFree = false, isHomeAdmin = false, onLogo
         {menuAberto && isHomeAdmin && (
           <div className="lg:hidden mt-4 border-t-2 border-gray-300 dark:border-gray-700 pt-4">
             <div className="flex flex-col bg-white dark:bg-gray-800 rounded-lg shadow-xl border-2 border-gray-200 dark:border-gray-700 overflow-hidden">
+              <Link
+                to="/admin/login"
+                onClick={() => {
+                  window.scrollTo({ top: 0, behavior: 'smooth' })
+                  setMenuAberto(false)
+                }}
+                className="px-4 py-4 border-b-2 border-gray-200 dark:border-gray-700 flex items-center justify-between text-gray-700 dark:text-gray-300 hover:text-white hover:bg-indigo-600 dark:hover:bg-indigo-600 active:bg-indigo-700 active:text-white transition-all duration-200 font-medium"
+              >
+                <span className="font-medium">Perfil</span>
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              </Link>
               <div className="px-4 py-4 border-b-2 border-gray-200 dark:border-gray-700 flex items-center justify-between">
                 <span className="text-gray-700 dark:text-gray-300 font-medium">Tema</span>
                 <button
@@ -385,57 +375,45 @@ const Cabecalho = ({ onNavigate, isHomeFree = false, isHomeAdmin = false, onLogo
                   )}
                 </button>
               </div>
-              <button
+              <Link
+                to="/admin/home"
                 onClick={() => {
-                  onNavigate?.('homeAdmin')
                   window.scrollTo({ top: 0, behavior: 'smooth' })
                   setMenuAberto(false)
                 }}
                 className="px-4 py-4 text-left text-gray-700 dark:text-gray-300 hover:text-white hover:bg-indigo-600 dark:hover:bg-indigo-600 active:bg-indigo-700 active:text-white transition-all duration-200 font-medium border-b-2 border-gray-200 dark:border-gray-700"
               >
                 Home
-              </button>
-              <button
+              </Link>
+              <Link
+                to="/admin/administradores"
                 onClick={() => {
-                  onNavigate?.('gerenciarAdministradores')
                   window.scrollTo({ top: 0, behavior: 'smooth' })
                   setMenuAberto(false)
                 }}
                 className="px-4 py-4 text-left text-gray-700 dark:text-gray-300 hover:text-white hover:bg-indigo-600 dark:hover:bg-indigo-600 active:bg-indigo-700 active:text-white transition-all duration-200 font-medium border-b-2 border-gray-200 dark:border-gray-700"
               >
                 Gerenciar Administradores
-              </button>
-              <button
+              </Link>
+              <Link
+                to="/admin/empresas"
                 onClick={() => {
-                  onNavigate?.('gerenciarEmpresas')
                   window.scrollTo({ top: 0, behavior: 'smooth' })
                   setMenuAberto(false)
                 }}
-                className="px-4 py-4 text-left text-gray-700 dark:text-gray-300 hover:text-white hover:bg-indigo-600 dark:hover:bg-indigo-600 active:bg-indigo-700 active:text-white transition-all duration-200 font-medium border-b-2 border-gray-200 dark:border-gray-700"
-              >
-                Gerenciar Empresas
-              </button>
-              <button
-                className="px-4 py-4 text-left text-gray-700 dark:text-gray-300 hover:text-white hover:bg-indigo-600 dark:hover:bg-indigo-600 active:bg-indigo-700 active:text-white transition-all duration-200 font-medium border-b-2 border-gray-200 dark:border-gray-700"
-              >
-                Relatórios
-              </button>
-              <button
                 className="px-4 py-4 text-left text-gray-700 dark:text-gray-300 hover:text-white hover:bg-indigo-600 dark:hover:bg-indigo-600 active:bg-indigo-700 active:text-white transition-all duration-200 font-medium"
               >
-                Configurações
-              </button>
+                Gerenciar Empresas
+              </Link>
             </div>
           </div>
         )}
         {menuAberto && isHomeFree && (
           <div className="lg:hidden mt-4 border-t-2 border-gray-300 dark:border-gray-700 pt-4">
             <div className="flex flex-col bg-white dark:bg-gray-800 rounded-lg shadow-xl border-2 border-gray-200 dark:border-gray-700 overflow-hidden">
-              <a
-                href="/login"
-                onClick={(e) => {
-                  e.preventDefault()
-                  onNavigate?.('login')
+              <Link
+                to="/login"
+                onClick={() => {
                   window.scrollTo({ top: 0, behavior: 'smooth' })
                   setMenuAberto(false)
                 }}
@@ -445,7 +423,7 @@ const Cabecalho = ({ onNavigate, isHomeFree = false, isHomeAdmin = false, onLogo
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
                 Perfil
-              </a>
+              </Link>
               <div className="px-4 py-4 border-b-2 border-gray-200 dark:border-gray-700 flex items-center justify-between">
                 <span className="text-gray-700 dark:text-gray-300 font-medium">Tema</span>
                 <button
@@ -464,26 +442,26 @@ const Cabecalho = ({ onNavigate, isHomeFree = false, isHomeAdmin = false, onLogo
                   )}
                 </button>
               </div>
-              <button
+              <Link
+                to="/home-free"
                 onClick={() => {
-                  onNavigate?.('homeFree')
                   window.scrollTo({ top: 0, behavior: 'smooth' })
                   setMenuAberto(false)
                 }}
                 className="px-4 py-4 text-left text-gray-700 dark:text-gray-300 hover:text-white hover:bg-indigo-600 dark:hover:bg-indigo-600 active:bg-indigo-700 active:text-white transition-all duration-200 font-medium border-b-2 border-gray-200 dark:border-gray-700"
               >
                 Home
-              </button>
-              <button
+              </Link>
+              <Link
+                to="/trilhas"
                 onClick={() => {
-                  onNavigate?.('trilhas')
                   window.scrollTo({ top: 0, behavior: 'smooth' })
                   setMenuAberto(false)
                 }}
                 className="px-4 py-4 text-left text-gray-700 dark:text-gray-300 hover:text-white hover:bg-indigo-600 dark:hover:bg-indigo-600 active:bg-indigo-700 active:text-white transition-all duration-200 font-medium border-b-2 border-gray-200 dark:border-gray-700"
               >
                 Minhas Trilhas
-              </button>
+              </Link>
               <button
                 className="px-4 py-4 text-left text-gray-700 dark:text-gray-300 hover:text-white hover:bg-indigo-600 dark:hover:bg-indigo-600 active:bg-indigo-700 active:text-white transition-all duration-200 font-medium border-b-2 border-gray-200 dark:border-gray-700"
               >
@@ -505,16 +483,19 @@ const Cabecalho = ({ onNavigate, isHomeFree = false, isHomeAdmin = false, onLogo
         {menuAberto && !isHomeFree && !isHomeAdmin && (
           <div className="lg:hidden mt-4 border-t-2 border-gray-300 dark:border-gray-700 pt-4">
             <div className="flex flex-col bg-white dark:bg-gray-800 rounded-lg shadow-xl border-2 border-gray-200 dark:border-gray-700 overflow-hidden">
-              <a 
-                href="/login" 
-                onClick={(e) => handleClick(e, 'login')}
+              <Link 
+                to="/login"
+                onClick={() => {
+                  window.scrollTo({ top: 0, behavior: 'smooth' })
+                  setMenuAberto(false)
+                }}
                 className="px-4 py-4 text-gray-700 dark:text-gray-300 hover:text-white hover:bg-indigo-600 dark:hover:bg-indigo-600 active:bg-indigo-700 active:text-white transition-all duration-200 font-medium border-b-2 border-gray-200 dark:border-gray-700 flex items-center gap-2"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
                 Login
-              </a>
+              </Link>
               <div className="px-4 py-4 border-b-2 border-gray-200 dark:border-gray-700 flex items-center justify-between">
                 <span className="text-gray-700 dark:text-gray-300 font-medium">Tema</span>
                 <button
@@ -533,41 +514,56 @@ const Cabecalho = ({ onNavigate, isHomeFree = false, isHomeAdmin = false, onLogo
                   )}
                 </button>
               </div>
-              <a 
-                href="/" 
-                onClick={(e) => handleClick(e, 'home')}
+              <Link 
+                to="/"
+                onClick={() => {
+                  window.scrollTo({ top: 0, behavior: 'smooth' })
+                  setMenuAberto(false)
+                }}
                 className="px-4 py-4 text-gray-700 dark:text-gray-300 hover:text-white hover:bg-indigo-600 dark:hover:bg-indigo-600 active:bg-indigo-700 active:text-white transition-all duration-200 font-medium border-b-2 border-gray-200 dark:border-gray-700"
               >
                 Home
-              </a>
-              <a 
-                href="/sobre" 
-                onClick={(e) => handleClick(e, 'sobre')}
+              </Link>
+              <Link 
+                to="/sobre"
+                onClick={() => {
+                  window.scrollTo({ top: 0, behavior: 'smooth' })
+                  setMenuAberto(false)
+                }}
                 className="px-4 py-4 text-gray-700 dark:text-gray-300 hover:text-white hover:bg-indigo-600 dark:hover:bg-indigo-600 active:bg-indigo-700 active:text-white transition-all duration-200 font-medium border-b-2 border-gray-200 dark:border-gray-700"
               >
                 Sobre
-              </a>
-              <a 
-                href="/integrantes" 
-                onClick={(e) => handleClick(e, 'integrantes')}
+              </Link>
+              <Link 
+                to="/integrantes"
+                onClick={() => {
+                  window.scrollTo({ top: 0, behavior: 'smooth' })
+                  setMenuAberto(false)
+                }}
                 className="px-4 py-4 text-gray-700 dark:text-gray-300 hover:text-white hover:bg-indigo-600 dark:hover:bg-indigo-600 active:bg-indigo-700 active:text-white transition-all duration-200 font-medium border-b-2 border-gray-200 dark:border-gray-700"
               >
                 Integrantes
-              </a>
-              <a 
-                href="/faq" 
-                onClick={(e) => handleClick(e, 'faq')}
+              </Link>
+              <Link 
+                to="/faq"
+                onClick={() => {
+                  window.scrollTo({ top: 0, behavior: 'smooth' })
+                  setMenuAberto(false)
+                }}
                 className="px-4 py-4 text-gray-700 dark:text-gray-300 hover:text-white hover:bg-indigo-600 dark:hover:bg-indigo-600 active:bg-indigo-700 active:text-white transition-all duration-200 font-medium border-b-2 border-gray-200 dark:border-gray-700"
               >
                 FAQ
-              </a>
-              <a 
-                href="/contato" 
-                onClick={(e) => handleClick(e, 'contato')}
+              </Link>
+              <Link 
+                to="/contato"
+                onClick={() => {
+                  window.scrollTo({ top: 0, behavior: 'smooth' })
+                  setMenuAberto(false)
+                }}
                 className="px-4 py-4 text-gray-700 dark:text-gray-300 hover:text-white hover:bg-indigo-600 dark:hover:bg-indigo-600 active:bg-indigo-700 active:text-white transition-all duration-200 font-medium"
               >
                 Contato
-              </a>
+              </Link>
             </div>
           </div>
         )}

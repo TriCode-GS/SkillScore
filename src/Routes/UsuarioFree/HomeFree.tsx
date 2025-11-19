@@ -1,25 +1,28 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../Contexto/AutenticacaoContexto'
 import Cabecalho from '../../Components/Cabecalho/Cabecalho'
 import { buscarUsuarioPorId } from '../../Types/AutenticacaoLogin'
 
-interface HomeFreeProps {
-  onNavigate?: (pagina: string) => void
-}
-
-const HomeFree = ({ onNavigate }: HomeFreeProps) => {
+const HomeFree = () => {
+  const navigate = useNavigate()
+  
+  const handleNavigate = (path: string) => {
+    navigate(path)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
   const { user, logout, isAuthenticated, login } = useAuth()
   const [nomeUsuario, setNomeUsuario] = useState<string>('')
 
   useEffect(() => {
     if (!isAuthenticated) {
       const timer = setTimeout(() => {
-        onNavigate?.('login')
+        navigate('/login')
         window.scrollTo({ top: 0, behavior: 'smooth' })
       }, 100)
       return () => clearTimeout(timer)
     }
-  }, [isAuthenticated, onNavigate])
+  }, [isAuthenticated, navigate])
 
   useEffect(() => {
     const buscarNomeUsuario = async () => {
@@ -47,7 +50,7 @@ const HomeFree = ({ onNavigate }: HomeFreeProps) => {
 
   const handleLogout = () => {
     logout()
-    onNavigate?.('home')
+    navigate('/')
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
@@ -76,7 +79,7 @@ const HomeFree = ({ onNavigate }: HomeFreeProps) => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Cabecalho onNavigate={onNavigate} isHomeFree={true} onLogout={handleLogout} />
+      <Cabecalho isHomeFree={true} onLogout={handleLogout} />
       <main className="flex-grow bg-gray-50 dark:bg-gray-900 py-8 sm:py-12 md:py-16">
         <section className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
@@ -88,10 +91,7 @@ const HomeFree = ({ onNavigate }: HomeFreeProps) => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
               <button 
-                onClick={() => {
-                  onNavigate?.('trilhas')
-                  window.scrollTo({ top: 0, behavior: 'smooth' })
-                }}
+                onClick={() => handleNavigate('/trilhas')}
                 className="p-6 bg-white dark:bg-gray-800 rounded-lg border-2 border-gray-200 dark:border-gray-600 hover:border-indigo-400 dark:hover:border-indigo-600 hover:shadow-lg transition-all duration-200 text-left"
               >
                 <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-2">
