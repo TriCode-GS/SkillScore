@@ -1,18 +1,21 @@
 import { useState, useEffect } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../../Contexto/AutenticacaoContexto'
 import Cabecalho from '../../Components/Cabecalho/Cabecalho'
 import Rodape from '../../Components/Rodape/Rodape'
 import Botao from '../../Components/Botao/Botao'
 import ListaSelecao from '../../Components/ListaSelecao/ListaSelecao'
+import { buscarEmpresaPorCNPJ } from '../../Types/Empresa'
+import { autenticarAdministradorEmpresa } from '../../Types/AutenticacaoLogin'
 
 type TipoLogin = 'menu' | 'admin' | 'gestor' | 'funcionario'
 
 interface AdminFormData {
   cnpj: string
   razaoSocial: string
+  email: string
   senha: string
-  lembrarMe: boolean
 }
 
 interface GestorFormData {
@@ -20,7 +23,6 @@ interface GestorFormData {
   departamento: string
   email: string
   senha: string
-  lembrarMe: boolean
 }
 
 interface FuncionarioFormData {
@@ -28,7 +30,6 @@ interface FuncionarioFormData {
   departamento: string
   email: string
   senha: string
-  lembrarMe: boolean
 }
 
 const LoginCorporativo = () => {
@@ -59,29 +60,72 @@ const LoginCorporativo = () => {
     return value
   }
 
-  const getCheckboxClasses = (checked: boolean) => {
-    const baseClasses = 'w-5 h-5 border-2 rounded-md transition-all duration-200 flex items-center justify-center'
-    if (checked) {
-      return `${baseClasses} bg-indigo-600 border-indigo-600 dark:bg-indigo-500 dark:border-indigo-500`
-    }
-    return `${baseClasses} border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 group-hover:border-indigo-500 dark:group-hover:border-indigo-400`
-  }
-
-  const getCheckIconClasses = (checked: boolean) => {
-    const baseClasses = 'w-3.5 h-3.5 text-white transition-opacity duration-200'
-    return checked ? `${baseClasses} opacity-100` : `${baseClasses} opacity-0`
-  }
-
   const FormularioAdmin = () => {
-    const { register, handleSubmit, control, watch, formState: { errors } } = useForm<AdminFormData>({
+    const { login } = useAuth()
+    const { register, handleSubmit, control, watch, setValue, formState: { errors } } = useForm<AdminFormData>({
       defaultValues: {
-        lembrarMe: false
+        razaoSocial: ''
       }
     })
 
-    const lembrarMe = watch('lembrarMe', false)
+    const [erro, setErro] = useState('')
+    const [carregando, setCarregando] = useState(false)
+    const cnpj = watch('cnpj', '')
 
-    const onSubmit = (_data: AdminFormData) => {
+    useEffect(() => {
+      const buscarEmpresa = async () => {
+        const cnpjLimpo = cnpj.replace(/\D/g, '')
+        if (cnpjLimpo.length === 14) {
+          setErro('')
+          try {
+            const empresa = await buscarEmpresaPorCNPJ(cnpj)
+            setValue('razaoSocial', empresa.nomeEmpresa || empresa.razaoSocial || '')
+          } catch (error) {
+            const mensagemErro = error instanceof Error ? error.message : 'Erro ao buscar empresa'
+            setErro(mensagemErro)
+            setValue('razaoSocial', '')
+          }
+        } else if (cnpjLimpo.length > 0 && cnpjLimpo.length < 14) {
+          setValue('razaoSocial', '')
+          setErro('')
+        }
+      }
+
+      const timeoutId = setTimeout(() => {
+        buscarEmpresa()
+      }, 500)
+
+      return () => clearTimeout(timeoutId)
+    }, [cnpj, setValue])
+
+    const onSubmit = async (data: AdminFormData) => {
+      setErro('')
+      setCarregando(true)
+      
+      try {
+        const response = await autenticarAdministradorEmpresa({
+          email: data.email,
+          senha: data.senha
+        })
+        
+        if (response) {
+          login({
+            idUsuario: response.idUsuario,
+            nomeUsuario: response.nomeUsuario,
+            email: data.email,
+            tipoUsuario: response.tipoUsuario,
+            isAdmin: false
+          })
+          
+          navigate('/admin/home')
+          window.scrollTo({ top: 0, behavior: 'smooth' })
+        }
+      } catch (error) {
+        const mensagemErro = error instanceof Error ? error.message : 'Erro ao autenticar'
+        setErro(mensagemErro)
+      } finally {
+        setCarregando(false)
+      }
     }
 
     return (
@@ -94,6 +138,14 @@ const LoginCorporativo = () => {
         </p>
         
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
+          {erro && (
+            <div className="p-3 sm:p-4 bg-red-50 dark:bg-red-900/20 border-2 border-red-300 dark:border-red-700 rounded-lg">
+              <p className="text-sm text-red-600 dark:text-red-400 font-semibold break-words">
+                {erro}
+              </p>
+            </div>
+          )}
+          
           <div>
             <label 
               htmlFor="cnpj" 
@@ -112,7 +164,8 @@ const LoginCorporativo = () => {
                   value={field.value || ''}
                   onChange={(e) => field.onChange(formatCNPJ(e.target.value))}
                   maxLength={18}
-                  className="w-full px-4 py-2 sm:py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm sm:text-base"
+                  disabled={carregando}
+                  className="w-full px-4 py-2 sm:py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed"
                   placeholder="00.000.000/0000-00"
                 />
               )}
@@ -124,27 +177,62 @@ const LoginCorporativo = () => {
             )}
           </div>
           
-          <Controller
-            name="razaoSocial"
-            control={control}
-            rules={{ required: 'Razão Social é obrigatória' }}
-            render={({ field }) => (
-              <ListaSelecao
-                options={empresas}
-                value={field.value || ''}
-                onChange={field.onChange}
-                placeholder="Nome da empresa"
-                label="Razão Social"
-                required
-                id="razaoSocial"
-              />
+          <div>
+            <label 
+              htmlFor="razaoSocial" 
+              className="block text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2"
+            >
+              Razão Social
+            </label>
+            <Controller
+              name="razaoSocial"
+              control={control}
+              rules={{ required: 'Razão Social é obrigatória' }}
+              render={({ field }) => (
+                <input
+                  type="text"
+                  id="razaoSocial"
+                  value={field.value || ''}
+                  disabled
+                  className="w-full px-4 py-2 sm:py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 text-sm sm:text-base cursor-not-allowed"
+                  placeholder="Inclua o CNPJ e aguarde"
+                />
+              )}
+            />
+            {errors.razaoSocial && (
+              <p className="mt-2 text-sm text-red-600 dark:text-red-400">
+                {errors.razaoSocial.message}
+              </p>
             )}
-          />
-          {errors.razaoSocial && (
-            <p className="mt-2 text-sm text-red-600 dark:text-red-400">
-              {errors.razaoSocial.message}
-            </p>
-          )}
+          </div>
+          
+          <div>
+            <label 
+              htmlFor="emailAdmin" 
+              className="block text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2"
+            >
+              Email
+            </label>
+            <input
+              type="email"
+              id="emailAdmin"
+              {...register('email', {
+                required: 'Email é obrigatório',
+                pattern: {
+                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                  message: 'Email inválido'
+                }
+              })}
+              disabled={carregando}
+              className="w-full px-4 py-2 sm:py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed"
+              placeholder="seu@email.com"
+            />
+            {errors.email && (
+              <p className="mt-2 text-sm text-red-600 dark:text-red-400">
+                {errors.email.message}
+              </p>
+            )}
+          </div>
           
           <div>
             <label 
@@ -159,7 +247,8 @@ const LoginCorporativo = () => {
               {...register('senha', {
                 required: 'Senha é obrigatória'
               })}
-              className="w-full px-4 py-2 sm:py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm sm:text-base"
+              disabled={carregando}
+              className="w-full px-4 py-2 sm:py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed"
               placeholder="••••••••"
             />
             {errors.senha && (
@@ -169,45 +258,14 @@ const LoginCorporativo = () => {
             )}
           </div>
           
-          <div className="flex items-center">
-            <Controller
-              name="lembrarMe"
-              control={control}
-              render={({ field }) => (
-                <label className="flex items-center cursor-pointer group">
-                  <div className="relative">
-                    <input
-                      type="checkbox"
-                      checked={field.value}
-                      onChange={(e) => field.onChange(e.target.checked)}
-                      className="sr-only"
-                    />
-                    <div className={getCheckboxClasses(lembrarMe)}>
-                      <svg 
-                        className={getCheckIconClasses(lembrarMe)}
-                        fill="none" 
-                        stroke="currentColor" 
-                        viewBox="0 0 24 24"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                      </svg>
-                    </div>
-                  </div>
-                  <span className="ml-3 text-sm sm:text-base text-gray-700 dark:text-gray-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                    Lembrar-me
-                  </span>
-                </label>
-              )}
-            />
-          </div>
-          
           <Botao
             type="submit"
             variant="primary"
             size="md"
             className="w-full"
+            disabled={carregando}
           >
-            Entrar
+            {carregando ? 'Entrando...' : 'Entrar'}
           </Botao>
         </form>
         
@@ -224,13 +282,7 @@ const LoginCorporativo = () => {
   }
 
   const FormularioGestor = () => {
-    const { register, handleSubmit, control, watch, formState: { errors } } = useForm<GestorFormData>({
-      defaultValues: {
-        lembrarMe: false
-      }
-    })
-
-    const lembrarMe = watch('lembrarMe', false)
+    const { register, handleSubmit, control, formState: { errors } } = useForm<GestorFormData>()
 
     const onSubmit = (_data: GestorFormData) => {
     }
@@ -339,38 +391,6 @@ const LoginCorporativo = () => {
             )}
           </div>
           
-          <div className="flex items-center">
-            <Controller
-              name="lembrarMe"
-              control={control}
-              render={({ field }) => (
-                <label className="flex items-center cursor-pointer group">
-                  <div className="relative">
-                    <input
-                      type="checkbox"
-                      checked={field.value}
-                      onChange={(e) => field.onChange(e.target.checked)}
-                      className="sr-only"
-                    />
-                    <div className={getCheckboxClasses(lembrarMe)}>
-                      <svg 
-                        className={getCheckIconClasses(lembrarMe)}
-                        fill="none" 
-                        stroke="currentColor" 
-                        viewBox="0 0 24 24"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                      </svg>
-                    </div>
-                  </div>
-                  <span className="ml-3 text-sm sm:text-base text-gray-700 dark:text-gray-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                    Lembrar-me
-                  </span>
-                </label>
-              )}
-            />
-          </div>
-          
           <Botao
             type="submit"
             variant="primary"
@@ -394,13 +414,7 @@ const LoginCorporativo = () => {
   }
 
   const FormularioFuncionario = () => {
-    const { register, handleSubmit, control, watch, formState: { errors } } = useForm<FuncionarioFormData>({
-      defaultValues: {
-        lembrarMe: false
-      }
-    })
-
-    const lembrarMe = watch('lembrarMe', false)
+    const { register, handleSubmit, control, formState: { errors } } = useForm<FuncionarioFormData>()
 
     const onSubmit = (_data: FuncionarioFormData) => {
     }
@@ -507,38 +521,6 @@ const LoginCorporativo = () => {
                 {errors.senha.message}
               </p>
             )}
-          </div>
-          
-          <div className="flex items-center">
-            <Controller
-              name="lembrarMe"
-              control={control}
-              render={({ field }) => (
-                <label className="flex items-center cursor-pointer group">
-                  <div className="relative">
-                    <input
-                      type="checkbox"
-                      checked={field.value}
-                      onChange={(e) => field.onChange(e.target.checked)}
-                      className="sr-only"
-                    />
-                    <div className={getCheckboxClasses(lembrarMe)}>
-                      <svg 
-                        className={getCheckIconClasses(lembrarMe)}
-                        fill="none" 
-                        stroke="currentColor" 
-                        viewBox="0 0 24 24"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                      </svg>
-                    </div>
-                  </div>
-                  <span className="ml-3 text-sm sm:text-base text-gray-700 dark:text-gray-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                    Lembrar-me
-                  </span>
-                </label>
-              )}
-            />
           </div>
           
           <Botao
