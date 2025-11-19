@@ -1,27 +1,30 @@
 import { useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../Contexto/AutenticacaoContexto'
 import Cabecalho from '../../Components/Cabecalho/Cabecalho'
 
-interface HomeAdminProps {
-  onNavigate?: (pagina: string) => void
-}
-
-const HomeAdmin = ({ onNavigate }: HomeAdminProps) => {
+const HomeAdmin = () => {
+  const navigate = useNavigate()
+  
+  const handleNavigate = (path: string) => {
+    navigate(path)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
   const { user, logout, isAuthenticated } = useAuth()
 
   useEffect(() => {
     if (!isAuthenticated || !user?.isAdmin) {
       const timer = setTimeout(() => {
-        onNavigate?.('loginAdmin')
+        navigate('/admin/login')
         window.scrollTo({ top: 0, behavior: 'smooth' })
       }, 100)
       return () => clearTimeout(timer)
     }
-  }, [isAuthenticated, user, onNavigate])
+  }, [isAuthenticated, user, navigate])
 
   const handleLogout = () => {
     logout()
-    onNavigate?.('home')
+    navigate('/')
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
@@ -50,7 +53,7 @@ const HomeAdmin = ({ onNavigate }: HomeAdminProps) => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Cabecalho onNavigate={onNavigate} isHomeAdmin={true} onLogout={handleLogout} />
+      <Cabecalho isHomeAdmin={true} onLogout={handleLogout} />
       <main className="flex-grow bg-gray-50 dark:bg-gray-900 py-8 sm:py-12 md:py-16">
         <section className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
@@ -65,10 +68,7 @@ const HomeAdmin = ({ onNavigate }: HomeAdminProps) => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
               <button 
-                onClick={() => {
-                  onNavigate?.('gerenciarAdministradores')
-                  window.scrollTo({ top: 0, behavior: 'smooth' })
-                }}
+                onClick={() => handleNavigate('/admin/administradores')}
                 className="p-6 bg-white dark:bg-gray-800 rounded-lg border-2 border-gray-200 dark:border-gray-600 hover:border-indigo-400 dark:hover:border-indigo-600 hover:shadow-lg transition-all duration-200 text-left"
               >
                 <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-2">
@@ -80,10 +80,7 @@ const HomeAdmin = ({ onNavigate }: HomeAdminProps) => {
               </button>
 
               <button 
-                onClick={() => {
-                  onNavigate?.('gerenciarEmpresas')
-                  window.scrollTo({ top: 0, behavior: 'smooth' })
-                }}
+                onClick={() => handleNavigate('/admin/empresas')}
                 className="p-6 bg-white dark:bg-gray-800 rounded-lg border-2 border-gray-200 dark:border-gray-600 hover:border-indigo-400 dark:hover:border-indigo-600 hover:shadow-lg transition-all duration-200 text-left"
               >
                 <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-2">

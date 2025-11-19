@@ -1,17 +1,20 @@
+import { useNavigate } from 'react-router-dom'
 import Cabecalho from '../../Components/Cabecalho/Cabecalho'
 import Rodape from '../../Components/Rodape/Rodape'
 import Botao from '../../Components/Botao/Botao'
 import iconWhatsApp from '../../assets/img/RedesSociais/WhatsApp.png'
 
-interface ContatoProps {
-  onNavigate?: (pagina: string) => void
-}
-
-const Contato = ({ onNavigate }: ContatoProps) => {
+const Contato = () => {
+  const navigate = useNavigate()
+  
+  const handleNavigate = (path: string) => {
+    navigate(path)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Cabecalho onNavigate={onNavigate} />
+      <Cabecalho />
       <main className="flex-grow bg-gray-50 dark:bg-gray-900">
         <section className="container mx-auto px-4 py-8 sm:py-12 md:py-16">
           <div className="max-w-4xl mx-auto">
@@ -30,10 +33,7 @@ const Contato = ({ onNavigate }: ContatoProps) => {
                 <Botao
                   variant="outline"
                   size="md"
-                  onClick={() => {
-                    onNavigate?.('faq')
-                    window.scrollTo({ top: 0, behavior: 'smooth' })
-                  }}
+                  onClick={() => handleNavigate('/faq')}
                   className="w-full bg-transparent"
                 >
                   Ver FAQ
@@ -98,7 +98,7 @@ const Contato = ({ onNavigate }: ContatoProps) => {
           </div>
         </section>
       </main>
-      <Rodape onNavigate={onNavigate} />
+      <Rodape />
     </div>
   )
 }

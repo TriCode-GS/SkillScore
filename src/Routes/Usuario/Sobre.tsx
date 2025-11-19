@@ -1,14 +1,10 @@
 import Cabecalho from '../../Components/Cabecalho/Cabecalho'
 import Rodape from '../../Components/Rodape/Rodape'
 
-interface SobreProps {
-  onNavigate?: (pagina: string) => void
-}
-
-const Sobre = ({ onNavigate }: SobreProps) => {
+const Sobre = () => {
   return (
     <div className="min-h-screen flex flex-col">
-      <Cabecalho onNavigate={onNavigate} />
+      <Cabecalho />
       <main className="flex-grow bg-white dark:bg-gray-900">
         <section className="container mx-auto px-4 py-8 sm:py-12 md:py-16">
           <div className="max-w-4xl mx-auto">
@@ -34,7 +30,7 @@ const Sobre = ({ onNavigate }: SobreProps) => {
           </div>
         </section>
       </main>
-      <Rodape onNavigate={onNavigate} />
+      <Rodape />
     </div>
   )
 }

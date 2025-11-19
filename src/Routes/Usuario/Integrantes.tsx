@@ -8,10 +8,6 @@ import iconGithubBlack from '../../assets/img/RedesSociais/GithubBlack.png'
 import iconGithubWhite from '../../assets/img/RedesSociais/GithubWhite.png'
 import iconLinkedin from '../../assets/img/RedesSociais/linkedin.png'
 
-interface IntegrantesProps {
-  onNavigate?: (pagina: string) => void
-}
-
 interface Integrante {
   nome: string
   foto: string
@@ -48,12 +44,12 @@ const integrantes: Integrante[] = [
   }
 ]
 
-const Integrantes = ({ onNavigate }: IntegrantesProps) => {
+const Integrantes = () => {
   const { theme } = useTheme()
   
   return (
     <div className="min-h-screen flex flex-col">
-      <Cabecalho onNavigate={onNavigate} />
+      <Cabecalho />
       <main className="flex-grow bg-white dark:bg-gray-900">
         <section className="container mx-auto px-4 py-8 sm:py-12 md:py-16">
           <div className="max-w-6xl mx-auto">
@@ -122,7 +118,7 @@ const Integrantes = ({ onNavigate }: IntegrantesProps) => {
           </div>
         </section>
       </main>
-      <Rodape onNavigate={onNavigate} />
+      <Rodape />
     </div>
   )
 }

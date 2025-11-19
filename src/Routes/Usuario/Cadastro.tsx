@@ -1,13 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useForm, Controller } from 'react-hook-form'
+import { useNavigate } from 'react-router-dom'
 import Cabecalho from '../../Components/Cabecalho/Cabecalho'
 import Rodape from '../../Components/Rodape/Rodape'
 import Botao from '../../Components/Botao/Botao'
 import { cadastrarUsuario } from '../../Types/AutenticacaoLogin'
-
-interface CadastroProps {
-  onNavigate?: (pagina: string) => void
-}
 
 interface CadastroFormData {
   nome: string
@@ -17,7 +14,13 @@ interface CadastroFormData {
   aceitarTermos: boolean
 }
 
-const Cadastro = ({ onNavigate }: CadastroProps) => {
+const Cadastro = () => {
+  const navigate = useNavigate()
+  
+  const handleNavigate = (path: string) => {
+    navigate(path)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
   const [mostrarTermos, setMostrarTermos] = useState(false)
   const [erroTermos, setErroTermos] = useState(false)
   const [erroSenha, setErroSenha] = useState(false)
@@ -121,25 +124,22 @@ const Cadastro = ({ onNavigate }: CadastroProps) => {
     
     try {
       const dadosCadastro = {
-        nome_usuario: data.nome.trim(),
+        nomeUsuario: data.nome.trim(),
         email: data.email.trim(),
         senha: data.senha,
-        tipo_usuario: 'USUARIO',
-        tipo_login: 'USUARIO',
-        id_empresa: null,
-        area_atuacao: null,
+        tipoUsuario: 'USUARIO',
+        tipoLogin: 'USUARIO',
+        idEmpresa: null,
+        areaAtuacao: null,
         competencias: null,
-        nivel_senioridade: null
+        nivelSenioridade: null
       }
       
       await cadastrarUsuario(dadosCadastro)
       
       setCarregando(false)
-      
-      if (onNavigate) {
-        onNavigate('login')
-        window.scrollTo({ top: 0, behavior: 'smooth' })
-      }
+      navigate('/login')
+      window.scrollTo({ top: 0, behavior: 'smooth' })
     } catch (error) {
       setCarregando(false)
       setErroApi(error instanceof Error ? error.message : 'Erro ao cadastrar usuário. Tente novamente.')
@@ -148,7 +148,7 @@ const Cadastro = ({ onNavigate }: CadastroProps) => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Cabecalho onNavigate={onNavigate} />
+      <Cabecalho />
       <main className="flex-grow bg-gray-50 dark:bg-gray-900 flex items-center justify-center py-8 sm:py-12 md:py-16">
         <section className="container mx-auto px-4">
           <div className="max-w-md mx-auto">
@@ -475,10 +475,7 @@ const Cadastro = ({ onNavigate }: CadastroProps) => {
                 <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
                   Já tem uma conta?{' '}
                   <button
-                    onClick={() => {
-                      onNavigate?.('login')
-                      window.scrollTo({ top: 0, behavior: 'smooth' })
-                    }}
+                    onClick={() => handleNavigate('/login')}
                     className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-semibold transition-colors"
                   >
                     Fazer Login
@@ -489,7 +486,7 @@ const Cadastro = ({ onNavigate }: CadastroProps) => {
           </div>
         </section>
       </main>
-      <Rodape onNavigate={onNavigate} />
+      <Rodape />
       
       {mostrarTermos && (
         <div className="fixed inset-0 bg-white/30 dark:bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">

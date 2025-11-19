@@ -1,13 +1,7 @@
-interface RodapeProps {
-  onNavigate?: (pagina: string) => void
-}
+import { Link } from 'react-router-dom'
 
-const Rodape = ({ onNavigate }: RodapeProps) => {
-  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>, pagina: string) => {
-    e.preventDefault()
-    if (onNavigate) {
-      onNavigate(pagina)
-    }
+const Rodape = () => {
+  const handleLinkClick = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
@@ -28,49 +22,49 @@ const Rodape = ({ onNavigate }: RodapeProps) => {
             <h4 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Links Rápidos</h4>
             <ul className="space-y-2">
               <li>
-                <a 
-                  href="/" 
-                  onClick={(e) => handleClick(e, 'home')}
+                <Link 
+                  to="/" 
+                  onClick={handleLinkClick}
                   className="text-gray-400 dark:text-gray-600 hover:text-indigo-400 dark:hover:text-indigo-600 transition-colors"
                 >
                   Home
-                </a>
+                </Link>
               </li>
               <li>
-                <a 
-                  href="/sobre" 
-                  onClick={(e) => handleClick(e, 'sobre')}
+                <Link 
+                  to="/sobre" 
+                  onClick={handleLinkClick}
                   className="text-gray-400 dark:text-gray-600 hover:text-indigo-400 dark:hover:text-indigo-600 transition-colors"
                 >
                   Sobre
-                </a>
+                </Link>
               </li>
               <li>
-                <a 
-                  href="/integrantes" 
-                  onClick={(e) => handleClick(e, 'integrantes')}
+                <Link 
+                  to="/integrantes" 
+                  onClick={handleLinkClick}
                   className="text-gray-400 dark:text-gray-600 hover:text-indigo-400 dark:hover:text-indigo-600 transition-colors"
                 >
                   Integrantes
-                </a>
+                </Link>
               </li>
               <li>
-                <a 
-                  href="/faq" 
-                  onClick={(e) => handleClick(e, 'faq')}
+                <Link 
+                  to="/faq" 
+                  onClick={handleLinkClick}
                   className="text-gray-400 dark:text-gray-600 hover:text-indigo-400 dark:hover:text-indigo-600 transition-colors"
                 >
                   FAQ
-                </a>
+                </Link>
               </li>
               <li>
-                <a 
-                  href="/contato" 
-                  onClick={(e) => handleClick(e, 'contato')}
+                <Link 
+                  to="/contato" 
+                  onClick={handleLinkClick}
                   className="text-gray-400 dark:text-gray-600 hover:text-indigo-400 dark:hover:text-indigo-600 transition-colors"
                 >
                   Contato
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -89,13 +83,13 @@ const Rodape = ({ onNavigate }: RodapeProps) => {
           
           <div>
             <h4 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Contato</h4>
-            <a
-              href="/contato"
-              onClick={(e) => handleClick(e, 'contato')}
+            <Link
+              to="/contato"
+              onClick={handleLinkClick}
               className="text-sm sm:text-base text-gray-400 dark:text-gray-600 hover:text-indigo-400 dark:hover:text-indigo-600 transition-colors cursor-pointer"
             >
               Entre em contato conosco para mais informações sobre nossos planos e serviços.
-            </a>
+            </Link>
           </div>
         </div>
         

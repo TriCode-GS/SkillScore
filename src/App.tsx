@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { Routes, Route, Navigate } from 'react-router-dom'
 import { ThemeProvider } from './Contexto/TemaContexto'
 import { AuthProvider } from './Contexto/AutenticacaoContexto'
 import Home from './Routes/Usuario/Home'
@@ -17,46 +17,30 @@ import GerenciarAdministradores from './Routes/Admin/GerenciarAdministradores'
 import LoginCorporativo from './Routes/Corporativo/LoginCorporativo'
 
 function App() {
-  const [paginaAtual, setPaginaAtual] = useState('home')
-
-  const renderizarPagina = () => {
-    switch (paginaAtual) {
-      case 'sobre':
-        return <Sobre onNavigate={setPaginaAtual} />
-      case 'integrantes':
-        return <Integrantes onNavigate={setPaginaAtual} />
-      case 'faq':
-        return <FAQ onNavigate={setPaginaAtual} />
-      case 'contato':
-        return <Contato onNavigate={setPaginaAtual} />
-      case 'login':
-        return <Login onNavigate={setPaginaAtual} />
-      case 'cadastro':
-        return <Cadastro onNavigate={setPaginaAtual} />
-          case 'homeFree':
-            return <HomeFree onNavigate={setPaginaAtual} />
-          case 'trilhas':
-            return <Trilhas onNavigate={setPaginaAtual} />
-          case 'loginAdmin':
-            return <LoginAdmin onNavigate={setPaginaAtual} />
-          case 'homeAdmin':
-            return <HomeAdmin onNavigate={setPaginaAtual} />
-          case 'gerenciarEmpresas':
-            return <GerenciarEmpresas onNavigate={setPaginaAtual} />
-          case 'gerenciarAdministradores':
-            return <GerenciarAdministradores onNavigate={setPaginaAtual} />
-          case 'loginCorporativo':
-            return <LoginCorporativo onNavigate={setPaginaAtual} />
-      case 'home':
-      default:
-        return <Home onNavigate={setPaginaAtual} />
-    }
-  }
-
   return (
     <ThemeProvider>
       <AuthProvider>
-        {renderizarPagina()}
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/home" element={<Home />} />
+          <Route path="/sobre" element={<Sobre />} />
+          <Route path="/integrantes" element={<Integrantes />} />
+          <Route path="/faq" element={<FAQ />} />
+          <Route path="/contato" element={<Contato />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/cadastro" element={<Cadastro />} />
+          <Route path="/login-corporativo" element={<LoginCorporativo />} />
+          <Route path="/home-free" element={<HomeFree />} />
+          <Route path="/trilhas" element={<Trilhas />} />
+          <Route path="/trilhas/:id" element={<Trilhas />} />
+          <Route path="/admin/login" element={<LoginAdmin />} />
+          <Route path="/admin/home" element={<HomeAdmin />} />
+          <Route path="/admin/empresas" element={<GerenciarEmpresas />} />
+          <Route path="/admin/empresas/:id" element={<GerenciarEmpresas />} />
+          <Route path="/admin/administradores" element={<GerenciarAdministradores />} />
+          <Route path="/admin/administradores/:id" element={<GerenciarAdministradores />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
       </AuthProvider>
     </ThemeProvider>
   )

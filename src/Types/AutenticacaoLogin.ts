@@ -21,6 +21,13 @@ export type LoginData = {
   tipoLogin: string
 }
 
+export interface LoginApiResponse {
+  idLogin?: number
+  idUsuario?: number
+  email?: string
+  tipoLogin?: string
+}
+
 export type LoginUpdateData = {
   idUsuario?: number
   email?: string
@@ -29,25 +36,39 @@ export type LoginUpdateData = {
 }
 
 export type CadastroCredentials = {
-  nome_usuario: string
+  nomeUsuario: string
   email: string
   senha: string
-  tipo_usuario: string
-  tipo_login: string
-  id_empresa: number | null
-  area_atuacao: string | null
+  tipoUsuario: string
+  tipoLogin: string
+  idEmpresa: number | null
+  areaAtuacao: string | null
   competencias: string | null
-  nivel_senioridade: string | null
+  nivelSenioridade: string | null
 }
 
-export type CadastroResponse = unknown
+export type CadastroResponse = {
+  idUsuario?: number
+  email?: string
+  tipoLogin?: string
+  message?: string
+}
 
 export type LoginCredentials = {
   email: string
   senha: string
 }
 
-export type LoginResponse = unknown
+export interface LoginResponse {
+  idUsuario?: number
+  idLogin?: number
+  email?: string
+  nomeUsuario?: string
+  nome?: string
+  tipoLogin?: string
+  tipoUsuario?: string
+  message?: string
+}
 
 export type UsuarioResponse = {
   idUsuario: number
@@ -59,7 +80,7 @@ export type UsuarioResponse = {
   competencias: string | null
 }
 
-export async function criarUsuario(usuarioData: UsuarioData): Promise<{ id_usuario: number }> {
+export async function criarUsuario(usuarioData: UsuarioData): Promise<{ idUsuario: number }> {
   const baseUrl = getBaseUrl()
   const urlString = `${baseUrl}/usuarios`
   
@@ -139,7 +160,7 @@ export async function criarUsuario(usuarioData: UsuarioData): Promise<{ id_usuar
 
   const response = await res.json() as UsuarioData & { idUsuario?: number }
   return {
-    id_usuario: response.idUsuario || 0
+    idUsuario: response.idUsuario || 0
   }
 }
 
@@ -213,34 +234,34 @@ export async function criarLogin(loginData: LoginData): Promise<CadastroResponse
 }
 
 export async function cadastrarUsuario(credentials: CadastroCredentials): Promise<CadastroResponse> {
-  if (!credentials.nome_usuario || credentials.nome_usuario.trim() === '') {
+  if (!credentials.nomeUsuario || credentials.nomeUsuario.trim() === '') {
     throw new Error('Nome do usuário é obrigatório')
   }
   
-  if (!credentials.tipo_usuario || credentials.tipo_usuario.trim() === '') {
+  if (!credentials.tipoUsuario || credentials.tipoUsuario.trim() === '') {
     throw new Error('Tipo de usuário é obrigatório')
   }
   
-  if (!credentials.tipo_login || credentials.tipo_login.trim() === '') {
+  if (!credentials.tipoLogin || credentials.tipoLogin.trim() === '') {
     throw new Error('Tipo de login é obrigatório')
   }
   
   const usuarioData: UsuarioData = {
-    idEmpresa: credentials.id_empresa,
-    nomeUsuario: credentials.nome_usuario.trim(),
-    tipoUsuario: credentials.tipo_usuario.trim(),
-    areaAtuacao: credentials.area_atuacao,
-    nivelSenioridade: credentials.nivel_senioridade,
+    idEmpresa: credentials.idEmpresa,
+    nomeUsuario: credentials.nomeUsuario.trim(),
+    tipoUsuario: credentials.tipoUsuario.trim(),
+    areaAtuacao: credentials.areaAtuacao,
+    nivelSenioridade: credentials.nivelSenioridade,
     competencias: credentials.competencias
   }
 
   const usuarioCriado = await criarUsuario(usuarioData)
 
   const loginData: LoginData = {
-    idUsuario: usuarioCriado.id_usuario,
+    idUsuario: usuarioCriado.idUsuario,
     email: credentials.email.trim(),
     senha: credentials.senha,
-    tipoLogin: credentials.tipo_login.trim()
+    tipoLogin: credentials.tipoLogin.trim()
   }
 
   return await criarLogin(loginData)

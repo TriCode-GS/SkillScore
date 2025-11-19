@@ -1,11 +1,8 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import Cabecalho from '../../Components/Cabecalho/Cabecalho'
 import Rodape from '../../Components/Rodape/Rodape'
 import Botao from '../../Components/Botao/Botao'
-
-interface FAQProps {
-  onNavigate?: (pagina: string) => void
-}
 
 interface PerguntaResposta {
   pergunta: string
@@ -47,7 +44,8 @@ const faqs: PerguntaResposta[] = [
   }
 ]
 
-const FAQ = ({ onNavigate }: FAQProps) => {
+const FAQ = () => {
+  const navigate = useNavigate()
   const [botaoClicado, setBotaoClicado] = useState<'sim' | 'nao' | null>(null)
   const [mostrarMensagem, setMostrarMensagem] = useState(false)
 
@@ -68,13 +66,13 @@ const FAQ = ({ onNavigate }: FAQProps) => {
 
   const handleNao = () => {
     setBotaoClicado('nao')
-    onNavigate?.('contato')
+    navigate('/contato')
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Cabecalho onNavigate={onNavigate} />
+      <Cabecalho />
       <main className="flex-grow bg-white dark:bg-gray-900">
         <section className="container mx-auto px-4 py-8 sm:py-12 md:py-16">
           <div className="max-w-4xl mx-auto">
@@ -130,7 +128,7 @@ const FAQ = ({ onNavigate }: FAQProps) => {
           </div>
         </section>
       </main>
-      <Rodape onNavigate={onNavigate} />
+      <Rodape />
     </div>
   )
 }

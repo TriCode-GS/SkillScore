@@ -1,21 +1,24 @@
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { useNavigate } from 'react-router-dom'
 import Cabecalho from '../../Components/Cabecalho/Cabecalho'
 import Rodape from '../../Components/Rodape/Rodape'
 import Botao from '../../Components/Botao/Botao'
 import { useAuth } from '../../Contexto/AutenticacaoContexto'
 import { autenticarAdministrador } from '../../Types/AutenticacaoLogin'
 
-interface LoginAdminProps {
-  onNavigate?: (pagina: string) => void
-}
-
 interface LoginAdminFormData {
   email: string
   senha: string
 }
 
-const LoginAdmin = ({ onNavigate }: LoginAdminProps) => {
+const LoginAdmin = () => {
+  const navigate = useNavigate()
+  
+  const handleNavigate = (path: string) => {
+    navigate(path)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
   const [erroLogin, setErroLogin] = useState('')
   const [carregando, setCarregando] = useState(false)
   const { login } = useAuth()
@@ -42,11 +45,11 @@ const LoginAdmin = ({ onNavigate }: LoginAdminProps) => {
         return
       }
 
-      const response = await autenticarAdministrador({ email: emailTrimmed, senha: senhaTrimmed }) as any
+      const response = await autenticarAdministrador({ email: emailTrimmed, senha: senhaTrimmed })
       
       const adminData = {
-        id: response.idUsuario?.toString() || response.id_usuario?.toString() || '',
-        idUsuario: response.idUsuario || response.id_usuario || 0,
+        id: response.idUsuario?.toString() || '',
+        idUsuario: response.idUsuario || 0,
         email: response.email || emailTrimmed,
         nome: response.nomeUsuario || response.nome || emailTrimmed.split('@')[0],
         nomeUsuario: response.nomeUsuario || response.nome || emailTrimmed.split('@')[0],
@@ -57,11 +60,8 @@ const LoginAdmin = ({ onNavigate }: LoginAdminProps) => {
       login(adminData)
       
       setCarregando(false)
-      
-      if (onNavigate) {
-        onNavigate('homeAdmin')
-        window.scrollTo({ top: 0, behavior: 'smooth' })
-      }
+      navigate('/admin/home')
+      window.scrollTo({ top: 0, behavior: 'smooth' })
     } catch (error) {
       setCarregando(false)
       setErroLogin(error instanceof Error ? error.message : 'Erro ao fazer login. Tente novamente.')
@@ -70,7 +70,7 @@ const LoginAdmin = ({ onNavigate }: LoginAdminProps) => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Cabecalho onNavigate={onNavigate} />
+      <Cabecalho />
       <main className="flex-grow bg-gray-50 dark:bg-gray-900 flex items-center justify-center py-8 sm:py-12 md:py-16">
         <section className="container mx-auto px-4">
           <div className="max-w-md mx-auto">
@@ -153,7 +153,7 @@ const LoginAdmin = ({ onNavigate }: LoginAdminProps) => {
               
               <div className="mt-6 sm:mt-8 text-center">
                 <button
-                  onClick={() => onNavigate?.('login')}
+                  onClick={() => handleNavigate('/login')}
                   className="text-sm sm:text-base text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-semibold transition-colors"
                 >
                   Voltar para login de usuário
@@ -163,7 +163,7 @@ const LoginAdmin = ({ onNavigate }: LoginAdminProps) => {
           </div>
         </section>
       </main>
-      <Rodape onNavigate={onNavigate} />
+      <Rodape />
     </div>
   )
 }

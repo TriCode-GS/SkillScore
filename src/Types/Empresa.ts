@@ -1,15 +1,25 @@
 import { getBaseUrl } from './AutenticacaoLogin'
+import type { UsuarioData } from './AutenticacaoLogin'
 
 export type EmpresaData = {
   idEmpresa?: number
   nomeEmpresa?: string
-  nome_empresa?: string
   razaoSocial?: string
   cnpj: string
   setor?: string | null
   email?: string | null
   telefone?: string | null
   nomeAdministrador?: string
+}
+
+export interface UsuarioApiResponse {
+  idUsuario?: number
+  nomeUsuario?: string
+  tipoUsuario?: string
+  idEmpresa?: number | null
+  areaAtuacao?: string | null
+  nivelSenioridade?: string | null
+  competencias?: string | null
 }
 
 export type EmpresaResponse = EmpresaData & {
@@ -91,9 +101,8 @@ export async function cadastrarEmpresaCompleto(dados: CadastroEmpresaCompletoDat
     throw new Error('Nome da empresa é obrigatório')
   }
   
-  const empresaData: any = {
+  const empresaData: EmpresaData = {
     nomeEmpresa: nomeEmpresa,
-    nome_empresa: nomeEmpresa,
     cnpj: dados.cnpj.replace(/\D/g, ''),
     setor: dados.setor && dados.setor.trim() ? dados.setor.trim() : null,
     email: dados.email && dados.email.trim() ? dados.email.trim() : null
@@ -103,39 +112,30 @@ export async function cadastrarEmpresaCompleto(dados: CadastroEmpresaCompletoDat
   
   const { criarUsuario, atualizarUsuario } = await import('./AutenticacaoLogin')
   
-  const usuarioDataInicial: any = {
+  const usuarioDataInicial: UsuarioData = {
     nomeUsuario: dados.nomeAdministrador.trim(),
-    nome_usuario: dados.nomeAdministrador.trim(),
     tipoUsuario: 'ADMINISTRADOR EMP',
-    tipo_usuario: 'ADMINISTRADOR EMP',
     areaAtuacao: null,
-    area_atuacao: null,
     nivelSenioridade: null,
-    nivel_senioridade: null,
     competencias: null
   }
   
   const usuarioCriado = await criarUsuario(usuarioDataInicial)
   
-  const usuarioDataAtualizado: any = {
+  const usuarioDataAtualizado: UsuarioData = {
     idEmpresa: empresaCriada.idEmpresa,
-    id_empresa: empresaCriada.idEmpresa,
     nomeUsuario: dados.nomeAdministrador.trim(),
-    nome_usuario: dados.nomeAdministrador.trim(),
     tipoUsuario: 'ADMINISTRADOR EMP',
-    tipo_usuario: 'ADMINISTRADOR EMP',
     areaAtuacao: null,
-    area_atuacao: null,
     nivelSenioridade: null,
-    nivel_senioridade: null,
     competencias: null
   }
   
-  await atualizarUsuario(usuarioCriado.id_usuario, usuarioDataAtualizado)
+  await atualizarUsuario(usuarioCriado.idUsuario, usuarioDataAtualizado)
   
   const { criarLogin } = await import('./AutenticacaoLogin')
   const loginData = {
-    idUsuario: usuarioCriado.id_usuario,
+    idUsuario: usuarioCriado.idUsuario,
     email: dados.email && dados.email.trim() ? dados.email.trim() : dados.nomeAdministrador.trim(),
     senha: dados.senha,
     tipoLogin: 'ADMINISTRADOR EMP'

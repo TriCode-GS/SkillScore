@@ -1,13 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../Contexto/AutenticacaoContexto'
 import Cabecalho from '../../Components/Cabecalho/Cabecalho'
 import Botao from '../../Components/Botao/Botao'
-import { criarUsuario, atualizarUsuario, listarUsuarios, excluirUsuario, excluirLogin, criarLogin, atualizarLogin, type UsuarioResponse, type LoginData, type LoginUpdateData, getBaseUrl } from '../../Types/AutenticacaoLogin'
-
-interface GerenciarAdministradoresProps {
-  onNavigate?: (pagina: string) => void
-}
+import { criarUsuario, atualizarUsuario, listarUsuarios, excluirUsuario, excluirLogin, criarLogin, atualizarLogin, type UsuarioResponse, type LoginData, type LoginUpdateData, type UsuarioData, type LoginApiResponse, getBaseUrl } from '../../Types/AutenticacaoLogin'
 
 interface AdministradorFormData {
   nomeUsuario: string
@@ -23,8 +20,14 @@ interface AdministradorEdicaoFormData {
   confirmarSenha: string
 }
 
-const GerenciarAdministradores = ({ onNavigate }: GerenciarAdministradoresProps) => {
+const GerenciarAdministradores = () => {
+  const navigate = useNavigate()
   const { user, isAuthenticated } = useAuth()
+  
+  const handleNavigate = (path: string) => {
+    navigate(path)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
   const [administradores, setAdministradores] = useState<(UsuarioResponse & { nomeEmpresa?: string; email?: string; idLogin?: number })[]>([])
   const [carregando, setCarregando] = useState(false)
   const [carregandoEdicao, setCarregandoEdicao] = useState(false)
@@ -107,13 +110,13 @@ const GerenciarAdministradores = ({ onNavigate }: GerenciarAdministradoresProps)
   useEffect(() => {
     if (!isAuthenticated || !user?.isAdmin) {
       const timer = setTimeout(() => {
-        onNavigate?.('loginAdmin')
+        navigate('/admin/login')
         window.scrollTo({ top: 0, behavior: 'smooth' })
       }, 100)
       return () => clearTimeout(timer)
     }
     carregarAdministradores()
-  }, [isAuthenticated, user, onNavigate])
+  }, [isAuthenticated, user, navigate])
 
   const carregarAdministradores = async () => {
     setCarregando(true)
@@ -135,19 +138,19 @@ const GerenciarAdministradores = ({ onNavigate }: GerenciarAdministradoresProps)
           mode: 'cors',
         })
         
-        let loginsListados: any[] = []
+        let loginsListados: LoginApiResponse[] = []
         if (resLogins.ok) {
-          loginsListados = await resLogins.json() as any[]
+          loginsListados = await resLogins.json() as LoginApiResponse[]
         }
         
         const administradoresComEmail = administradoresFiltrados.map((administrador) => {
-          const login = loginsListados.find((l: any) => {
-            const loginIdUsuario = l.idUsuario || l.id_usuario
+          const login = loginsListados.find((l) => {
+            const loginIdUsuario = l.idUsuario
             return loginIdUsuario != null && Number(loginIdUsuario) === Number(administrador.idUsuario)
           })
           
           const email = login?.email || '-'
-          const idLogin = login?.idLogin || login?.id_login
+          const idLogin = login?.idLogin
           return { ...administrador, email, idLogin }
         })
         
@@ -190,22 +193,17 @@ const GerenciarAdministradores = ({ onNavigate }: GerenciarAdministradoresProps)
     setCarregandoCadastro(true)
     
     try {
-      const usuarioData: any = {
+      const usuarioData: UsuarioData = {
         nomeUsuario: data.nomeUsuario.trim(),
-        nome_usuario: data.nomeUsuario.trim(),
         tipoUsuario: 'ADMINISTRADOR EMP',
-        tipo_usuario: 'ADMINISTRADOR EMP',
         areaAtuacao: null,
-        area_atuacao: null,
         nivelSenioridade: null,
-        nivel_senioridade: null,
         competencias: null,
-        idEmpresa: null,
-        id_empresa: null
+        idEmpresa: null
       }
       
       const usuarioCriado = await criarUsuario(usuarioData)
-      const idUsuario = usuarioCriado.id_usuario
+      const idUsuario = usuarioCriado.idUsuario
       
       const loginData: LoginData = {
         idUsuario: idUsuario,
@@ -273,18 +271,13 @@ const GerenciarAdministradores = ({ onNavigate }: GerenciarAdministradoresProps)
     try {
       const tipoUsuarioAtual = administradorSelecionado.tipoUsuario || 'ADMINISTRADOR EMP'
       
-      const usuarioData: any = {
+      const usuarioData: UsuarioData = {
         nomeUsuario: data.nomeUsuario.trim(),
-        nome_usuario: data.nomeUsuario.trim(),
         tipoUsuario: tipoUsuarioAtual,
-        tipo_usuario: tipoUsuarioAtual,
         areaAtuacao: administradorSelecionado.areaAtuacao || null,
-        area_atuacao: administradorSelecionado.areaAtuacao || null,
         nivelSenioridade: administradorSelecionado.nivelSenioridade || null,
-        nivel_senioridade: administradorSelecionado.nivelSenioridade || null,
         competencias: administradorSelecionado.competencias || null,
-        idEmpresa: administradorSelecionado.idEmpresa || null,
-        id_empresa: administradorSelecionado.idEmpresa || null
+        idEmpresa: administradorSelecionado.idEmpresa || null
       }
       
       await atualizarUsuario(administradorSelecionado.idUsuario, usuarioData)
@@ -352,7 +345,7 @@ const GerenciarAdministradores = ({ onNavigate }: GerenciarAdministradoresProps)
   const handleLogout = () => {
     const { logout } = useAuth()
     logout()
-    onNavigate?.('home')
+    navigate('/')
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
@@ -368,7 +361,7 @@ const GerenciarAdministradores = ({ onNavigate }: GerenciarAdministradoresProps)
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Cabecalho onNavigate={onNavigate} isHomeAdmin={true} onLogout={handleLogout} />
+      <Cabecalho isHomeAdmin={true} onLogout={handleLogout} />
       <main className="flex-grow bg-gray-50 dark:bg-gray-900 py-8 sm:py-12 md:py-16">
         <section className="container mx-auto px-4 sm:px-6 md:px-8 relative">
           <div className="max-w-6xl mx-auto">
@@ -376,8 +369,7 @@ const GerenciarAdministradores = ({ onNavigate }: GerenciarAdministradoresProps)
               <div className="flex justify-end mb-3 md:hidden">
                 <button
                   onClick={() => {
-                    onNavigate?.('homeAdmin')
-                    window.scrollTo({ top: 0, behavior: 'smooth' })
+                    handleNavigate('/admin/home')
                   }}
                   className="px-3 py-1.5 text-xs font-semibold text-indigo-600 dark:text-indigo-400 border-2 border-indigo-600 dark:border-indigo-400 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-colors whitespace-nowrap"
                 >
@@ -421,8 +413,7 @@ const GerenciarAdministradores = ({ onNavigate }: GerenciarAdministradoresProps)
                 </div>
                 <button
                   onClick={() => {
-                    onNavigate?.('homeAdmin')
-                    window.scrollTo({ top: 0, behavior: 'smooth' })
+                    handleNavigate('/admin/home')
                   }}
                   className="hidden md:block px-4 sm:px-5 md:px-6 lg:px-8 py-2 sm:py-2.5 md:py-2.5 lg:py-3 text-xs sm:text-sm md:text-base lg:text-lg font-semibold text-indigo-600 dark:text-indigo-400 border-2 border-indigo-600 dark:border-indigo-400 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-colors whitespace-nowrap self-auto"
                 >
