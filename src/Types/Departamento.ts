@@ -136,3 +136,64 @@ export async function cadastrarDepartamento(departamentoData: DepartamentoData):
   return res.json()
 }
 
+export async function editarDepartamento(idDepartamento: number, departamentoData: DepartamentoData): Promise<DepartamentoResponse> {
+  const baseUrl = getBaseUrl()
+  const urlString = `${baseUrl}/departamentos/${idDepartamento}`
+  
+  let url: URL
+  try {
+    url = new URL(urlString)
+  } catch (error) {
+    throw new Error(`URL inválida: ${urlString}`)
+  }
+
+  let res: Response
+
+  try {
+    res = await fetch(url.toString(), {
+      method: 'PUT',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(departamentoData),
+      mode: 'cors',
+    })
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido'
+    if (errorMessage.includes('Failed to fetch') || errorMessage.includes('CORS')) {
+      throw new Error('Erro de CORS: O servidor não está configurado corretamente para aceitar requisições deste domínio.')
+    }
+    throw new Error(`Não foi possível conectar à API. URL: ${url.toString()}. Erro: ${errorMessage}`)
+  }
+
+  if (!res.ok) {
+    let backendMessage: string | undefined
+
+    try {
+      const text = await res.text()
+      if (text && text.trim().length > 0) {
+        backendMessage = text.trim()
+      }
+    } catch (_) {}
+
+    if (!backendMessage) {
+      try {
+        const data = await res.clone().json() as unknown
+        if (typeof data === 'string') backendMessage = data
+        else if (data && typeof data === 'object') {
+          const anyData = data as { message?: string; error?: string; detalhe?: string }
+          backendMessage = anyData.message || anyData.error || anyData.detalhe
+        }
+      } catch (_) {}
+    }
+
+    const statusText = res.statusText || 'Erro'
+    const message = backendMessage || `Falha ao editar departamento (status ${res.status} ${statusText})`
+
+    throw new Error(message)
+  }
+
+  return res.json()
+}
+

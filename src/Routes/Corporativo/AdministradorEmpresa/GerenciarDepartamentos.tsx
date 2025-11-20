@@ -5,7 +5,7 @@ import { useAuth } from '../../../Contexto/AutenticacaoContexto'
 import Cabecalho from '../../../Components/Cabecalho/Cabecalho'
 import Botao from '../../../Components/Botao/Botao'
 import ListaSelecao from '../../../Components/ListaSelecao/ListaSelecao'
-import { cadastrarDepartamento, listarDepartamentos, type DepartamentoData, type DepartamentoResponse } from '../../../Types/Departamento'
+import { cadastrarDepartamento, listarDepartamentos, editarDepartamento, type DepartamentoData, type DepartamentoResponse } from '../../../Types/Departamento'
 import { buscarUsuarioPorId, getBaseUrl, type UsuarioResponse } from '../../../Types/AutenticacaoLogin'
 
 interface DepartamentoFormData {
@@ -37,12 +37,15 @@ const GerenciarDepartamentos = () => {
   const [departamentos, setDepartamentos] = useState<DepartamentoComGestor[]>([])
   const [carregando, setCarregando] = useState(false)
   const [carregandoCadastro, setCarregandoCadastro] = useState(false)
+  const [carregandoEdicao, setCarregandoEdicao] = useState(false)
   const [carregandoAssociacao, setCarregandoAssociacao] = useState(false)
   const [erro, setErro] = useState('')
   const [mostrarModalCadastro, setMostrarModalCadastro] = useState(false)
+  const [mostrarModalEdicao, setMostrarModalEdicao] = useState(false)
   const [mostrarModalAssociarGestor, setMostrarModalAssociarGestor] = useState(false)
   const [mostrarModalDesvincularGestor, setMostrarModalDesvincularGestor] = useState(false)
   const [departamentoSelecionado, setDepartamentoSelecionado] = useState<DepartamentoResponse | null>(null)
+  const [departamentoParaEditar, setDepartamentoParaEditar] = useState<DepartamentoComGestor | null>(null)
   const [gestorParaDesvincular, setGestorParaDesvincular] = useState<{ idUsuario: number; nomeUsuario: string; idDepartamento: number } | null>(null)
   const [gestoresDisponiveis, setGestoresDisponiveis] = useState<GestorOption[]>([])
   const [carregandoGestores, setCarregandoGestores] = useState(false)
@@ -50,6 +53,7 @@ const GerenciarDepartamentos = () => {
   const [idEmpresa, setIdEmpresa] = useState<number | null>(null)
 
   const { register: registerCadastro, handleSubmit: handleSubmitCadastro, reset: resetCadastro, formState: { errors: errorsCadastro } } = useForm<DepartamentoFormData>()
+  const { register: registerEdicao, handleSubmit: handleSubmitEdicao, reset: resetEdicao, formState: { errors: errorsEdicao } } = useForm<DepartamentoFormData>()
   const { handleSubmit: handleSubmitAssociarGestor, reset: resetAssociarGestor, control: controlAssociarGestor, formState: { errors: errorsAssociarGestor } } = useForm<AssociarGestorFormData>()
 
   useEffect(() => {
@@ -350,6 +354,46 @@ const GerenciarDepartamentos = () => {
     }
   }
 
+  const abrirModalEdicao = (departamento: DepartamentoComGestor) => {
+    setDepartamentoParaEditar(departamento)
+    resetEdicao({
+      nomeDepartamento: departamento.nomeDepartamento || ''
+    })
+    setErro('')
+    setMostrarModalEdicao(true)
+  }
+
+  const onSubmitEdicao = async (data: DepartamentoFormData) => {
+    if (!departamentoParaEditar?.idDepartamento || !idEmpresa) {
+      setErro('Não foi possível identificar o departamento')
+      return
+    }
+    
+    setErro('')
+    setCarregandoEdicao(true)
+    
+    try {
+      const departamentoData: DepartamentoData = {
+        idEmpresa: idEmpresa,
+        nomeDepartamento: data.nomeDepartamento.trim(),
+        descricao: null
+      }
+      
+      await editarDepartamento(departamentoParaEditar.idDepartamento, departamentoData)
+      
+      resetEdicao()
+      setErro('')
+      await carregarDepartamentos(idEmpresa)
+      setMostrarModalEdicao(false)
+      setDepartamentoParaEditar(null)
+    } catch (error) {
+      const mensagemErro = error instanceof Error ? error.message : 'Erro ao editar departamento'
+      setErro(mensagemErro)
+    } finally {
+      setCarregandoEdicao(false)
+    }
+  }
+
   const handleLogout = () => {
     logout()
     navigate('/login-corporativo')
@@ -454,6 +498,7 @@ const GerenciarDepartamentos = () => {
                         <tr>
                           <th className="px-3 sm:px-4 md:px-5 lg:px-6 py-2.5 sm:py-3 md:py-3.5 lg:py-4 text-center text-xs sm:text-sm md:text-base font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap">Nome do Departamento</th>
                           <th className="px-3 sm:px-4 md:px-5 lg:px-6 py-2.5 sm:py-3 md:py-3.5 lg:py-4 text-center text-xs sm:text-sm md:text-base font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap hidden md:table-cell">Gestor</th>
+                          <th className="px-3 sm:px-4 md:px-5 lg:px-6 py-2.5 sm:py-3 md:py-3.5 lg:py-4 text-center text-xs sm:text-sm md:text-base font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap">Ações</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800">
@@ -492,8 +537,19 @@ const GerenciarDepartamentos = () => {
                                 </button>
                               )}
                             </td>
-                            <td className="px-3 sm:px-4 md:px-5 lg:px-6 py-2.5 sm:py-3 md:py-3.5 lg:py-4 text-center md:hidden">
-                              <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 space-y-1">
+                            <td className="px-3 sm:px-4 md:px-5 lg:px-6 py-2.5 sm:py-3 md:py-3.5 lg:py-4 text-center">
+                              <div className="flex flex-col sm:flex-row justify-center gap-1.5 sm:gap-2 md:gap-2.5">
+                                <button
+                                  onClick={() => abrirModalEdicao(departamento)}
+                                  className="p-2 sm:p-2.5 md:p-3 text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-colors"
+                                  aria-label="Editar"
+                                >
+                                  <svg className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                  </svg>
+                                </button>
+                              </div>
+                              <div className="md:hidden mt-1.5 text-xs sm:text-sm text-gray-500 dark:text-gray-400 space-y-1">
                                 <div>
                                   Gestor: {departamento.nomeGestor ? (
                                     <div className="flex items-center justify-center gap-2">
@@ -611,6 +667,95 @@ const GerenciarDepartamentos = () => {
                   onClick={handleSubmitCadastro(onSubmitCadastro)}
                 >
                   {carregandoCadastro ? 'Cadastrando...' : 'Cadastrar'}
+                </Botao>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {mostrarModalEdicao && departamentoParaEditar && (
+        <div className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-3 sm:p-4 md:p-6">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md md:max-w-lg lg:max-w-xl w-full border-2 border-indigo-200 dark:border-indigo-800 max-h-[95vh] sm:max-h-[92vh] md:max-h-[90vh] flex flex-col m-2 sm:m-3 md:m-0">
+            <div className="flex justify-between items-center p-4 sm:p-5 md:p-6 pb-3 sm:pb-4 md:pb-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+              <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white break-words pr-2">
+                Editar Departamento
+              </h2>
+              <button
+                onClick={() => {
+                  if (!carregandoEdicao) {
+                    setMostrarModalEdicao(false)
+                    setDepartamentoParaEditar(null)
+                    resetEdicao()
+                    setErro('')
+                  }
+                }}
+                disabled={carregandoEdicao}
+                className={`text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors ${carregandoEdicao ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="overflow-y-auto flex-1 px-4 sm:px-5 md:px-6 py-3 sm:py-4 md:py-5">
+              {erro && (
+                <div className="mb-3 sm:mb-4 md:mb-5 p-3 sm:p-4 md:p-5 bg-red-50 dark:bg-red-900/20 border-2 border-red-300 dark:border-red-700 rounded-lg">
+                  <p className="text-xs sm:text-sm md:text-base text-red-600 dark:text-red-400 font-semibold break-words">
+                    {erro}
+                  </p>
+                </div>
+              )}
+              <form onSubmit={handleSubmitEdicao(onSubmitEdicao)} className="space-y-3 sm:space-y-4 md:space-y-5">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Nome do Departamento *
+                  </label>
+                  <input
+                    type="text"
+                    {...registerEdicao('nomeDepartamento', { required: 'Nome do departamento é obrigatório' })}
+                    className="w-full px-4 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                    placeholder="Nome do departamento"
+                    disabled={carregandoEdicao}
+                  />
+                  {errorsEdicao.nomeDepartamento && (
+                    <p className="mt-1 text-xs text-red-600 dark:text-red-400">
+                      {errorsEdicao.nomeDepartamento.message}
+                    </p>
+                  )}
+                </div>
+              </form>
+            </div>
+            
+            <div className="p-4 sm:p-5 md:p-6 pt-3 sm:pt-4 md:pt-5 border-t border-gray-200 dark:border-gray-700 flex-shrink-0">
+              <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-3 md:gap-4">
+                <Botao
+                  type="button"
+                  variant="secondary"
+                  size="md"
+                  className="flex-1 w-full sm:w-auto"
+                  disabled={carregandoEdicao}
+                  onClick={() => {
+                    if (!carregandoEdicao) {
+                      setMostrarModalEdicao(false)
+                      setDepartamentoParaEditar(null)
+                      resetEdicao()
+                      setErro('')
+                    }
+                  }}
+                >
+                  Cancelar
+                </Botao>
+                <Botao
+                  type="button"
+                  variant="primary"
+                  size="md"
+                  className="flex-1 w-full sm:w-auto"
+                  disabled={carregandoEdicao}
+                  onClick={handleSubmitEdicao(onSubmitEdicao)}
+                >
+                  {carregandoEdicao ? 'Salvando...' : 'Salvar'}
                 </Botao>
               </div>
             </div>
