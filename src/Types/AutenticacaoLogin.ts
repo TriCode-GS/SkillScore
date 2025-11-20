@@ -7,9 +7,9 @@ export const getBaseUrl = () => {
 
 export type UsuarioData = {
   idEmpresa?: number | null
+  idDepartamento?: number | null
   nomeUsuario: string
   tipoUsuario: string
-  areaAtuacao?: string | null
   nivelSenioridade?: string | null
   competencias?: string | null
 }
@@ -42,7 +42,7 @@ export type CadastroCredentials = {
   tipoUsuario: string
   tipoLogin: string
   idEmpresa: number | null
-  areaAtuacao: string | null
+  idDepartamento: number | null
   competencias: string | null
   nivelSenioridade: string | null
 }
@@ -73,9 +73,9 @@ export interface LoginResponse {
 export type UsuarioResponse = {
   idUsuario: number
   idEmpresa: number | null
+  idDepartamento: number | null
   nomeUsuario: string
   tipoUsuario: string
-  areaAtuacao: string | null
   nivelSenioridade: string | null
   competencias: string | null
 }
@@ -248,9 +248,9 @@ export async function cadastrarUsuario(credentials: CadastroCredentials): Promis
   
   const usuarioData: UsuarioData = {
     idEmpresa: credentials.idEmpresa,
+    idDepartamento: credentials.idDepartamento,
     nomeUsuario: credentials.nomeUsuario.trim(),
     tipoUsuario: credentials.tipoUsuario.trim(),
-    areaAtuacao: credentials.areaAtuacao,
     nivelSenioridade: credentials.nivelSenioridade,
     competencias: credentials.competencias
   }
@@ -410,6 +410,68 @@ export async function autenticarAdministrador(credentials: LoginCredentials): Pr
       headers: {
         'Accept': 'application/json',
       },
+    })
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido'
+    throw new Error(`Não foi possível conectar à API (rede/CORS/servidor inativo). Detalhes: ${errorMessage}`)
+  }
+
+  if (!res.ok) {
+    let backendMessage: string | undefined
+
+    try {
+      const text = await res.text()
+      if (text && text.trim().length > 0) {
+        backendMessage = text.trim()
+      }
+    } catch (_) {}
+
+    if (!backendMessage) {
+      try {
+        const data = await res.clone().json() as unknown
+        if (typeof data === 'string') backendMessage = data
+        else if (data && typeof data === 'object') {
+          const anyData = data as { message?: string; error?: string; detalhe?: string }
+          backendMessage = anyData.message || anyData.error || anyData.detalhe
+        }
+      } catch (_) {}
+    }
+
+    if (!backendMessage && res.status === 401) {
+      backendMessage = 'Credenciais inválidas'
+    }
+
+    const statusText = res.statusText || 'Erro'
+    const message = backendMessage || `Falha na autenticação (status ${res.status} ${statusText})`
+
+    throw new Error(message)
+  }
+
+  return res.json()
+}
+
+export async function autenticarAdministradorEmpresa(credentials: LoginCredentials): Promise<LoginResponse> {
+  const baseUrl = getBaseUrl()
+  let url: URL
+  
+  try {
+    url = new URL(`${baseUrl}/logins/autenticar/administrador-emp`)
+  } catch (error) {
+    throw new Error(`URL inválida: ${baseUrl}/logins/autenticar/administrador-emp`)
+  }
+
+  url.searchParams.set('email', credentials.email)
+  url.searchParams.set('senha', credentials.senha)
+
+  let res: Response
+
+  try {
+    res = await fetch(url.toString(), {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+      },
+      mode: 'cors',
     })
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido'
