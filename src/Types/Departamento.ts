@@ -197,3 +197,63 @@ export async function editarDepartamento(idDepartamento: number, departamentoDat
   return res.json()
 }
 
+export async function excluirDepartamento(idDepartamento: number): Promise<void> {
+  const baseUrl = getBaseUrl()
+  const urlString = `${baseUrl}/departamentos/${idDepartamento}`
+  
+  let url: URL
+  try {
+    url = new URL(urlString)
+  } catch (error) {
+    throw new Error(`URL inválida: ${urlString}`)
+  }
+
+  let res: Response
+
+  try {
+    res = await fetch(url.toString(), {
+      method: 'DELETE',
+      headers: {
+        'Accept': 'application/json',
+      },
+      mode: 'cors',
+    })
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido'
+    if (errorMessage.includes('Failed to fetch') || errorMessage.includes('CORS')) {
+      throw new Error('Erro de CORS: O servidor não está configurado corretamente para aceitar requisições deste domínio.')
+    }
+    throw new Error(`Não foi possível conectar à API. URL: ${url.toString()}. Erro: ${errorMessage}`)
+  }
+
+  if (!res.ok) {
+    let backendMessage: string | undefined
+
+    try {
+      const text = await res.text()
+      if (text && text.trim().length > 0) {
+        backendMessage = text.trim()
+      }
+    } catch (_) {}
+
+    if (!backendMessage) {
+      try {
+        const data = await res.clone().json() as unknown
+        if (typeof data === 'string') backendMessage = data
+        else if (data && typeof data === 'object') {
+          const anyData = data as { message?: string; error?: string; detalhe?: string }
+          backendMessage = anyData.message || anyData.error || anyData.detalhe
+        }
+      } catch (_) {}
+    }
+
+    let message = backendMessage || `Falha ao excluir departamento (status ${res.status} ${res.statusText || 'Erro'})`
+    
+    if (backendMessage && (backendMessage.includes('Existem usuários vinculados') || backendMessage.includes('usuários vinculados a este departamento'))) {
+      message = 'Não é possível deletar o departamento pois existe um gestor vinculado.'
+    }
+    
+    throw new Error(message)
+  }
+}
+
