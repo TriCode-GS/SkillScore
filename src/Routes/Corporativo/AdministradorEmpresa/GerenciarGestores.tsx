@@ -4,9 +4,16 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../../Contexto/AutenticacaoContexto'
 import Cabecalho from '../../../Components/Cabecalho/Cabecalho'
 import Botao from '../../../Components/Botao/Botao'
-import { criarUsuario, listarUsuarios, criarLogin, buscarUsuarioPorId, type UsuarioResponse, type LoginData, type UsuarioData, type LoginApiResponse, getBaseUrl } from '../../../Types/AutenticacaoLogin'
+import { criarUsuario, listarUsuarios, criarLogin, buscarUsuarioPorId, atualizarUsuario, atualizarLogin, type UsuarioResponse, type LoginData, type UsuarioData, type LoginApiResponse, type LoginUpdateData, getBaseUrl } from '../../../Types/AutenticacaoLogin'
 
 interface GestorFormData {
+  nomeUsuario: string
+  email: string
+  senha: string
+  confirmarSenha: string
+}
+
+interface GestorEdicaoFormData {
   nomeUsuario: string
   email: string
   senha: string
@@ -24,15 +31,21 @@ const GerenciarGestores = () => {
   const [gestores, setGestores] = useState<(UsuarioResponse & { email?: string; idLogin?: number })[]>([])
   const [carregando, setCarregando] = useState(false)
   const [carregandoCadastro, setCarregandoCadastro] = useState(false)
+  const [carregandoEdicao, setCarregandoEdicao] = useState(false)
   const [erro, setErro] = useState('')
   const [erroSenha, setErroSenha] = useState(false)
   const [erroValidacoesSenha, setErroValidacoesSenha] = useState(false)
   const [mostrarModalCadastro, setMostrarModalCadastro] = useState(false)
+  const [mostrarModalEdicao, setMostrarModalEdicao] = useState(false)
+  const [gestorSelecionado, setGestorSelecionado] = useState<UsuarioResponse & { email?: string; idLogin?: number } | null>(null)
 
   const { register: registerCadastro, handleSubmit: handleSubmitCadastro, reset: resetCadastro, watch, formState: { errors: errorsCadastro } } = useForm<GestorFormData>()
+  const { register: registerEdicao, handleSubmit: handleSubmitEdicao, reset: resetEdicao, watch: watchEdicao, formState: { errors: errorsEdicao } } = useForm<GestorEdicaoFormData>()
 
   const senha = watch('senha', '')
   const confirmarSenha = watch('confirmarSenha', '')
+  const senhaEdicao = watchEdicao('senha', '')
+  const confirmarSenhaEdicao = watchEdicao('confirmarSenha', '')
 
   useEffect(() => {
     if (senha && confirmarSenha && senha !== confirmarSenha) {
@@ -41,6 +54,14 @@ const GerenciarGestores = () => {
       setErroSenha(false)
     }
   }, [senha, confirmarSenha])
+
+  useEffect(() => {
+    if (senhaEdicao && confirmarSenhaEdicao && senhaEdicao !== confirmarSenhaEdicao) {
+      setErroSenha(true)
+    } else {
+      setErroSenha(false)
+    }
+  }, [senhaEdicao, confirmarSenhaEdicao])
 
   const validarSenha = (senhaAtual: string) => {
     const temConteudo = senhaAtual.length > 0
@@ -55,6 +76,20 @@ const GerenciarGestores = () => {
   }
 
   const validacoesSenha = validarSenha(senha)
+
+  const validarSenhaEdicao = (senhaAtual: string) => {
+    const temConteudo = senhaAtual.length > 0
+    return {
+      maxCaracteres: temConteudo && senhaAtual.length >= 8 && senhaAtual.length <= 16,
+      maiusculasMinusculas: temConteudo && /[a-z]/.test(senhaAtual) && /[A-Z]/.test(senhaAtual),
+      temNumero: temConteudo && /\d/.test(senhaAtual),
+      temCaractereEspecial: temConteudo && /[!@#$%&*]/.test(senhaAtual),
+      semEspacos: temConteudo && !/\s/.test(senhaAtual),
+      semInfoPessoal: true
+    }
+  }
+
+  const validacoesSenhaEdicao = validarSenhaEdicao(senhaEdicao)
 
   const getCheckboxInstrucaoClasses = (validado: boolean) => {
     const baseClasses = 'w-5 h-5 border-2 rounded-md transition-all duration-200 flex items-center justify-center'
@@ -212,6 +247,90 @@ const GerenciarGestores = () => {
     }
   }
 
+  const abrirModalEdicao = (gestor: UsuarioResponse & { email?: string; idLogin?: number }) => {
+    setGestorSelecionado(gestor)
+    resetEdicao({
+      nomeUsuario: gestor.nomeUsuario || '',
+      email: gestor.email || '',
+      senha: '',
+      confirmarSenha: ''
+    })
+    setMostrarModalEdicao(true)
+  }
+
+  const onSubmitEdicao = async (data: GestorEdicaoFormData) => {
+    if (!gestorSelecionado) return
+    
+    setErro('')
+    setErroSenha(false)
+    setErroValidacoesSenha(false)
+    
+    if (data.senha && data.senha !== data.confirmarSenha) {
+      setErroSenha(true)
+      setErro('As senhas não coincidem')
+      return
+    }
+    
+    if (data.senha && data.senha.trim() !== '') {
+      const todasValidacoesSenha = 
+        validacoesSenhaEdicao.maxCaracteres &&
+        validacoesSenhaEdicao.maiusculasMinusculas &&
+        validacoesSenhaEdicao.temNumero &&
+        validacoesSenhaEdicao.temCaractereEspecial &&
+        validacoesSenhaEdicao.semEspacos &&
+        validacoesSenhaEdicao.semInfoPessoal
+      
+      if (!todasValidacoesSenha) {
+        setErroValidacoesSenha(true)
+        setErro('Você precisa atender a todos os requisitos de senha para atualizar')
+        return
+      }
+    }
+    
+    setCarregandoEdicao(true)
+    
+    try {
+      const tipoUsuarioAtual = gestorSelecionado.tipoUsuario || 'GESTOR'
+      
+      const usuarioData: UsuarioData = {
+        nomeUsuario: data.nomeUsuario.trim(),
+        tipoUsuario: tipoUsuarioAtual,
+        areaAtuacao: gestorSelecionado.areaAtuacao || null,
+        nivelSenioridade: gestorSelecionado.nivelSenioridade || null,
+        competencias: gestorSelecionado.competencias || null,
+        idEmpresa: gestorSelecionado.idEmpresa || null
+      }
+      
+      await atualizarUsuario(gestorSelecionado.idUsuario, usuarioData)
+      
+      if (gestorSelecionado.idLogin) {
+        const loginUpdateData: LoginUpdateData = {
+          idUsuario: gestorSelecionado.idUsuario,
+          tipoLogin: 'GESTOR'
+        }
+        if (data.email && data.email.trim() !== '') {
+          loginUpdateData.email = data.email.trim()
+        }
+        if (data.senha && data.senha.trim() !== '') {
+          loginUpdateData.senha = data.senha
+        }
+        
+        await atualizarLogin(gestorSelecionado.idLogin, loginUpdateData)
+      }
+      
+      resetEdicao()
+      setErro('')
+      await carregarGestores()
+      setMostrarModalEdicao(false)
+      setGestorSelecionado(null)
+    } catch (error) {
+      const mensagemErro = error instanceof Error ? error.message : 'Erro ao editar gestor'
+      setErro(mensagemErro)
+    } finally {
+      setCarregandoEdicao(false)
+    }
+  }
+
   const handleLogout = () => {
     logout()
     navigate('/login-corporativo')
@@ -316,6 +435,7 @@ const GerenciarGestores = () => {
                         <tr>
                           <th className="px-3 sm:px-4 md:px-5 lg:px-6 py-2.5 sm:py-3 md:py-3.5 lg:py-4 text-center text-xs sm:text-sm md:text-base font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap">Nome do Gestor</th>
                           <th className="px-3 sm:px-4 md:px-5 lg:px-6 py-2.5 sm:py-3 md:py-3.5 lg:py-4 text-center text-xs sm:text-sm md:text-base font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap">Email</th>
+                          <th className="px-3 sm:px-4 md:px-5 lg:px-6 py-2.5 sm:py-3 md:py-3.5 lg:py-4 text-center text-xs sm:text-sm md:text-base font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap">Ações</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800">
@@ -329,6 +449,19 @@ const GerenciarGestores = () => {
                             <td className="px-3 sm:px-4 md:px-5 lg:px-6 py-2.5 sm:py-3 md:py-3.5 lg:py-4 text-center text-xs sm:text-sm md:text-base text-gray-600 dark:text-gray-400 break-words">
                               <div className="truncate md:whitespace-normal" title={gestor.email || '-'}>
                                 {gestor.email || '-'}
+                              </div>
+                            </td>
+                            <td className="px-3 sm:px-4 md:px-5 lg:px-6 py-2.5 sm:py-3 md:py-3.5 lg:py-4 text-center">
+                              <div className="flex flex-col sm:flex-row justify-center gap-1.5 sm:gap-2 md:gap-2.5">
+                                <button
+                                  onClick={() => abrirModalEdicao(gestor)}
+                                  className="p-2 sm:p-2.5 md:p-3 text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-colors"
+                                  aria-label="Editar"
+                                >
+                                  <svg className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                  </svg>
+                                </button>
                               </div>
                             </td>
                           </tr>
@@ -627,6 +760,316 @@ const GerenciarGestores = () => {
                   onClick={handleSubmitCadastro(onSubmitCadastro)}
                 >
                   {carregandoCadastro ? 'Cadastrando...' : 'Cadastrar'}
+                </Botao>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {mostrarModalEdicao && gestorSelecionado && (
+        <div className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-3 sm:p-4 md:p-6">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md md:max-w-lg lg:max-w-xl w-full border-2 border-indigo-200 dark:border-indigo-800 max-h-[95vh] sm:max-h-[92vh] md:max-h-[90vh] flex flex-col m-2 sm:m-3 md:m-0">
+            <div className="flex justify-between items-center p-4 sm:p-5 md:p-6 pb-3 sm:pb-4 md:pb-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+              <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white break-words pr-2">
+                Editar Gestor
+              </h2>
+              <button
+                onClick={() => {
+                  if (!carregandoEdicao) {
+                    setMostrarModalEdicao(false)
+                    setGestorSelecionado(null)
+                    resetEdicao()
+                    setErro('')
+                    setErroSenha(false)
+                    setErroValidacoesSenha(false)
+                  }
+                }}
+                disabled={carregandoEdicao}
+                className={`text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors ${carregandoEdicao ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="overflow-y-auto flex-1 px-4 sm:px-5 md:px-6 py-3 sm:py-4 md:py-5">
+              {erro && (
+                <div className="mb-3 sm:mb-4 md:mb-5 p-3 sm:p-4 md:p-5 bg-red-50 dark:bg-red-900/20 border-2 border-red-300 dark:border-red-700 rounded-lg">
+                  <p className="text-xs sm:text-sm md:text-base text-red-600 dark:text-red-400 font-semibold break-words">
+                    {erro}
+                  </p>
+                </div>
+              )}
+              <form onSubmit={handleSubmitEdicao(onSubmitEdicao)} className="space-y-3 sm:space-y-4 md:space-y-5">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Nome do Gestor *
+                  </label>
+                  <input
+                    type="text"
+                    {...registerEdicao('nomeUsuario', { required: 'Nome do gestor é obrigatório' })}
+                    className="w-full px-4 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                    placeholder="Nome completo"
+                    disabled={carregandoEdicao}
+                  />
+                  {errorsEdicao.nomeUsuario && (
+                    <p className="mt-1 text-xs text-red-600 dark:text-red-400">
+                      {errorsEdicao.nomeUsuario.message}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Email *
+                  </label>
+                  <input
+                    type="email"
+                    {...registerEdicao('email', { 
+                      required: 'Email é obrigatório',
+                      pattern: {
+                        value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                        message: 'Email inválido'
+                      }
+                    })}
+                    className="w-full px-4 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                    placeholder="email@exemplo.com"
+                    disabled={carregandoEdicao}
+                  />
+                  {errorsEdicao.email && (
+                    <p className="mt-1 text-xs text-red-600 dark:text-red-400">
+                      {errorsEdicao.email.message}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <div className={`mb-4 p-4 rounded-lg border ${
+                    erroValidacoesSenha 
+                      ? 'bg-red-50 dark:bg-red-900/20 border-red-300 dark:border-red-700' 
+                      : 'bg-gray-50 dark:bg-gray-700/50 border-gray-200 dark:border-gray-600'
+                  }`}>
+                    <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                      Instruções para Criação da Senha
+                    </p>
+                    {erroValidacoesSenha && (
+                      <p className="mb-3 text-sm text-red-600 dark:text-red-400 font-semibold">
+                        Você precisa atender a todos os requisitos de senha para atualizar
+                      </p>
+                    )}
+                    <div className="space-y-2">
+                      <div className="flex items-start">
+                        <div className={getCheckboxInstrucaoClasses(validacoesSenhaEdicao.maxCaracteres)}>
+                          <svg 
+                            className={getCheckIconInstrucaoClasses(validacoesSenhaEdicao.maxCaracteres)}
+                            fill="none" 
+                            stroke="currentColor" 
+                            viewBox="0 0 24 24"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                          </svg>
+                        </div>
+                        <span className="ml-3 text-xs sm:text-sm text-gray-700 dark:text-gray-300">
+                          A senha deve ter entre 8 e 16 caracteres
+                        </span>
+                      </div>
+                      
+                      <div className="flex items-start">
+                        <div className={getCheckboxInstrucaoClasses(validacoesSenhaEdicao.maiusculasMinusculas)}>
+                          <svg 
+                            className={getCheckIconInstrucaoClasses(validacoesSenhaEdicao.maiusculasMinusculas)}
+                            fill="none" 
+                            stroke="currentColor" 
+                            viewBox="0 0 24 24"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                          </svg>
+                        </div>
+                        <span className="ml-3 text-xs sm:text-sm text-gray-700 dark:text-gray-300">
+                          Utilize letras maiúsculas e minúsculas
+                        </span>
+                      </div>
+                      
+                      <div className="flex items-start">
+                        <div className={getCheckboxInstrucaoClasses(validacoesSenhaEdicao.temNumero)}>
+                          <svg 
+                            className={getCheckIconInstrucaoClasses(validacoesSenhaEdicao.temNumero)}
+                            fill="none" 
+                            stroke="currentColor" 
+                            viewBox="0 0 24 24"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                          </svg>
+                        </div>
+                        <span className="ml-3 text-xs sm:text-sm text-gray-700 dark:text-gray-300">
+                          Inclua pelo menos um número
+                        </span>
+                      </div>
+                      
+                      <div className="flex items-start">
+                        <div className={getCheckboxInstrucaoClasses(validacoesSenhaEdicao.temCaractereEspecial)}>
+                          <svg 
+                            className={getCheckIconInstrucaoClasses(validacoesSenhaEdicao.temCaractereEspecial)}
+                            fill="none" 
+                            stroke="currentColor" 
+                            viewBox="0 0 24 24"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                          </svg>
+                        </div>
+                        <span className="ml-3 text-xs sm:text-sm text-gray-700 dark:text-gray-300">
+                          Inclua pelo menos um caractere especial (! @ # $ % & * …)
+                        </span>
+                      </div>
+                      
+                      <div className="flex items-start">
+                        <div className={getCheckboxInstrucaoClasses(validacoesSenhaEdicao.semEspacos)}>
+                          <svg 
+                            className={getCheckIconInstrucaoClasses(validacoesSenhaEdicao.semEspacos)}
+                            fill="none" 
+                            stroke="currentColor" 
+                            viewBox="0 0 24 24"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                          </svg>
+                        </div>
+                        <span className="ml-3 text-xs sm:text-sm text-gray-700 dark:text-gray-300">
+                          Não utilize espaços
+                        </span>
+                      </div>
+                      
+                      <div className="flex items-start">
+                        <div className={getCheckboxInstrucaoClasses(validacoesSenhaEdicao.semInfoPessoal)}>
+                          <svg 
+                            className={getCheckIconInstrucaoClasses(validacoesSenhaEdicao.semInfoPessoal)}
+                            fill="none" 
+                            stroke="currentColor" 
+                            viewBox="0 0 24 24"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                          </svg>
+                        </div>
+                        <span className="ml-3 text-xs sm:text-sm text-gray-700 dark:text-gray-300">
+                          Evite informações pessoais, como nome ou data de nascimento (Opcional)
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Senha (deixe em branco para não alterar)
+                  </label>
+                  
+                  <input
+                    type="password"
+                    {...registerEdicao('senha', {
+                      maxLength: {
+                        value: 16,
+                        message: 'A senha deve ter no máximo 16 caracteres'
+                      },
+                      minLength: {
+                        value: 8,
+                        message: 'A senha deve ter no mínimo 8 caracteres'
+                      },
+                      validate: (value) => {
+                        if (value && value.trim() !== '') {
+                          const senhaAtual = value
+                          const validacoes = validarSenhaEdicao(senhaAtual)
+                          return (validacoes.maxCaracteres &&
+                            validacoes.maiusculasMinusculas &&
+                            validacoes.temNumero &&
+                            validacoes.temCaractereEspecial &&
+                            validacoes.semEspacos &&
+                            validacoes.semInfoPessoal) || 'Senha não atende aos requisitos'
+                        }
+                        return true
+                      },
+                      onChange: () => {
+                        setErroValidacoesSenha(false)
+                      }
+                    })}
+                    maxLength={16}
+                    className="w-full px-4 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                    placeholder="••••••••"
+                    disabled={carregandoEdicao}
+                  />
+                  {errorsEdicao.senha && (
+                    <p className="mt-1 text-xs text-red-600 dark:text-red-400">
+                      {errorsEdicao.senha.message}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Confirmar Senha
+                  </label>
+                  <input
+                    type="password"
+                    {...registerEdicao('confirmarSenha', {
+                      validate: (value) => {
+                        const senha = watchEdicao('senha')
+                        if (senha && senha.trim() !== '') {
+                          return value === senha || 'As senhas não coincidem'
+                        }
+                        return true
+                      }
+                    })}
+                    maxLength={16}
+                    className={`w-full px-4 py-2 border-2 rounded-lg focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm ${
+                      erroSenha 
+                        ? 'border-red-500 dark:border-red-500 focus:border-red-500 dark:focus:border-red-500' 
+                        : 'border-gray-300 dark:border-gray-600 focus:border-indigo-600 dark:focus:border-indigo-400'
+                    }`}
+                    placeholder="••••••••"
+                    disabled={carregandoEdicao}
+                  />
+                  {erroSenha && confirmarSenhaEdicao && (
+                    <p className="mt-1 text-xs text-red-600 dark:text-red-400">
+                      As senhas não coincidem
+                    </p>
+                  )}
+                  {errorsEdicao.confirmarSenha && !erroSenha && (
+                    <p className="mt-1 text-xs text-red-600 dark:text-red-400">
+                      {errorsEdicao.confirmarSenha.message}
+                    </p>
+                  )}
+                </div>
+              </form>
+            </div>
+            
+            <div className="p-4 sm:p-5 md:p-6 pt-3 sm:pt-4 md:pt-5 border-t border-gray-200 dark:border-gray-700 flex-shrink-0">
+              <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-3 md:gap-4">
+                <Botao
+                  type="button"
+                  variant="secondary"
+                  size="md"
+                  className="flex-1 w-full sm:w-auto"
+                  disabled={carregandoEdicao}
+                  onClick={() => {
+                    if (!carregandoEdicao) {
+                      setMostrarModalEdicao(false)
+                      setGestorSelecionado(null)
+                      resetEdicao()
+                      setErro('')
+                      setErroSenha(false)
+                      setErroValidacoesSenha(false)
+                    }
+                  }}
+                >
+                  Cancelar
+                </Botao>
+                <Botao
+                  type="button"
+                  variant="primary"
+                  size="md"
+                  className="flex-1 w-full sm:w-auto"
+                  disabled={carregandoEdicao}
+                  onClick={handleSubmitEdicao(onSubmitEdicao)}
+                >
+                  {carregandoEdicao ? 'Salvando...' : 'Salvar'}
                 </Botao>
               </div>
             </div>
