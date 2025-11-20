@@ -1,14 +1,28 @@
 import { useState, useEffect } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../../Contexto/AutenticacaoContexto'
 import Cabecalho from '../../../Components/Cabecalho/Cabecalho'
 import Botao from '../../../Components/Botao/Botao'
+import ListaSelecao from '../../../Components/ListaSelecao/ListaSelecao'
 import { cadastrarDepartamento, listarDepartamentos, type DepartamentoData, type DepartamentoResponse } from '../../../Types/Departamento'
-import { buscarUsuarioPorId } from '../../../Types/AutenticacaoLogin'
+import { buscarUsuarioPorId, getBaseUrl, type UsuarioResponse } from '../../../Types/AutenticacaoLogin'
 
 interface DepartamentoFormData {
   nomeDepartamento: string
+}
+
+interface AssociarGestorFormData {
+  idGestor: string
+}
+
+interface GestorOption {
+  idUsuario: number
+  nomeUsuario: string
+}
+
+interface DepartamentoComGestor extends DepartamentoResponse {
+  nomeGestor?: string
 }
 
 const GerenciarDepartamentos = () => {
@@ -19,14 +33,20 @@ const GerenciarDepartamentos = () => {
     navigate(path)
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
-  const [departamentos, setDepartamentos] = useState<DepartamentoResponse[]>([])
+  const [departamentos, setDepartamentos] = useState<DepartamentoComGestor[]>([])
   const [carregando, setCarregando] = useState(false)
   const [carregandoCadastro, setCarregandoCadastro] = useState(false)
+  const [carregandoAssociacao, setCarregandoAssociacao] = useState(false)
   const [erro, setErro] = useState('')
   const [mostrarModalCadastro, setMostrarModalCadastro] = useState(false)
+  const [mostrarModalAssociarGestor, setMostrarModalAssociarGestor] = useState(false)
+  const [departamentoSelecionado, setDepartamentoSelecionado] = useState<DepartamentoResponse | null>(null)
+  const [gestoresDisponiveis, setGestoresDisponiveis] = useState<GestorOption[]>([])
+  const [carregandoGestores, setCarregandoGestores] = useState(false)
   const [idEmpresa, setIdEmpresa] = useState<number | null>(null)
 
   const { register: registerCadastro, handleSubmit: handleSubmitCadastro, reset: resetCadastro, formState: { errors: errorsCadastro } } = useForm<DepartamentoFormData>()
+  const { handleSubmit: handleSubmitAssociarGestor, reset: resetAssociarGestor, control: controlAssociarGestor, formState: { errors: errorsAssociarGestor } } = useForm<AssociarGestorFormData>()
 
   useEffect(() => {
     if (!isAuthenticated || user?.tipoUsuario !== 'ADMINISTRADOR EMP') {
@@ -59,11 +79,163 @@ const GerenciarDepartamentos = () => {
     setErro('')
     try {
       const departamentosListados = await listarDepartamentos(empresaId)
-      setDepartamentos(departamentosListados)
+      
+      try {
+        const baseUrl = getBaseUrl()
+        const urlStringGestores = `${baseUrl}/usuarios/gestores`
+        const resGestores = await fetch(urlStringGestores, {
+          method: 'GET',
+          headers: { 'Accept': 'application/json' },
+          mode: 'cors',
+        })
+        
+        if (resGestores.ok) {
+          const gestores = await resGestores.json() as UsuarioResponse[]
+          const departamentosComGestor = departamentosListados.map((departamento) => {
+            const gestor = gestores.find((g) => {
+              const gIdDepartamento = g.idDepartamento
+              const departamentoId = departamento.idDepartamento
+              return gIdDepartamento != null && departamentoId != null && 
+                     Number(gIdDepartamento) === Number(departamentoId)
+            })
+            
+            if (gestor) {
+              return {
+                ...departamento,
+                nomeGestor: gestor.nomeUsuario || '-'
+              }
+            }
+            
+            return { ...departamento, nomeGestor: undefined }
+          })
+          
+          setDepartamentos(departamentosComGestor)
+        } else {
+          setDepartamentos(departamentosListados)
+        }
+      } catch (error) {
+        setDepartamentos(departamentosListados)
+      }
     } catch (error) {
       setErro(error instanceof Error ? error.message : 'Erro ao carregar departamentos')
     } finally {
       setCarregando(false)
+    }
+  }
+
+  const carregarGestoresDisponiveis = async () => {
+    setCarregandoGestores(true)
+    try {
+      const baseUrl = getBaseUrl()
+      const urlString = `${baseUrl}/usuarios/gestores`
+      const res = await fetch(urlString, {
+        method: 'GET',
+        headers: { 'Accept': 'application/json' },
+        mode: 'cors',
+      })
+      
+      if (res.ok) {
+        const gestores = await res.json() as UsuarioResponse[]
+        const gestoresFiltrados = gestores
+          .filter((g) => {
+            if (!idEmpresa) return false
+            return g.idEmpresa === idEmpresa
+          })
+          .map((g) => ({
+            idUsuario: g.idUsuario || 0,
+            nomeUsuario: g.nomeUsuario || '-'
+          }))
+        
+        setGestoresDisponiveis(gestoresFiltrados)
+      } else {
+        setGestoresDisponiveis([])
+      }
+    } catch (error) {
+      setGestoresDisponiveis([])
+    } finally {
+      setCarregandoGestores(false)
+    }
+  }
+
+  const abrirModalAssociarGestor = (departamento: DepartamentoResponse) => {
+    setDepartamentoSelecionado(departamento)
+    resetAssociarGestor()
+    setErro('')
+    setMostrarModalAssociarGestor(true)
+    carregarGestoresDisponiveis()
+  }
+
+  const onSubmitAssociarGestor = async (data: AssociarGestorFormData) => {
+    if (!departamentoSelecionado?.idDepartamento || !data.idGestor) {
+      setErro('Selecione um gestor')
+      return
+    }
+
+    setErro('')
+    setCarregandoAssociacao(true)
+
+    try {
+      const baseUrl = getBaseUrl()
+      const idGestorNum = parseInt(data.idGestor, 10)
+      const urlString = `${baseUrl}/usuarios/${idGestorNum}/departamento`
+      
+      const res = await fetch(urlString, {
+        method: 'PUT',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ idDepartamento: departamentoSelecionado.idDepartamento }),
+        mode: 'cors',
+      })
+
+      if (res.ok) {
+        resetAssociarGestor()
+        setMostrarModalAssociarGestor(false)
+        setDepartamentoSelecionado(null)
+        setErro('')
+        if (idEmpresa) {
+          await carregarDepartamentos(idEmpresa)
+        }
+      } else {
+        let backendMessage: string | undefined
+
+        try {
+          const text = await res.text()
+          if (text && text.trim().length > 0) {
+            backendMessage = text.trim()
+          }
+        } catch (_) {}
+
+        if (!backendMessage) {
+          try {
+            const data = await res.clone().json() as unknown
+            if (typeof data === 'string') backendMessage = data
+            else if (data && typeof data === 'object') {
+              const anyData = data as { message?: string; error?: string; detalhe?: string }
+              backendMessage = anyData.message || anyData.error || anyData.detalhe
+            }
+          } catch (_) {}
+        }
+
+        let message = backendMessage || `Falha ao associar gestor (status ${res.status} ${res.statusText || 'Erro'})`
+        
+        if (backendMessage && (backendMessage.includes('já está vinculado') || backendMessage.includes('já está vinculado ao departamento'))) {
+          message = 'Este gestor já está vinculado a um departamento'
+        }
+        
+        setErro(message)
+      }
+    } catch (error) {
+      let errorMessage = error instanceof Error ? error.message : 'Erro ao associar gestor'
+      
+      if (errorMessage.includes('já está vinculado') || errorMessage.includes('já está vinculado ao departamento')) {
+        errorMessage = 'Este gestor já está vinculado a um departamento'
+      }
+      
+      setErro(errorMessage)
+    } finally {
+      setCarregandoAssociacao(false)
     }
   }
 
@@ -200,6 +372,7 @@ const GerenciarDepartamentos = () => {
                       <thead className="bg-gray-50 dark:bg-gray-700">
                         <tr>
                           <th className="px-3 sm:px-4 md:px-5 lg:px-6 py-2.5 sm:py-3 md:py-3.5 lg:py-4 text-center text-xs sm:text-sm md:text-base font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap">Nome do Departamento</th>
+                          <th className="px-3 sm:px-4 md:px-5 lg:px-6 py-2.5 sm:py-3 md:py-3.5 lg:py-4 text-center text-xs sm:text-sm md:text-base font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap hidden md:table-cell">Gestor</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800">
@@ -208,6 +381,39 @@ const GerenciarDepartamentos = () => {
                             <td className="px-3 sm:px-4 md:px-5 lg:px-6 py-2.5 sm:py-3 md:py-3.5 lg:py-4 text-center text-xs sm:text-sm md:text-base text-gray-900 dark:text-white break-words">
                               <div className="truncate md:whitespace-normal" title={departamento.nomeDepartamento || '-'}>
                                 {departamento.nomeDepartamento || '-'}
+                              </div>
+                            </td>
+                            <td className="px-3 sm:px-4 md:px-5 lg:px-6 py-2.5 sm:py-3 md:py-3.5 lg:py-4 text-center hidden md:table-cell">
+                              {departamento.nomeGestor ? (
+                                <span className="text-xs sm:text-sm md:text-base text-gray-600 dark:text-gray-400">
+                                  {departamento.nomeGestor}
+                                </span>
+                              ) : (
+                                <button
+                                  onClick={() => abrirModalAssociarGestor(departamento)}
+                                  className="p-1.5 sm:p-2 md:p-2.5 text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 hover:bg-green-50 dark:hover:bg-green-900/30 rounded-lg transition-colors"
+                                  aria-label="Associar Gestor"
+                                >
+                                  <svg className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                  </svg>
+                                </button>
+                              )}
+                            </td>
+                            <td className="px-3 sm:px-4 md:px-5 lg:px-6 py-2.5 sm:py-3 md:py-3.5 lg:py-4 text-center md:hidden">
+                              <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 space-y-1">
+                                <div>
+                                  Gestor: {departamento.nomeGestor ? (
+                                    <span>{departamento.nomeGestor}</span>
+                                  ) : (
+                                    <button
+                                      onClick={() => abrirModalAssociarGestor(departamento)}
+                                      className="text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 font-semibold"
+                                    >
+                                      Associar
+                                    </button>
+                                  )}
+                                </div>
                               </div>
                             </td>
                           </tr>
@@ -302,6 +508,139 @@ const GerenciarDepartamentos = () => {
                   onClick={handleSubmitCadastro(onSubmitCadastro)}
                 >
                   {carregandoCadastro ? 'Cadastrando...' : 'Cadastrar'}
+                </Botao>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {mostrarModalAssociarGestor && departamentoSelecionado && (
+        <div className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-3 sm:p-4 md:p-6">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md md:max-w-lg lg:max-w-xl w-full border-2 border-indigo-200 dark:border-indigo-800 max-h-[95vh] sm:max-h-[92vh] md:max-h-[90vh] flex flex-col m-2 sm:m-3 md:m-0">
+            <div className="flex justify-between items-center p-4 sm:p-5 md:p-6 pb-3 sm:pb-4 md:pb-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+              <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white break-words pr-2">
+                Associar Gestor
+              </h2>
+              <button
+                onClick={() => {
+                  if (!carregandoAssociacao) {
+                    setMostrarModalAssociarGestor(false)
+                    setDepartamentoSelecionado(null)
+                    resetAssociarGestor()
+                    setErro('')
+                  }
+                }}
+                disabled={carregandoAssociacao}
+                className={`text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors ${carregandoAssociacao ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="overflow-y-auto flex-1 px-4 sm:px-5 md:px-6 py-3 sm:py-4 md:py-5">
+              {erro && (
+                <div className="mb-3 sm:mb-4 md:mb-5 p-3 sm:p-4 md:p-5 bg-red-50 dark:bg-red-900/20 border-2 border-red-300 dark:border-red-700 rounded-lg">
+                  <p className="text-xs sm:text-sm md:text-base text-red-600 dark:text-red-400 font-semibold break-words">
+                    {erro}
+                  </p>
+                </div>
+              )}
+
+              <div className="space-y-3 sm:space-y-4 md:space-y-5 mb-4 sm:mb-5 md:mb-6">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Nome do Departamento
+                  </label>
+                  <input
+                    type="text"
+                    value={departamentoSelecionado.nomeDepartamento || ''}
+                    disabled
+                    className="w-full px-4 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 text-sm cursor-not-allowed"
+                  />
+                </div>
+              </div>
+
+              <form onSubmit={handleSubmitAssociarGestor(onSubmitAssociarGestor)} className="space-y-3 sm:space-y-4 md:space-y-5">
+                <div>
+                  {carregandoGestores ? (
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                        Gestor *
+                      </label>
+                      <div className="w-full px-4 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 text-sm">
+                        Carregando gestores...
+                      </div>
+                    </div>
+                  ) : (
+                    <Controller
+                      name="idGestor"
+                      control={controlAssociarGestor}
+                      rules={{ required: 'Selecione um gestor' }}
+                      render={({ field }) => {
+                        const nomesGestores = gestoresDisponiveis.map(gestor => gestor.nomeUsuario)
+                        const nomeSelecionado = gestoresDisponiveis.find(
+                          gestor => gestor.idUsuario.toString() === field.value
+                        )?.nomeUsuario || ''
+                        
+                        return (
+                          <ListaSelecao
+                            options={nomesGestores}
+                            value={nomeSelecionado}
+                            onChange={(nomeSelecionado) => {
+                              const gestorSelecionado = gestoresDisponiveis.find(
+                                gestor => gestor.nomeUsuario === nomeSelecionado
+                              )
+                              field.onChange(gestorSelecionado?.idUsuario.toString() || '')
+                            }}
+                            placeholder="Selecione um gestor"
+                            label="Gestor *"
+                            required
+                            id="gestor-departamento"
+                          />
+                        )
+                      }}
+                    />
+                  )}
+                  {errorsAssociarGestor.idGestor && (
+                    <p className="mt-1 text-xs text-red-600 dark:text-red-400">
+                      {errorsAssociarGestor.idGestor.message}
+                    </p>
+                  )}
+                </div>
+              </form>
+            </div>
+            
+            <div className="p-4 sm:p-5 md:p-6 pt-3 sm:pt-4 md:pt-5 border-t border-gray-200 dark:border-gray-700 flex-shrink-0">
+              <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-3 md:gap-4">
+                <Botao
+                  type="button"
+                  variant="secondary"
+                  size="md"
+                  className="flex-1 w-full sm:w-auto"
+                  disabled={carregandoAssociacao}
+                  onClick={() => {
+                    if (!carregandoAssociacao) {
+                      setMostrarModalAssociarGestor(false)
+                      setDepartamentoSelecionado(null)
+                      resetAssociarGestor()
+                      setErro('')
+                    }
+                  }}
+                >
+                  Cancelar
+                </Botao>
+                <Botao
+                  type="button"
+                  variant="primary"
+                  size="md"
+                  className="flex-1 w-full sm:w-auto"
+                  onClick={handleSubmitAssociarGestor(onSubmitAssociarGestor)}
+                  disabled={carregandoAssociacao || carregandoGestores}
+                >
+                  {carregandoAssociacao ? 'Associando...' : 'Associar'}
                 </Botao>
               </div>
             </div>
