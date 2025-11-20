@@ -107,11 +107,13 @@ const Cabecalho = ({ isHomeFree = false, isHomeAdmin = false, isHomeAdminEmp = f
                 >
                   Home
                 </Link>
-                <span
-                  className="text-sm lg:text-base font-semibold text-gray-400 dark:text-gray-500 px-3 lg:px-4 py-2 rounded-lg whitespace-nowrap cursor-not-allowed opacity-60"
+                <Link
+                  to="/admin-emp/gestores"
+                  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                  className="text-sm lg:text-base font-semibold text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors px-3 lg:px-4 py-2 rounded-lg hover:bg-indigo-50 dark:hover:bg-gray-800 whitespace-nowrap"
                 >
                   Gerenciar Gestores
-                </span>
+                </Link>
                 <span
                   className="text-sm lg:text-base font-semibold text-gray-400 dark:text-gray-500 px-3 lg:px-4 py-2 rounded-lg whitespace-nowrap cursor-not-allowed opacity-60"
                 >
@@ -485,11 +487,16 @@ const Cabecalho = ({ isHomeFree = false, isHomeAdmin = false, isHomeAdminEmp = f
               >
                 Home
               </Link>
-              <span
-                className="px-4 py-4 text-left text-gray-400 dark:text-gray-500 font-medium border-b-2 border-gray-200 dark:border-gray-700 cursor-not-allowed opacity-60"
+              <Link
+                to="/admin-emp/gestores"
+                onClick={() => {
+                  window.scrollTo({ top: 0, behavior: 'smooth' })
+                  setMenuAberto(false)
+                }}
+                className="px-4 py-4 text-left text-gray-700 dark:text-gray-300 hover:text-white hover:bg-indigo-600 dark:hover:bg-indigo-600 active:bg-indigo-700 active:text-white transition-all duration-200 font-medium border-b-2 border-gray-200 dark:border-gray-700"
               >
                 Gerenciar Gestores
-              </span>
+              </Link>
               <span
                 className="px-4 py-4 text-left text-gray-400 dark:text-gray-500 font-medium cursor-not-allowed opacity-60"
               >
