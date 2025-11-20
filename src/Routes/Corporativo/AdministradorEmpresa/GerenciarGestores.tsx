@@ -219,7 +219,6 @@ const GerenciarGestores = () => {
       const usuarioData: UsuarioData = {
         nomeUsuario: data.nomeUsuario.trim(),
         tipoUsuario: 'GESTOR',
-        areaAtuacao: null,
         nivelSenioridade: null,
         competencias: null,
         idEmpresa: idEmpresa
@@ -297,7 +296,6 @@ const GerenciarGestores = () => {
       const usuarioData: UsuarioData = {
         nomeUsuario: data.nomeUsuario.trim(),
         tipoUsuario: tipoUsuarioAtual,
-        areaAtuacao: gestorSelecionado.areaAtuacao || null,
         nivelSenioridade: gestorSelecionado.nivelSenioridade || null,
         competencias: gestorSelecionado.competencias || null,
         idEmpresa: gestorSelecionado.idEmpresa || null

@@ -113,8 +113,11 @@ const HomeAdministradorEmpresa = () => {
               </button>
 
               <button 
-                disabled
-                className="p-6 bg-white dark:bg-gray-800 rounded-lg border-2 border-gray-200 dark:border-gray-600 opacity-60 cursor-not-allowed transition-all duration-200 text-left"
+                onClick={() => {
+                  navigate('/admin-emp/departamentos')
+                  window.scrollTo({ top: 0, behavior: 'smooth' })
+                }}
+                className="p-6 bg-white dark:bg-gray-800 rounded-lg border-2 border-gray-200 dark:border-gray-600 hover:border-indigo-600 dark:hover:border-indigo-400 hover:shadow-lg transition-all duration-200 text-left"
               >
                 <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-2">
                   Gerenciar Departamentos

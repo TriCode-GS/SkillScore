@@ -17,7 +17,7 @@ export interface UsuarioApiResponse {
   nomeUsuario?: string
   tipoUsuario?: string
   idEmpresa?: number | null
-  areaAtuacao?: string | null
+  idDepartamento?: number | null
   nivelSenioridade?: string | null
   competencias?: string | null
 }
@@ -115,7 +115,6 @@ export async function cadastrarEmpresaCompleto(dados: CadastroEmpresaCompletoDat
   const usuarioDataInicial: UsuarioData = {
     nomeUsuario: dados.nomeAdministrador.trim(),
     tipoUsuario: 'ADMINISTRADOR EMP',
-    areaAtuacao: null,
     nivelSenioridade: null,
     competencias: null
   }
@@ -126,7 +125,6 @@ export async function cadastrarEmpresaCompleto(dados: CadastroEmpresaCompletoDat
     idEmpresa: empresaCriada.idEmpresa,
     nomeUsuario: dados.nomeAdministrador.trim(),
     tipoUsuario: 'ADMINISTRADOR EMP',
-    areaAtuacao: null,
     nivelSenioridade: null,
     competencias: null
   }

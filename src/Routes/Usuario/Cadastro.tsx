@@ -130,7 +130,7 @@ const Cadastro = () => {
         tipoUsuario: 'USUARIO',
         tipoLogin: 'USUARIO',
         idEmpresa: null,
-        areaAtuacao: null,
+        idDepartamento: null,
         competencias: null,
         nivelSenioridade: null
       }

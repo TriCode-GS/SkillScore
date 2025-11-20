@@ -7,9 +7,9 @@ export const getBaseUrl = () => {
 
 export type UsuarioData = {
   idEmpresa?: number | null
+  idDepartamento?: number | null
   nomeUsuario: string
   tipoUsuario: string
-  areaAtuacao?: string | null
   nivelSenioridade?: string | null
   competencias?: string | null
 }
@@ -42,7 +42,7 @@ export type CadastroCredentials = {
   tipoUsuario: string
   tipoLogin: string
   idEmpresa: number | null
-  areaAtuacao: string | null
+  idDepartamento: number | null
   competencias: string | null
   nivelSenioridade: string | null
 }
@@ -73,9 +73,9 @@ export interface LoginResponse {
 export type UsuarioResponse = {
   idUsuario: number
   idEmpresa: number | null
+  idDepartamento: number | null
   nomeUsuario: string
   tipoUsuario: string
-  areaAtuacao: string | null
   nivelSenioridade: string | null
   competencias: string | null
 }
@@ -248,9 +248,9 @@ export async function cadastrarUsuario(credentials: CadastroCredentials): Promis
   
   const usuarioData: UsuarioData = {
     idEmpresa: credentials.idEmpresa,
+    idDepartamento: credentials.idDepartamento,
     nomeUsuario: credentials.nomeUsuario.trim(),
     tipoUsuario: credentials.tipoUsuario.trim(),
-    areaAtuacao: credentials.areaAtuacao,
     nivelSenioridade: credentials.nivelSenioridade,
     competencias: credentials.competencias
   }

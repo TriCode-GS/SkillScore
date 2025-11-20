@@ -196,7 +196,6 @@ const GerenciarAdministradores = () => {
       const usuarioData: UsuarioData = {
         nomeUsuario: data.nomeUsuario.trim(),
         tipoUsuario: 'ADMINISTRADOR EMP',
-        areaAtuacao: null,
         nivelSenioridade: null,
         competencias: null,
         idEmpresa: null
@@ -274,7 +273,6 @@ const GerenciarAdministradores = () => {
       const usuarioData: UsuarioData = {
         nomeUsuario: data.nomeUsuario.trim(),
         tipoUsuario: tipoUsuarioAtual,
-        areaAtuacao: administradorSelecionado.areaAtuacao || null,
         nivelSenioridade: administradorSelecionado.nivelSenioridade || null,
         competencias: administradorSelecionado.competencias || null,
         idEmpresa: administradorSelecionado.idEmpresa || null
