@@ -23,6 +23,7 @@ interface GestorOption {
 
 interface DepartamentoComGestor extends DepartamentoResponse {
   nomeGestor?: string
+  idGestor?: number
 }
 
 const GerenciarDepartamentos = () => {
@@ -40,9 +41,12 @@ const GerenciarDepartamentos = () => {
   const [erro, setErro] = useState('')
   const [mostrarModalCadastro, setMostrarModalCadastro] = useState(false)
   const [mostrarModalAssociarGestor, setMostrarModalAssociarGestor] = useState(false)
+  const [mostrarModalDesvincularGestor, setMostrarModalDesvincularGestor] = useState(false)
   const [departamentoSelecionado, setDepartamentoSelecionado] = useState<DepartamentoResponse | null>(null)
+  const [gestorParaDesvincular, setGestorParaDesvincular] = useState<{ idUsuario: number; nomeUsuario: string; idDepartamento: number } | null>(null)
   const [gestoresDisponiveis, setGestoresDisponiveis] = useState<GestorOption[]>([])
   const [carregandoGestores, setCarregandoGestores] = useState(false)
+  const [carregandoDesvinculacao, setCarregandoDesvinculacao] = useState(false)
   const [idEmpresa, setIdEmpresa] = useState<number | null>(null)
 
   const { register: registerCadastro, handleSubmit: handleSubmitCadastro, reset: resetCadastro, formState: { errors: errorsCadastro } } = useForm<DepartamentoFormData>()
@@ -102,11 +106,12 @@ const GerenciarDepartamentos = () => {
             if (gestor) {
               return {
                 ...departamento,
-                nomeGestor: gestor.nomeUsuario || '-'
+                nomeGestor: gestor.nomeUsuario || '-',
+                idGestor: gestor.idUsuario || undefined
               }
             }
             
-            return { ...departamento, nomeGestor: undefined }
+            return { ...departamento, nomeGestor: undefined, idGestor: undefined }
           })
           
           setDepartamentos(departamentosComGestor)
@@ -163,6 +168,82 @@ const GerenciarDepartamentos = () => {
     setErro('')
     setMostrarModalAssociarGestor(true)
     carregarGestoresDisponiveis()
+  }
+
+  const abrirModalDesvincularGestor = (departamento: DepartamentoComGestor) => {
+    const idGestor = departamento.idGestor
+    const idDepartamento = departamento.idDepartamento
+    if (idGestor !== undefined && idDepartamento !== undefined && departamento.nomeGestor) {
+      setGestorParaDesvincular({
+        idUsuario: idGestor,
+        nomeUsuario: departamento.nomeGestor,
+        idDepartamento: idDepartamento
+      })
+      setErro('')
+      setMostrarModalDesvincularGestor(true)
+    }
+  }
+
+  const handleDesvincularGestor = async () => {
+    if (!gestorParaDesvincular) {
+      setErro('Erro ao identificar o gestor')
+      return
+    }
+
+    setErro('')
+    setCarregandoDesvinculacao(true)
+
+    try {
+      const baseUrl = getBaseUrl()
+      const urlString = `${baseUrl}/usuarios/${gestorParaDesvincular.idUsuario}/departamento`
+      
+      const res = await fetch(urlString, {
+        method: 'PUT',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ idDepartamento: null }),
+        mode: 'cors',
+      })
+
+      if (res.ok) {
+        setMostrarModalDesvincularGestor(false)
+        setGestorParaDesvincular(null)
+        setErro('')
+        if (idEmpresa) {
+          await carregarDepartamentos(idEmpresa)
+        }
+      } else {
+        let backendMessage: string | undefined
+
+        try {
+          const text = await res.text()
+          if (text && text.trim().length > 0) {
+            backendMessage = text.trim()
+          }
+        } catch (_) {}
+
+        if (!backendMessage) {
+          try {
+            const data = await res.clone().json() as unknown
+            if (typeof data === 'string') backendMessage = data
+            else if (data && typeof data === 'object') {
+              const anyData = data as { message?: string; error?: string; detalhe?: string }
+              backendMessage = anyData.message || anyData.error || anyData.detalhe
+            }
+          } catch (_) {}
+        }
+
+        const statusText = res.statusText || 'Erro'
+        const message = backendMessage || `Falha ao desvincular gestor (status ${res.status} ${statusText})`
+        setErro(message)
+      }
+    } catch (error) {
+      setErro(error instanceof Error ? error.message : 'Erro ao desvincular gestor')
+    } finally {
+      setCarregandoDesvinculacao(false)
+    }
   }
 
   const onSubmitAssociarGestor = async (data: AssociarGestorFormData) => {
@@ -385,9 +466,20 @@ const GerenciarDepartamentos = () => {
                             </td>
                             <td className="px-3 sm:px-4 md:px-5 lg:px-6 py-2.5 sm:py-3 md:py-3.5 lg:py-4 text-center hidden md:table-cell">
                               {departamento.nomeGestor ? (
-                                <span className="text-xs sm:text-sm md:text-base text-gray-600 dark:text-gray-400">
-                                  {departamento.nomeGestor}
-                                </span>
+                                <div className="flex items-center justify-center gap-2">
+                                  <span className="text-xs sm:text-sm md:text-base text-gray-600 dark:text-gray-400">
+                                    {departamento.nomeGestor}
+                                  </span>
+                                  <button
+                                    onClick={() => abrirModalDesvincularGestor(departamento)}
+                                    className="p-1 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
+                                    aria-label="Desvincular Gestor"
+                                  >
+                                    <svg className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                  </button>
+                                </div>
                               ) : (
                                 <button
                                   onClick={() => abrirModalAssociarGestor(departamento)}
@@ -404,7 +496,18 @@ const GerenciarDepartamentos = () => {
                               <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 space-y-1">
                                 <div>
                                   Gestor: {departamento.nomeGestor ? (
-                                    <span>{departamento.nomeGestor}</span>
+                                    <div className="flex items-center justify-center gap-2">
+                                      <span>{departamento.nomeGestor}</span>
+                                      <button
+                                        onClick={() => abrirModalDesvincularGestor(departamento)}
+                                        className="p-1 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
+                                        aria-label="Desvincular Gestor"
+                                      >
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                      </button>
+                                    </div>
                                   ) : (
                                     <button
                                       onClick={() => abrirModalAssociarGestor(departamento)}
@@ -641,6 +744,76 @@ const GerenciarDepartamentos = () => {
                   disabled={carregandoAssociacao || carregandoGestores}
                 >
                   {carregandoAssociacao ? 'Associando...' : 'Associar'}
+                </Botao>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {mostrarModalDesvincularGestor && gestorParaDesvincular && (
+        <div className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-3 sm:p-4 md:p-6">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md md:max-w-lg lg:max-w-xl w-full border-2 border-red-200 dark:border-red-800 m-2 sm:m-3 md:m-0">
+            <div className="p-4 sm:p-5 md:p-6">
+              <div className="flex justify-between items-center mb-4 sm:mb-5 md:mb-6">
+                <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white break-words pr-2">
+                  Desvincular Gestor
+                </h2>
+                <button
+                  onClick={() => {
+                    if (!carregandoDesvinculacao) {
+                      setMostrarModalDesvincularGestor(false)
+                      setGestorParaDesvincular(null)
+                      setErro('')
+                    }
+                  }}
+                  disabled={carregandoDesvinculacao}
+                  className={`text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors ${carregandoDesvinculacao ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              {erro && (
+                <div className="mb-4 sm:mb-5 md:mb-6 p-3 sm:p-4 md:p-5 bg-red-50 dark:bg-red-900/20 border-2 border-red-300 dark:border-red-700 rounded-lg">
+                  <p className="text-xs sm:text-sm md:text-base text-red-600 dark:text-red-400 font-semibold break-words">
+                    {erro}
+                  </p>
+                </div>
+              )}
+
+              <p className="text-xs sm:text-sm md:text-base lg:text-lg text-gray-600 dark:text-gray-400 mb-4 sm:mb-5 md:mb-6 break-words text-center">
+                Tem certeza que deseja desvincular o gestor <strong className="break-words text-gray-900 dark:text-white">{gestorParaDesvincular.nomeUsuario}</strong> deste departamento?
+              </p>
+
+              <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-3 md:gap-4">
+                <Botao
+                  type="button"
+                  variant="secondary"
+                  size="md"
+                  className="flex-1 w-full sm:w-auto"
+                  disabled={carregandoDesvinculacao}
+                  onClick={() => {
+                    if (!carregandoDesvinculacao) {
+                      setMostrarModalDesvincularGestor(false)
+                      setGestorParaDesvincular(null)
+                      setErro('')
+                    }
+                  }}
+                >
+                  Cancelar
+                </Botao>
+                <Botao
+                  type="button"
+                  variant="primary"
+                  size="md"
+                  className="flex-1 w-full sm:w-auto bg-red-600 hover:bg-red-700 dark:bg-red-600 dark:hover:bg-red-700"
+                  disabled={carregandoDesvinculacao}
+                  onClick={handleDesvincularGestor}
+                >
+                  {carregandoDesvinculacao ? 'Desvinculando...' : 'Desvincular'}
                 </Botao>
               </div>
             </div>
