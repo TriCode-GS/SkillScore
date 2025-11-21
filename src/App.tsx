@@ -15,6 +15,7 @@ import HomeAdmin from './Routes/Admin/HomeAdmin'
 import GerenciarEmpresas from './Routes/Admin/GerenciarEmpresas'
 import GerenciarAdministradores from './Routes/Admin/GerenciarAdministradores'
 import GerenciarCursos from './Routes/Admin/GerenciarCursos'
+import GerenciarTrilhas from './Routes/Admin/GerenciarTrilhas'
 import LoginCorporativo from './Routes/Corporativo/LoginCorporativo'
 import HomeAdministradorEmpresa from './Routes/Corporativo/AdministradorEmpresa/HomeAdministradorEmpresa'
 import GerenciarGestores from './Routes/Corporativo/AdministradorEmpresa/GerenciarGestores'
@@ -47,6 +48,7 @@ function App() {
           <Route path="/admin/administradores" element={<GerenciarAdministradores />} />
           <Route path="/admin/administradores/:id" element={<GerenciarAdministradores />} />
           <Route path="/admin/cursos" element={<GerenciarCursos />} />
+          <Route path="/admin/trilhas" element={<GerenciarTrilhas />} />
           <Route path="/admin-emp/home" element={<HomeAdministradorEmpresa />} />
           <Route path="/admin-emp/gestores" element={<GerenciarGestores />} />
           <Route path="/admin-emp/departamentos" element={<GerenciarDepartamentos />} />

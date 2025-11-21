@@ -103,6 +103,18 @@ const HomeAdmin = () => {
                 </p>
               </button>
 
+              <button 
+                onClick={() => handleNavigate('/admin/trilhas')}
+                className="p-6 bg-white dark:bg-gray-800 rounded-lg border-2 border-gray-200 dark:border-gray-600 hover:border-indigo-400 dark:hover:border-indigo-600 hover:shadow-lg transition-all duration-200 text-left"
+              >
+                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                  Gerenciar Trilhas
+                </h3>
+                <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
+                  Cadastre e gerencie trilhas da plataforma
+                </p>
+              </button>
+
             </div>
           </div>
         </section>
