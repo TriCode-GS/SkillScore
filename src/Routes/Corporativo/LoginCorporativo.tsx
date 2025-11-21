@@ -392,7 +392,7 @@ const LoginCorporativo = () => {
           login(userData)
           
           setTimeout(() => {
-            navigate('/integrantes')
+            navigate('/gestor/home')
             window.scrollTo({ top: 0, behavior: 'smooth' })
           }, 200)
         }
