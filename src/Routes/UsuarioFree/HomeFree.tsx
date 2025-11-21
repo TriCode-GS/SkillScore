@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../Contexto/AutenticacaoContexto'
 import Cabecalho from '../../Components/Cabecalho/Cabecalho'
+import Rodape from '../../Components/Rodape/Rodape'
 import { buscarUsuarioPorId } from '../../Types/AutenticacaoLogin'
 
 const HomeFree = () => {
@@ -89,10 +90,10 @@ const HomeFree = () => {
               </h1>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+            <div className="flex justify-center">
               <button 
                 onClick={() => handleNavigate('/trilhas')}
-                className="p-6 bg-white dark:bg-gray-800 rounded-lg border-2 border-gray-200 dark:border-gray-600 hover:border-indigo-400 dark:hover:border-indigo-600 hover:shadow-lg transition-all duration-200 text-left"
+                className="p-6 bg-white dark:bg-gray-800 rounded-lg border-2 border-gray-200 dark:border-gray-600 hover:border-indigo-400 dark:hover:border-indigo-600 hover:shadow-lg transition-all duration-200 text-left max-w-md w-full"
               >
                 <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-2">
                   Minhas Trilhas
@@ -101,37 +102,17 @@ const HomeFree = () => {
                   Acesse suas trilhas de aprendizado
                 </p>
               </button>
-
-              <button className="p-6 bg-white dark:bg-gray-800 rounded-lg border-2 border-gray-200 dark:border-gray-600 hover:border-indigo-400 dark:hover:border-indigo-600 hover:shadow-lg transition-all duration-200 text-left">
-                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                  Meu Progresso
-                </h3>
-                <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
-                  Visualize seu progresso e conquistas
-                </p>
-              </button>
-
-              <button className="p-6 bg-white dark:bg-gray-800 rounded-lg border-2 border-gray-200 dark:border-gray-600 hover:border-indigo-400 dark:hover:border-indigo-600 hover:shadow-lg transition-all duration-200 text-left">
-                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                  Perfil
-                </h3>
-                <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
-                  Gerencie suas informações pessoais
-                </p>
-              </button>
-
-              <button className="p-6 bg-white dark:bg-gray-800 rounded-lg border-2 border-gray-200 dark:border-gray-600 hover:border-indigo-400 dark:hover:border-indigo-600 hover:shadow-lg transition-all duration-200 text-left">
-                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                  Configurações
-                </h3>
-                <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
-                  Ajuste suas preferências
-                </p>
-              </button>
             </div>
           </div>
         </section>
       </main>
+      <Rodape
+        linksRapidos={[
+          { label: 'Home', path: '/home-free', onClick: () => handleNavigate('/home-free') },
+          { label: 'Minhas Trilhas', path: '/trilhas', onClick: () => handleNavigate('/trilhas') }
+        ]}
+        onLinkClick={(path) => handleNavigate(path)}
+      />
     </div>
   )
 }

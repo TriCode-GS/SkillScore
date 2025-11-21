@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../../Contexto/AutenticacaoContexto'
 import { buscarUsuarioPorId } from '../../../Types/AutenticacaoLogin'
 import Cabecalho from '../../../Components/Cabecalho/Cabecalho'
+import Rodape from '../../../Components/Rodape/Rodape'
 
 const HomeFuncionario = () => {
   const navigate = useNavigate()
@@ -148,6 +149,12 @@ const HomeFuncionario = () => {
           </div>
         </section>
       </main>
+      <Rodape
+        linksRapidos={[
+          { label: 'Home', path: '/funcionario/home', onClick: () => { navigate('/funcionario/home'); window.scrollTo({ top: 0, behavior: 'smooth' }) } }
+        ]}
+        onLinkClick={(path) => { navigate(path); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
+      />
     </div>
   )
 }

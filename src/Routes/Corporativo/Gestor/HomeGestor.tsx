@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../../Contexto/AutenticacaoContexto'
 import { buscarUsuarioPorId } from '../../../Types/AutenticacaoLogin'
 import Cabecalho from '../../../Components/Cabecalho/Cabecalho'
+import Rodape from '../../../Components/Rodape/Rodape'
 
 const HomeGestor = () => {
   const navigate = useNavigate()
@@ -129,6 +130,13 @@ const HomeGestor = () => {
           </div>
         </section>
       </main>
+      <Rodape
+        linksRapidos={[
+          { label: 'Home', path: '/gestor/home', onClick: () => handleNavigate('/gestor/home') },
+          { label: 'Gerenciar Funcionários', path: '/gestor/funcionarios', onClick: () => handleNavigate('/gestor/funcionarios') }
+        ]}
+        onLinkClick={(path) => handleNavigate(path)}
+      />
     </div>
   )
 }

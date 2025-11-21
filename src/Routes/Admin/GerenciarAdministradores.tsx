@@ -361,8 +361,8 @@ const GerenciarAdministradores = () => {
     <div className="min-h-screen flex flex-col">
       <Cabecalho isHomeAdmin={true} onLogout={handleLogout} />
       <main className="flex-grow bg-gray-50 dark:bg-gray-900 py-8 sm:py-12 md:py-16">
-        <section className="container mx-auto px-4 sm:px-6 md:px-8 relative">
-          <div className="max-w-6xl mx-auto">
+        <section className="container mx-auto px-2 sm:px-3 md:px-4 relative">
+          <div className="max-w-full mx-auto">
             <div className="mb-4 sm:mb-5 md:mb-6 lg:mb-8">
               <div className="flex justify-end mb-3 md:hidden">
                 <button
@@ -438,7 +438,7 @@ const GerenciarAdministradores = () => {
               </div>
             ) : (
               <div className="bg-white dark:bg-gray-800 rounded-lg border-2 border-gray-200 dark:border-gray-700 overflow-hidden">
-                <div className="overflow-x-auto -mx-4 sm:mx-0">
+                <div className="overflow-x-auto -mx-2 sm:-mx-3 md:-mx-4">
                   <div className="inline-block min-w-full align-middle">
                     <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                       <thead className="bg-gray-50 dark:bg-gray-700">
@@ -462,7 +462,7 @@ const GerenciarAdministradores = () => {
                               </div>
                             </td>
                             <td className="px-3 sm:px-4 md:px-5 lg:px-6 py-2.5 sm:py-3 md:py-3.5 lg:py-4 text-center">
-                              <div className="flex flex-col sm:flex-row justify-center gap-1.5 sm:gap-2 md:gap-2.5">
+                              <div className="flex flex-row justify-center items-center gap-1.5 sm:gap-2 md:gap-2.5">
                                 <button
                                   onClick={() => abrirModalEdicao(administrador)}
                                   className="p-2 sm:p-2.5 md:p-3 text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-colors"
