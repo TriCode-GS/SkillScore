@@ -19,6 +19,7 @@ import HomeAdministradorEmpresa from './Routes/Corporativo/AdministradorEmpresa/
 import GerenciarGestores from './Routes/Corporativo/AdministradorEmpresa/GerenciarGestores'
 import GerenciarDepartamentos from './Routes/Corporativo/AdministradorEmpresa/GerenciarDepartamentos'
 import HomeGestor from './Routes/Corporativo/Gestor/HomeGestor'
+import GerenciarFuncionarios from './Routes/Corporativo/Gestor/GerenciarFuncionarios'
 
 function App() {
   return (
@@ -47,6 +48,7 @@ function App() {
           <Route path="/admin-emp/gestores" element={<GerenciarGestores />} />
           <Route path="/admin-emp/departamentos" element={<GerenciarDepartamentos />} />
           <Route path="/gestor/home" element={<HomeGestor />} />
+          <Route path="/gestor/funcionarios" element={<GerenciarFuncionarios />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AuthProvider>

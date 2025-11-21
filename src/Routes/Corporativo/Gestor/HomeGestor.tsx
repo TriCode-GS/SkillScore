@@ -9,6 +9,11 @@ const HomeGestor = () => {
   const { user, logout, isAuthenticated } = useAuth()
   const [nomeGestor, setNomeGestor] = useState<string>('')
 
+  const handleNavigate = (path: string) => {
+    navigate(path)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
   useEffect(() => {
     const timer = setTimeout(() => {
       if (!isAuthenticated) {
@@ -98,8 +103,8 @@ const HomeGestor = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
               <button 
-                disabled
-                className="p-6 bg-white dark:bg-gray-800 rounded-lg border-2 border-gray-200 dark:border-gray-600 opacity-60 cursor-not-allowed transition-all duration-200 text-left"
+                onClick={() => handleNavigate('/gestor/funcionarios')}
+                className="p-6 bg-white dark:bg-gray-800 rounded-lg border-2 border-indigo-200 dark:border-indigo-800 hover:border-indigo-400 dark:hover:border-indigo-600 transition-all duration-200 text-left hover:shadow-lg"
               >
                 <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-2">
                   Gerenciar Funcionários
