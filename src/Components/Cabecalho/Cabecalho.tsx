@@ -212,7 +212,7 @@ const Cabecalho = ({ isHomeFree = false, isHomeAdmin = false, isHomeAdminEmp = f
                   </Botao>
                 )}
               </div>
-              <div className="hidden lg:flex items-center gap-3 lg:gap-4">
+              <div className="hidden xl:flex items-center gap-3 lg:gap-4">
                 <Link
                   to="/login"
                   onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
@@ -259,10 +259,24 @@ const Cabecalho = ({ isHomeFree = false, isHomeAdmin = false, isHomeAdminEmp = f
                 >
                   Gerenciar Empresas
                 </Link>
+                <Link
+                  to="/admin/cursos"
+                  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                  className="text-sm lg:text-base font-semibold text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors px-3 lg:px-4 py-2 rounded-lg hover:bg-indigo-50 dark:hover:bg-gray-800 whitespace-nowrap"
+                >
+                  Gerenciar Cursos
+                </Link>
+                <Link
+                  to="/admin/trilhas"
+                  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                  className="text-sm lg:text-base font-semibold text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors px-3 lg:px-4 py-2 rounded-lg hover:bg-indigo-50 dark:hover:bg-gray-800 whitespace-nowrap"
+                >
+                  Gerenciar Trilhas
+                </Link>
               </div>
               <button
                 onClick={() => setMenuAberto(!menuAberto)}
-                className="lg:hidden text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors p-2 rounded-lg hover:bg-indigo-50 dark:hover:bg-gray-800"
+                className="xl:hidden text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors p-2 rounded-lg hover:bg-indigo-50 dark:hover:bg-gray-800"
                 aria-label="Menu"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -598,7 +612,7 @@ const Cabecalho = ({ isHomeFree = false, isHomeAdmin = false, isHomeAdminEmp = f
           </div>
         )}
         {menuAberto && isHomeAdmin && (
-          <div className="lg:hidden mt-4 border-t-2 border-gray-300 dark:border-gray-700 pt-4">
+          <div className="xl:hidden mt-4 border-t-2 border-gray-300 dark:border-gray-700 pt-4">
             <div className="flex flex-col bg-white dark:bg-gray-800 rounded-lg shadow-xl border-2 border-gray-200 dark:border-gray-700 overflow-hidden">
               <Link
                 to="/login"
@@ -657,9 +671,29 @@ const Cabecalho = ({ isHomeFree = false, isHomeAdmin = false, isHomeAdminEmp = f
                   window.scrollTo({ top: 0, behavior: 'smooth' })
                   setMenuAberto(false)
                 }}
-                className="px-4 py-4 text-left text-gray-700 dark:text-gray-300 hover:text-white hover:bg-indigo-600 dark:hover:bg-indigo-600 active:bg-indigo-700 active:text-white transition-all duration-200 font-medium"
+                className="px-4 py-4 text-left text-gray-700 dark:text-gray-300 hover:text-white hover:bg-indigo-600 dark:hover:bg-indigo-600 active:bg-indigo-700 active:text-white transition-all duration-200 font-medium border-b-2 border-gray-200 dark:border-gray-700"
               >
                 Gerenciar Empresas
+              </Link>
+              <Link
+                to="/admin/cursos"
+                onClick={() => {
+                  window.scrollTo({ top: 0, behavior: 'smooth' })
+                  setMenuAberto(false)
+                }}
+                className="px-4 py-4 text-left text-gray-700 dark:text-gray-300 hover:text-white hover:bg-indigo-600 dark:hover:bg-indigo-600 active:bg-indigo-700 active:text-white transition-all duration-200 font-medium border-b-2 border-gray-200 dark:border-gray-700"
+              >
+                Gerenciar Cursos
+              </Link>
+              <Link
+                to="/admin/trilhas"
+                onClick={() => {
+                  window.scrollTo({ top: 0, behavior: 'smooth' })
+                  setMenuAberto(false)
+                }}
+                className="px-4 py-4 text-left text-gray-700 dark:text-gray-300 hover:text-white hover:bg-indigo-600 dark:hover:bg-indigo-600 active:bg-indigo-700 active:text-white transition-all duration-200 font-medium"
+              >
+                Gerenciar Trilhas
               </Link>
             </div>
           </div>

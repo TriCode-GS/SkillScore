@@ -5,6 +5,7 @@ import { useAuth } from '../../Contexto/AutenticacaoContexto'
 import Cabecalho from '../../Components/Cabecalho/Cabecalho'
 import Botao from '../../Components/Botao/Botao'
 import ListaSelecao from '../../Components/ListaSelecao/ListaSelecao'
+import Rodape from '../../Components/Rodape/Rodape'
 import { listarEmpresas, cadastrarEmpresa, editarEmpresa, excluirEmpresa, type EmpresaData, type UsuarioApiResponse } from '../../Types/Empresa'
 import { atualizarUsuario, getBaseUrl, type UsuarioData } from '../../Types/AutenticacaoLogin'
 
@@ -186,7 +187,6 @@ const GerenciarEmpresas = () => {
             idEmpresa: empresaSelecionada.idEmpresa,
             nomeUsuario: administrador.nomeUsuario || '',
             tipoUsuario: administrador.tipoUsuario || 'ADMINISTRADOR EMP',
-            areaAtuacao: administrador.areaAtuacao || null,
             nivelSenioridade: administrador.nivelSenioridade || null,
             competencias: administrador.competencias || null
           }
@@ -962,6 +962,16 @@ const GerenciarEmpresas = () => {
           </div>
         </div>
       )}
+      <Rodape
+        linksRapidos={[
+          { label: 'Home', path: '/admin/home', onClick: () => handleNavigate('/admin/home') },
+          { label: 'Gerenciar Administradores', path: '/admin/administradores', onClick: () => handleNavigate('/admin/administradores') },
+          { label: 'Gerenciar Empresas', path: '/admin/empresas', onClick: () => handleNavigate('/admin/empresas') },
+          { label: 'Gerenciar Cursos', path: '/admin/cursos', onClick: () => handleNavigate('/admin/cursos') },
+          { label: 'Gerenciar Trilhas', path: '/admin/trilhas', onClick: () => handleNavigate('/admin/trilhas') }
+        ]}
+        onLinkClick={(path) => handleNavigate(path)}
+      />
     </div>
   )
 }

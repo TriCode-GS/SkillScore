@@ -1,8 +1,39 @@
 import { Link } from 'react-router-dom'
 
-const Rodape = () => {
+interface LinkRapido {
+  label: string
+  path: string
+  onClick?: () => void
+}
+
+interface RodapeProps {
+  linksRapidos?: LinkRapido[]
+  onLinkClick?: (path: string) => void
+}
+
+const Rodape = ({ linksRapidos, onLinkClick }: RodapeProps) => {
   const handleLinkClick = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const linksPadrao: LinkRapido[] = [
+    { label: 'Home', path: '/' },
+    { label: 'Sobre', path: '/sobre' },
+    { label: 'Integrantes', path: '/integrantes' },
+    { label: 'FAQ', path: '/faq' },
+    { label: 'Contato', path: '/contato' }
+  ]
+
+  const linksParaUsar = linksRapidos || linksPadrao
+
+  const handleLink = (link: LinkRapido) => {
+    if (link.onClick) {
+      link.onClick()
+    } else if (onLinkClick) {
+      onLinkClick(link.path)
+    } else {
+      handleLinkClick()
+    }
   }
 
   return (
@@ -21,51 +52,26 @@ const Rodape = () => {
           <div>
             <h4 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Links Rápidos</h4>
             <ul className="space-y-2">
-              <li>
-                <Link 
-                  to="/" 
-                  onClick={handleLinkClick}
-                  className="text-gray-400 dark:text-gray-600 hover:text-indigo-400 dark:hover:text-indigo-600 transition-colors"
-                >
-                  Home
-                </Link>
-              </li>
-              <li>
-                <Link 
-                  to="/sobre" 
-                  onClick={handleLinkClick}
-                  className="text-gray-400 dark:text-gray-600 hover:text-indigo-400 dark:hover:text-indigo-600 transition-colors"
-                >
-                  Sobre
-                </Link>
-              </li>
-              <li>
-                <Link 
-                  to="/integrantes" 
-                  onClick={handleLinkClick}
-                  className="text-gray-400 dark:text-gray-600 hover:text-indigo-400 dark:hover:text-indigo-600 transition-colors"
-                >
-                  Integrantes
-                </Link>
-              </li>
-              <li>
-                <Link 
-                  to="/faq" 
-                  onClick={handleLinkClick}
-                  className="text-gray-400 dark:text-gray-600 hover:text-indigo-400 dark:hover:text-indigo-600 transition-colors"
-                >
-                  FAQ
-                </Link>
-              </li>
-              <li>
-                <Link 
-                  to="/contato" 
-                  onClick={handleLinkClick}
-                  className="text-gray-400 dark:text-gray-600 hover:text-indigo-400 dark:hover:text-indigo-600 transition-colors"
-                >
-                  Contato
-                </Link>
-              </li>
+              {linksParaUsar.map((link, index) => (
+                <li key={index}>
+                  {onLinkClick || link.onClick ? (
+                    <button
+                      onClick={() => handleLink(link)}
+                      className="text-gray-400 dark:text-gray-600 hover:text-indigo-400 dark:hover:text-indigo-600 transition-colors text-left"
+                    >
+                      {link.label}
+                    </button>
+                  ) : (
+                    <Link 
+                      to={link.path} 
+                      onClick={handleLinkClick}
+                      className="text-gray-400 dark:text-gray-600 hover:text-indigo-400 dark:hover:text-indigo-600 transition-colors"
+                    >
+                      {link.label}
+                    </Link>
+                  )}
+                </li>
+              ))}
             </ul>
           </div>
           
@@ -83,13 +89,22 @@ const Rodape = () => {
           
           <div>
             <h4 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Contato</h4>
-            <Link
-              to="/contato"
-              onClick={handleLinkClick}
-              className="text-sm sm:text-base text-gray-400 dark:text-gray-600 hover:text-indigo-400 dark:hover:text-indigo-600 transition-colors cursor-pointer"
-            >
-              Entre em contato conosco para mais informações sobre nossos planos e serviços.
-            </Link>
+            {onLinkClick ? (
+              <button
+                onClick={() => onLinkClick('/contato')}
+                className="text-sm sm:text-base text-gray-400 dark:text-gray-600 hover:text-indigo-400 dark:hover:text-indigo-600 transition-colors cursor-pointer text-left"
+              >
+                Entre em contato conosco para mais informações sobre nossos planos e serviços.
+              </button>
+            ) : (
+              <Link
+                to="/contato"
+                onClick={handleLinkClick}
+                className="text-sm sm:text-base text-gray-400 dark:text-gray-600 hover:text-indigo-400 dark:hover:text-indigo-600 transition-colors cursor-pointer"
+              >
+                Entre em contato conosco para mais informações sobre nossos planos e serviços.
+              </Link>
+            )}
           </div>
         </div>
         
