@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../../Contexto/AutenticacaoContexto'
 import Cabecalho from '../../../Components/Cabecalho/Cabecalho'
 import Botao from '../../../Components/Botao/Botao'
-import { criarUsuario, listarUsuarios, criarLogin, buscarUsuarioPorId, atualizarUsuario, atualizarLogin, type UsuarioResponse, type LoginData, type UsuarioData, type LoginApiResponse, type LoginUpdateData, getBaseUrl } from '../../../Types/AutenticacaoLogin'
+import { criarUsuario, listarUsuarios, criarLogin, buscarUsuarioPorId, atualizarUsuario, atualizarLogin, excluirUsuario, excluirLogin, type UsuarioResponse, type LoginData, type UsuarioData, type LoginApiResponse, type LoginUpdateData, getBaseUrl } from '../../../Types/AutenticacaoLogin'
 
 interface FuncionarioFormData {
   nomeUsuario: string
@@ -34,11 +34,13 @@ const GerenciarFuncionarios = () => {
   const [carregando, setCarregando] = useState(false)
   const [carregandoCadastro, setCarregandoCadastro] = useState(false)
   const [carregandoEdicao, setCarregandoEdicao] = useState(false)
+  const [carregandoExclusao, setCarregandoExclusao] = useState(false)
   const [erro, setErro] = useState('')
   const [erroSenha, setErroSenha] = useState(false)
   const [erroValidacoesSenha, setErroValidacoesSenha] = useState(false)
   const [mostrarModalCadastro, setMostrarModalCadastro] = useState(false)
   const [mostrarModalEdicao, setMostrarModalEdicao] = useState(false)
+  const [mostrarModalExclusao, setMostrarModalExclusao] = useState(false)
   const [funcionarioSelecionado, setFuncionarioSelecionado] = useState<UsuarioResponse & { email?: string; idLogin?: number } | null>(null)
   const [idDepartamentoGestor, setIdDepartamentoGestor] = useState<number | null>(null)
 
@@ -354,6 +356,35 @@ const GerenciarFuncionarios = () => {
     }
   }
 
+  const abrirModalExclusao = (funcionario: UsuarioResponse & { email?: string; idLogin?: number }) => {
+    setFuncionarioSelecionado(funcionario)
+    setMostrarModalExclusao(true)
+  }
+
+  const handleExcluir = async () => {
+    if (!funcionarioSelecionado) return
+    
+    setErro('')
+    setCarregandoExclusao(true)
+    
+    try {
+      if (funcionarioSelecionado.idLogin) {
+        await excluirLogin(funcionarioSelecionado.idLogin)
+      }
+      
+      await excluirUsuario(funcionarioSelecionado.idUsuario)
+      setMostrarModalExclusao(false)
+      setFuncionarioSelecionado(null)
+      setErro('')
+      await carregarFuncionarios()
+    } catch (error) {
+      const mensagemErro = error instanceof Error ? error.message : 'Erro ao excluir funcionário'
+      setErro(mensagemErro)
+    } finally {
+      setCarregandoExclusao(false)
+    }
+  }
+
   const handleLogout = () => {
     logout()
     navigate('/login-corporativo')
@@ -497,6 +528,15 @@ const GerenciarFuncionarios = () => {
                                 >
                                   <svg className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                  </svg>
+                                </button>
+                                <button
+                                  onClick={() => abrirModalExclusao(funcionario)}
+                                  className="p-2 sm:p-2.5 md:p-3 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
+                                  aria-label="Excluir"
+                                >
+                                  <svg className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                   </svg>
                                 </button>
                               </div>
@@ -1143,6 +1183,67 @@ const GerenciarFuncionarios = () => {
                   onClick={handleSubmitEdicao(onSubmitEdicao)}
                 >
                   {carregandoEdicao ? 'Salvando...' : 'Salvar'}
+                </Botao>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {mostrarModalExclusao && funcionarioSelecionado && (
+        <div className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-3 sm:p-4 md:p-6">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md md:max-w-lg lg:max-w-xl w-full border-2 border-red-200 dark:border-red-800 m-2 sm:m-3 md:m-0">
+            <div className="p-4 sm:p-5 md:p-6">
+              <div className="flex justify-between items-center mb-4 sm:mb-5 md:mb-6">
+                <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white break-words pr-2">
+                  Excluir Funcionário
+                </h2>
+                <button
+                  onClick={() => {
+                    if (!carregandoExclusao) {
+                      setMostrarModalExclusao(false)
+                      setFuncionarioSelecionado(null)
+                    }
+                  }}
+                  disabled={carregandoExclusao}
+                  className={`text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors ${carregandoExclusao ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <p className="text-xs sm:text-sm md:text-base lg:text-lg text-gray-600 dark:text-gray-400 mb-4 sm:mb-5 md:mb-6 break-words text-center">
+                Tem certeza que deseja excluir o funcionário <strong className="break-words text-gray-900 dark:text-white">{funcionarioSelecionado.nomeUsuario}</strong>?
+                Esta ação não pode ser desfeita.
+              </p>
+
+              <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-3 md:gap-4">
+                <Botao
+                  type="button"
+                  variant="secondary"
+                  size="md"
+                  className="flex-1 w-full sm:w-auto"
+                  disabled={carregandoExclusao}
+                  onClick={() => {
+                    if (!carregandoExclusao) {
+                      setMostrarModalExclusao(false)
+                      setFuncionarioSelecionado(null)
+                    }
+                  }}
+                >
+                  Cancelar
+                </Botao>
+                <Botao
+                  type="button"
+                  variant="primary"
+                  size="md"
+                  className="flex-1 w-full sm:w-auto bg-red-600 hover:bg-red-700 dark:bg-red-600 dark:hover:bg-red-700"
+                  disabled={carregandoExclusao}
+                  onClick={handleExcluir}
+                >
+                  {carregandoExclusao ? 'Deletando...' : 'Deletar'}
                 </Botao>
               </div>
             </div>
