@@ -144,15 +144,15 @@ const LoginCorporativo = () => {
     }
 
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 sm:p-8 border-2 border-indigo-200 dark:border-indigo-800">
-        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2 sm:mb-4 text-center">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 sm:p-6 md:p-8 border-2 border-indigo-200 dark:border-indigo-800">
+        <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-2 sm:mb-3 md:mb-4 text-center break-words px-2">
           Administrador da Empresa
         </h1>
-        <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-6 sm:mb-8 text-center">
+        <p className="text-xs sm:text-sm md:text-base text-gray-600 dark:text-gray-400 mb-4 sm:mb-6 md:mb-8 text-center px-2">
           Acesso completo ao painel administrativo
         </p>
         
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-3 sm:space-y-4 md:space-y-6">
           {erro && (
             <div className="p-3 sm:p-4 bg-red-50 dark:bg-red-900/20 border-2 border-red-300 dark:border-red-700 rounded-lg">
               <p className="text-sm text-red-600 dark:text-red-400 font-semibold break-words">
@@ -399,15 +399,15 @@ const LoginCorporativo = () => {
     }
 
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 sm:p-8 border-2 border-indigo-200 dark:border-indigo-800">
-        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2 sm:mb-4 text-center">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 sm:p-6 md:p-8 border-2 border-indigo-200 dark:border-indigo-800">
+        <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-2 sm:mb-3 md:mb-4 text-center break-words px-2">
           Gestor
         </h1>
-        <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-6 sm:mb-8 text-center">
+        <p className="text-xs sm:text-sm md:text-base text-gray-600 dark:text-gray-400 mb-4 sm:mb-6 md:mb-8 text-center px-2">
           Acesso ao painel de gestão do departamento
         </p>
         
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-3 sm:space-y-4 md:space-y-6">
           {erro && (
             <div className="p-3 sm:p-4 bg-red-50 dark:bg-red-900/20 border-2 border-red-300 dark:border-red-700 rounded-lg">
               <p className="text-sm text-red-600 dark:text-red-400 font-semibold break-words">
@@ -581,7 +581,7 @@ const LoginCorporativo = () => {
           login(userData)
           
           setTimeout(() => {
-            navigate('/integrantes')
+            navigate('/funcionario/home')
             window.scrollTo({ top: 0, behavior: 'smooth' })
           }, 200)
         }
@@ -594,15 +594,15 @@ const LoginCorporativo = () => {
     }
 
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 sm:p-8 border-2 border-indigo-200 dark:border-indigo-800">
-        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2 sm:mb-4 text-center">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 sm:p-6 md:p-8 border-2 border-indigo-200 dark:border-indigo-800">
+        <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-2 sm:mb-3 md:mb-4 text-center break-words px-2">
           Funcionário
         </h1>
-        <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-6 sm:mb-8 text-center">
+        <p className="text-xs sm:text-sm md:text-base text-gray-600 dark:text-gray-400 mb-4 sm:mb-6 md:mb-8 text-center px-2">
           Acesso à plataforma de desenvolvimento
         </p>
         
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-3 sm:space-y-4 md:space-y-6">
           {erro && (
             <div className="p-3 sm:p-4 bg-red-50 dark:bg-red-900/20 border-2 border-red-300 dark:border-red-700 rounded-lg">
               <p className="text-sm text-red-600 dark:text-red-400 font-semibold break-words">
@@ -687,47 +687,47 @@ const LoginCorporativo = () => {
   }
 
   const renderMenuSelecao = () => (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 sm:p-8 border-2 border-indigo-200 dark:border-indigo-800">
-      <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2 sm:mb-4 text-center">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 sm:p-6 md:p-8 border-2 border-indigo-200 dark:border-indigo-800">
+      <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-2 sm:mb-3 md:mb-4 text-center break-words px-2">
         Login Corporativo
       </h1>
-      <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-6 sm:mb-8 text-center">
+      <p className="text-xs sm:text-sm md:text-base text-gray-600 dark:text-gray-400 mb-4 sm:mb-6 md:mb-8 text-center px-2">
         Selecione o tipo de acesso
       </p>
       
-      <div className="space-y-3 sm:space-y-4">
+      <div className="space-y-2.5 sm:space-y-3 md:space-y-4">
         <button
           onClick={() => setTipoLogin('admin')}
-          className="w-full px-4 py-3 sm:py-4 text-left bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-600 transition-all duration-200"
+          className="w-full px-3 sm:px-4 py-2.5 sm:py-3 md:py-4 text-left bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-600 transition-all duration-200"
         >
-          <div className="font-semibold text-indigo-700 dark:text-indigo-300 text-sm sm:text-base mb-1">
+          <div className="font-semibold text-indigo-700 dark:text-indigo-300 text-xs sm:text-sm md:text-base mb-1 break-words">
             Administrador da Empresa
           </div>
-          <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+          <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 break-words">
             Acesso completo ao painel administrativo
           </div>
         </button>
         
         <button
           onClick={() => setTipoLogin('gestor')}
-          className="w-full px-4 py-3 sm:py-4 text-left bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-600 transition-all duration-200"
+          className="w-full px-3 sm:px-4 py-2.5 sm:py-3 md:py-4 text-left bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-600 transition-all duration-200"
         >
-          <div className="font-semibold text-indigo-700 dark:text-indigo-300 text-sm sm:text-base mb-1">
+          <div className="font-semibold text-indigo-700 dark:text-indigo-300 text-xs sm:text-sm md:text-base mb-1 break-words">
             Gestor
           </div>
-          <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+          <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 break-words">
             Acesso ao painel de gestão do departamento
           </div>
         </button>
         
         <button
           onClick={() => setTipoLogin('funcionario')}
-          className="w-full px-4 py-3 sm:py-4 text-left bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-600 transition-all duration-200"
+          className="w-full px-3 sm:px-4 py-2.5 sm:py-3 md:py-4 text-left bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-600 transition-all duration-200"
         >
-          <div className="font-semibold text-indigo-700 dark:text-indigo-300 text-sm sm:text-base mb-1">
+          <div className="font-semibold text-indigo-700 dark:text-indigo-300 text-xs sm:text-sm md:text-base mb-1 break-words">
             Funcionário
           </div>
-          <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+          <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 break-words">
             Acesso à plataforma de desenvolvimento
           </div>
         </button>
@@ -747,9 +747,9 @@ const LoginCorporativo = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Cabecalho />
-      <main className="flex-grow bg-gray-50 dark:bg-gray-900 flex items-center justify-center py-8 sm:py-12 md:py-16">
-        <section className="container mx-auto px-4">
-          <div className="max-w-md mx-auto">
+      <main className="flex-grow bg-gray-50 dark:bg-gray-900 flex items-center justify-center py-6 sm:py-8 md:py-12 lg:py-16">
+        <section className="container mx-auto px-3 sm:px-4 md:px-6">
+          <div className="max-w-md mx-auto w-full">
             {tipoLogin === 'menu' && renderMenuSelecao()}
             {tipoLogin === 'admin' && <FormularioAdmin />}
             {tipoLogin === 'gestor' && <FormularioGestor />}

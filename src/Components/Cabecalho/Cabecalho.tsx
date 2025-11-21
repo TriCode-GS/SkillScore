@@ -9,10 +9,11 @@ interface CabecalhoProps {
   isHomeAdmin?: boolean
   isHomeAdminEmp?: boolean
   isHomeGestor?: boolean
+  isHomeFuncionario?: boolean
   onLogout?: () => void
 }
 
-const Cabecalho = ({ isHomeFree = false, isHomeAdmin = false, isHomeAdminEmp = false, isHomeGestor = false, onLogout }: CabecalhoProps) => {
+const Cabecalho = ({ isHomeFree = false, isHomeAdmin = false, isHomeAdminEmp = false, isHomeGestor = false, isHomeFuncionario = false, onLogout }: CabecalhoProps) => {
   const [menuAberto, setMenuAberto] = useState(false)
   const { theme, toggleTheme } = useTheme()
   const { user } = useAuth()
@@ -38,11 +39,11 @@ const Cabecalho = ({ isHomeFree = false, isHomeAdmin = false, isHomeAdminEmp = f
     <header className="bg-white dark:bg-gray-900 shadow-md">
       <nav className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
-          {(isHomeAdminEmp || isHomeGestor) ? (
+          {(isHomeAdminEmp || isHomeGestor || isHomeFuncionario) ? (
             <>
               <div className="flex items-center gap-2 sm:gap-3 md:gap-4 flex-1 min-w-0">
                 <Link 
-                  to={isHomeGestor ? "/gestor/home" : "/admin-emp/home"}
+                  to={isHomeGestor ? "/gestor/home" : isHomeFuncionario ? "/funcionario/home" : "/admin-emp/home"}
                   onClick={() => {
                     window.scrollTo({ top: 0, behavior: 'smooth' })
                   }}
@@ -119,6 +120,19 @@ const Cabecalho = ({ isHomeFree = false, isHomeAdmin = false, isHomeAdminEmp = f
                     </Link>
                     <span className="text-sm lg:text-base font-semibold text-gray-400 dark:text-gray-500 px-3 lg:px-4 py-2 rounded-lg whitespace-nowrap cursor-not-allowed opacity-60">
                       Gerenciar Departamento
+                    </span>
+                  </>
+                ) : isHomeFuncionario ? (
+                  <>
+                    <Link
+                      to="/funcionario/home"
+                      onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                      className="text-xs sm:text-sm lg:text-base font-semibold text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors px-2 sm:px-3 lg:px-4 py-2 rounded-lg hover:bg-indigo-50 dark:hover:bg-gray-800 whitespace-nowrap"
+                    >
+                      Home
+                    </Link>
+                    <span className="hidden lg:inline-block text-xs sm:text-sm lg:text-base font-semibold text-gray-400 dark:text-gray-500 px-2 sm:px-3 lg:px-4 py-2 rounded-lg whitespace-nowrap cursor-not-allowed opacity-60">
+                      Formulário para Definição de Trilha
                     </span>
                   </>
                 ) : (
@@ -470,38 +484,22 @@ const Cabecalho = ({ isHomeFree = false, isHomeAdmin = false, isHomeAdminEmp = f
             </>
           )}
         </div>
-        {menuAberto && (isHomeAdminEmp || isHomeGestor) && (
+        {menuAberto && (isHomeAdminEmp || isHomeGestor || isHomeFuncionario) && (
           <div className="lg:hidden mt-4 border-t-2 border-gray-300 dark:border-gray-700 pt-4">
             <div className="flex flex-col bg-white dark:bg-gray-800 rounded-lg shadow-xl border-2 border-gray-200 dark:border-gray-700 overflow-hidden">
-              {isHomeGestor ? (
-                <Link
-                  to="/login"
-                  onClick={() => {
-                    window.scrollTo({ top: 0, behavior: 'smooth' })
-                    setMenuAberto(false)
-                  }}
-                  className="px-4 py-4 border-b-2 border-gray-200 dark:border-gray-700 flex items-center justify-between text-gray-700 dark:text-gray-300 hover:text-white hover:bg-indigo-600 dark:hover:bg-indigo-600 active:bg-indigo-700 active:text-white transition-all duration-200 font-medium"
-                >
-                  <span className="font-medium">Perfil</span>
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                </Link>
-              ) : (
-                <Link
-                  to="/login"
-                  onClick={() => {
-                    window.scrollTo({ top: 0, behavior: 'smooth' })
-                    setMenuAberto(false)
-                  }}
-                  className="px-4 py-4 border-b-2 border-gray-200 dark:border-gray-700 flex items-center justify-between text-gray-700 dark:text-gray-300 hover:text-white hover:bg-indigo-600 dark:hover:bg-indigo-600 active:bg-indigo-700 active:text-white transition-all duration-200 font-medium"
-                >
-                  <span className="font-medium">Perfil</span>
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                </Link>
-              )}
+              <Link
+                to="/login"
+                onClick={() => {
+                  window.scrollTo({ top: 0, behavior: 'smooth' })
+                  setMenuAberto(false)
+                }}
+                className="px-4 py-4 border-b-2 border-gray-200 dark:border-gray-700 flex items-center justify-between text-gray-700 dark:text-gray-300 hover:text-white hover:bg-indigo-600 dark:hover:bg-indigo-600 active:bg-indigo-700 active:text-white transition-all duration-200 font-medium"
+              >
+                <span className="font-medium">Perfil</span>
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              </Link>
               <div className="px-4 py-4 border-b-2 border-gray-200 dark:border-gray-700 flex items-center justify-between">
                 <span className="text-gray-700 dark:text-gray-300 font-medium">Tema</span>
                 <button
@@ -544,6 +542,22 @@ const Cabecalho = ({ isHomeFree = false, isHomeAdmin = false, isHomeAdminEmp = f
                   </Link>
                   <span className="px-4 py-4 text-left text-gray-400 dark:text-gray-500 cursor-not-allowed opacity-60">
                     Gerenciar Departamento
+                  </span>
+                </>
+              ) : isHomeFuncionario ? (
+                <>
+                  <Link
+                    to="/funcionario/home"
+                    onClick={() => {
+                      window.scrollTo({ top: 0, behavior: 'smooth' })
+                      setMenuAberto(false)
+                    }}
+                    className="px-4 py-4 text-left text-gray-700 dark:text-gray-300 hover:text-white hover:bg-indigo-600 dark:hover:bg-indigo-600 active:bg-indigo-700 active:text-white transition-all duration-200 font-medium border-b-2 border-gray-200 dark:border-gray-700"
+                  >
+                    Home
+                  </Link>
+                  <span className="px-4 py-4 text-left text-gray-400 dark:text-gray-500 cursor-not-allowed opacity-60">
+                    Formulário para Definição de Trilha
                   </span>
                 </>
               ) : (
@@ -722,7 +736,7 @@ const Cabecalho = ({ isHomeFree = false, isHomeAdmin = false, isHomeAdminEmp = f
             </div>
           </div>
         )}
-        {menuAberto && !isHomeFree && !isHomeAdmin && (
+        {menuAberto && !isHomeFree && !isHomeAdmin && !isHomeAdminEmp && !isHomeGestor && !isHomeFuncionario && (
           <div className="lg:hidden mt-4 border-t-2 border-gray-300 dark:border-gray-700 pt-4">
             <div className="flex flex-col bg-white dark:bg-gray-800 rounded-lg shadow-xl border-2 border-gray-200 dark:border-gray-700 overflow-hidden">
               <Link 
