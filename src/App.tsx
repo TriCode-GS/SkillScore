@@ -9,17 +9,25 @@ import Contato from './Routes/Usuario/Contato'
 import Login from './Routes/Usuario/Login'
 import Cadastro from './Routes/Usuario/Cadastro'
 import HomeFree from './Routes/UsuarioFree/HomeFree'
-import Trilhas from './Routes/UsuarioFree/Trilhas'
+import DefinirTrilhaFree from './Routes/UsuarioFree/DefinirTrilhaFree'
 import LoginAdmin from './Routes/Admin/LoginAdmin'
 import HomeAdmin from './Routes/Admin/HomeAdmin'
 import GerenciarEmpresas from './Routes/Admin/GerenciarEmpresas'
 import GerenciarAdministradores from './Routes/Admin/GerenciarAdministradores'
+import GerenciarCursos from './Routes/Admin/GerenciarCursos'
+import GerenciarTrilhas from './Routes/Admin/GerenciarTrilhas'
+import UsuariosPorTrilha from './Routes/Admin/UsuariosPorTrilha'
 import LoginCorporativo from './Routes/Corporativo/LoginCorporativo'
 import HomeAdministradorEmpresa from './Routes/Corporativo/AdministradorEmpresa/HomeAdministradorEmpresa'
 import GerenciarGestores from './Routes/Corporativo/AdministradorEmpresa/GerenciarGestores'
 import GerenciarDepartamentos from './Routes/Corporativo/AdministradorEmpresa/GerenciarDepartamentos'
 import HomeGestor from './Routes/Corporativo/Gestor/HomeGestor'
 import GerenciarFuncionarios from './Routes/Corporativo/Gestor/GerenciarFuncionarios'
+import HomeFuncionario from './Routes/Corporativo/Funcionario/HomeFuncionario'
+import DefinirTrilha from './Routes/Corporativo/Funcionario/DefinirTrilha'
+import TrilhaAdministracao from './Routes/Trilhas/TrilhaAdministracao'
+import TrilhaTecnologia from './Routes/Trilhas/TrilhaTecnologia'
+import TrilhaRecursosHumanos from './Routes/Trilhas/TrilhaRecursosHumanos'
 
 function App() {
   return (
@@ -36,19 +44,29 @@ function App() {
           <Route path="/cadastro" element={<Cadastro />} />
           <Route path="/login-corporativo" element={<LoginCorporativo />} />
           <Route path="/home-free" element={<HomeFree />} />
-          <Route path="/trilhas" element={<Trilhas />} />
-          <Route path="/trilhas/:id" element={<Trilhas />} />
+          <Route path="/usuario/definir-trilha" element={<DefinirTrilhaFree />} />
+          <Route path="/usuario/trilha-administracao" element={<TrilhaAdministracao />} />
+          <Route path="/usuario/trilha-tecnologia" element={<TrilhaTecnologia />} />
+          <Route path="/usuario/trilha-recursos-humanos" element={<TrilhaRecursosHumanos />} />
           <Route path="/admin/login" element={<LoginAdmin />} />
           <Route path="/admin/home" element={<HomeAdmin />} />
           <Route path="/admin/empresas" element={<GerenciarEmpresas />} />
           <Route path="/admin/empresas/:id" element={<GerenciarEmpresas />} />
           <Route path="/admin/administradores" element={<GerenciarAdministradores />} />
           <Route path="/admin/administradores/:id" element={<GerenciarAdministradores />} />
+          <Route path="/admin/cursos" element={<GerenciarCursos />} />
+          <Route path="/admin/trilhas" element={<GerenciarTrilhas />} />
+          <Route path="/admin/usuarios-por-trilha" element={<UsuariosPorTrilha />} />
           <Route path="/admin-emp/home" element={<HomeAdministradorEmpresa />} />
           <Route path="/admin-emp/gestores" element={<GerenciarGestores />} />
           <Route path="/admin-emp/departamentos" element={<GerenciarDepartamentos />} />
           <Route path="/gestor/home" element={<HomeGestor />} />
           <Route path="/gestor/funcionarios" element={<GerenciarFuncionarios />} />
+          <Route path="/funcionario/home" element={<HomeFuncionario />} />
+          <Route path="/funcionario/definir-trilha" element={<DefinirTrilha />} />
+          <Route path="/funcionario/trilha-administracao" element={<TrilhaAdministracao />} />
+          <Route path="/funcionario/trilha-tecnologia" element={<TrilhaTecnologia />} />
+          <Route path="/funcionario/trilha-recursos-humanos" element={<TrilhaRecursosHumanos />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AuthProvider>

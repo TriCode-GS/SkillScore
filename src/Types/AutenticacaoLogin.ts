@@ -1,3 +1,5 @@
+import type { ApiErrorResponse } from './Diagnostico'
+
 export const getBaseUrl = () => {
   const envUrl = import.meta.env.VITE_API_URL
   const baseUrl = envUrl || 'https://skillscore-java.onrender.com'
@@ -5,11 +7,15 @@ export const getBaseUrl = () => {
   return cleanedUrl
 }
 
+export type TipoUsuario = 'USUARIO' | 'FUNCIONARIO' | 'ADMIN' | 'GESTOR' | 'ADMINISTRADOR EMP' | 'ADMINISTRADOR_EMPRESA'
+
+export type TipoLogin = 'USUARIO' | 'FUNCIONARIO' | 'ADMIN' | 'GESTOR' | 'ADMINISTRADOR EMP' | 'ADMINISTRADOR_EMPRESA'
+
 export type UsuarioData = {
   idEmpresa?: number | null
   idDepartamento?: number | null
   nomeUsuario: string
-  tipoUsuario: string
+  tipoUsuario: TipoUsuario | string
   nivelSenioridade?: string | null
   competencias?: string | null
 }
@@ -18,29 +24,29 @@ export type LoginData = {
   idUsuario: number
   email: string
   senha: string
-  tipoLogin: string
+  tipoLogin: TipoLogin | string
 }
 
 export interface LoginApiResponse {
   idLogin?: number
   idUsuario?: number
   email?: string
-  tipoLogin?: string
+  tipoLogin?: TipoLogin | string
 }
 
 export type LoginUpdateData = {
   idUsuario?: number
   email?: string
   senha?: string
-  tipoLogin?: string
+  tipoLogin?: TipoLogin | string
 }
 
 export type CadastroCredentials = {
   nomeUsuario: string
   email: string
   senha: string
-  tipoUsuario: string
-  tipoLogin: string
+  tipoUsuario: TipoUsuario | string
+  tipoLogin: TipoLogin | string
   idEmpresa: number | null
   idDepartamento: number | null
   competencias: string | null
@@ -65,8 +71,8 @@ export interface LoginResponse {
   email?: string
   nomeUsuario?: string
   nome?: string
-  tipoLogin?: string
-  tipoUsuario?: string
+  tipoLogin?: TipoLogin | string
+  tipoUsuario?: TipoUsuario | string
   message?: string
 }
 
@@ -75,7 +81,7 @@ export type UsuarioResponse = {
   idEmpresa: number | null
   idDepartamento: number | null
   nomeUsuario: string
-  tipoUsuario: string
+  tipoUsuario: TipoUsuario | string
   nivelSenioridade: string | null
   competencias: string | null
 }
@@ -119,19 +125,12 @@ export async function criarUsuario(usuarioData: UsuarioData): Promise<{ idUsuari
       const contentType = res.headers.get('content-type')
       
       if (contentType && contentType.includes('application/json')) {
-        const data = await responseClone.json() as unknown
+        const data = await responseClone.json() as string | ApiErrorResponse
         if (typeof data === 'string') {
           backendMessage = data
         } else if (data && typeof data === 'object') {
-          const anyData = data as { 
-            message?: string
-            error?: string
-            detalhe?: string
-            mensagem?: string
-            erro?: string
-            campo?: string
-          }
-          backendMessage = anyData.message || anyData.mensagem || anyData.error || anyData.erro || anyData.detalhe
+          const errorData = data as ApiErrorResponse
+          backendMessage = errorData.message || errorData.error || errorData.detalhe || errorData.erro || errorData.campo
         }
       } else {
         const text = await responseClone.text()
@@ -207,11 +206,11 @@ export async function criarLogin(loginData: LoginData): Promise<CadastroResponse
 
     if (!backendMessage) {
       try {
-        const data = await res.clone().json() as unknown
+        const data = await res.clone().json() as string | ApiErrorResponse
         if (typeof data === 'string') backendMessage = data
         else if (data && typeof data === 'object') {
-          const anyData = data as { message?: string; error?: string; detalhe?: string }
-          backendMessage = anyData.message || anyData.error || anyData.detalhe
+          const errorData = data as ApiErrorResponse
+          backendMessage = errorData.message || errorData.error || errorData.detalhe || errorData.erro
         }
       } catch (_) {}
     }
@@ -306,11 +305,11 @@ export async function autenticarLogin(credentials: LoginCredentials): Promise<Lo
 
     if (!backendMessage) {
       try {
-        const data = await res.clone().json() as unknown
+        const data = await res.clone().json() as string | ApiErrorResponse
         if (typeof data === 'string') backendMessage = data
         else if (data && typeof data === 'object') {
-          const anyData = data as { message?: string; error?: string; detalhe?: string }
-          backendMessage = anyData.message || anyData.error || anyData.detalhe
+          const errorData = data as ApiErrorResponse
+          backendMessage = errorData.message || errorData.error || errorData.detalhe || errorData.erro
         }
       } catch (_) {}
     }
@@ -367,11 +366,11 @@ export async function autenticarUsuario(credentials: LoginCredentials): Promise<
 
     if (!backendMessage) {
       try {
-        const data = await res.clone().json() as unknown
+        const data = await res.clone().json() as string | ApiErrorResponse
         if (typeof data === 'string') backendMessage = data
         else if (data && typeof data === 'object') {
-          const anyData = data as { message?: string; error?: string; detalhe?: string }
-          backendMessage = anyData.message || anyData.error || anyData.detalhe
+          const errorData = data as ApiErrorResponse
+          backendMessage = errorData.message || errorData.error || errorData.detalhe || errorData.erro
         }
       } catch (_) {}
     }
@@ -428,11 +427,11 @@ export async function autenticarAdministrador(credentials: LoginCredentials): Pr
 
     if (!backendMessage) {
       try {
-        const data = await res.clone().json() as unknown
+        const data = await res.clone().json() as string | ApiErrorResponse
         if (typeof data === 'string') backendMessage = data
         else if (data && typeof data === 'object') {
-          const anyData = data as { message?: string; error?: string; detalhe?: string }
-          backendMessage = anyData.message || anyData.error || anyData.detalhe
+          const errorData = data as ApiErrorResponse
+          backendMessage = errorData.message || errorData.error || errorData.detalhe || errorData.erro
         }
       } catch (_) {}
     }
@@ -490,11 +489,11 @@ export async function autenticarAdministradorEmpresa(credentials: LoginCredentia
 
     if (!backendMessage) {
       try {
-        const data = await res.clone().json() as unknown
+        const data = await res.clone().json() as string | ApiErrorResponse
         if (typeof data === 'string') backendMessage = data
         else if (data && typeof data === 'object') {
-          const anyData = data as { message?: string; error?: string; detalhe?: string }
-          backendMessage = anyData.message || anyData.error || anyData.detalhe
+          const errorData = data as ApiErrorResponse
+          backendMessage = errorData.message || errorData.error || errorData.detalhe || errorData.erro
         }
       } catch (_) {}
     }
@@ -555,11 +554,76 @@ export async function autenticarGestor(credentials: LoginCredentials): Promise<L
 
     if (!backendMessage) {
       try {
-        const data = await res.clone().json() as unknown
+        const data = await res.clone().json() as string | ApiErrorResponse
         if (typeof data === 'string') backendMessage = data
         else if (data && typeof data === 'object') {
-          const anyData = data as { message?: string; error?: string; detalhe?: string }
-          backendMessage = anyData.message || anyData.error || anyData.detalhe
+          const errorData = data as ApiErrorResponse
+          backendMessage = errorData.message || errorData.error || errorData.detalhe || errorData.erro
+        }
+      } catch (_) {}
+    }
+
+    if (!backendMessage && res.status === 401) {
+      backendMessage = 'Credenciais inválidas'
+    }
+
+    const statusText = res.statusText || 'Erro'
+    const message = backendMessage || `Falha na autenticação (status ${res.status} ${statusText})`
+
+    throw new Error(message)
+  }
+
+  return res.json()
+}
+
+export async function autenticarFuncionario(credentials: LoginCredentials): Promise<LoginResponse> {
+  const baseUrl = getBaseUrl()
+  let url: URL
+  
+  try {
+    url = new URL(`${baseUrl}/logins/autenticar/funcionario`)
+  } catch (error) {
+    throw new Error(`URL inválida: ${baseUrl}/logins/autenticar/funcionario`)
+  }
+
+  url.searchParams.set('email', credentials.email)
+  url.searchParams.set('senha', credentials.senha)
+
+  let res: Response
+
+  try {
+    res = await fetch(url.toString(), {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+      },
+      mode: 'cors',
+    })
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido'
+    if (errorMessage.includes('Failed to fetch') || errorMessage.includes('CORS')) {
+      throw new Error('Erro de CORS: O servidor não está configurado corretamente para aceitar requisições deste domínio. Verifique a configuração do backend.')
+    }
+    throw new Error(`Não foi possível conectar à API (rede/CORS/servidor inativo). Detalhes: ${errorMessage}`)
+  }
+
+  if (!res.ok) {
+    let backendMessage: string | undefined
+
+    try {
+      const text = await res.text()
+      if (text && text.trim().length > 0) {
+        backendMessage = text.trim()
+      }
+    } catch (_) {}
+
+    if (!backendMessage) {
+      try {
+        const data = await res.clone().json() as string | ApiErrorResponse
+        if (typeof data === 'string') backendMessage = data
+        else if (data && typeof data === 'object') {
+          const errorData = data as ApiErrorResponse
+          backendMessage = errorData.message || errorData.error || errorData.detalhe || errorData.erro
         }
       } catch (_) {}
     }
@@ -620,11 +684,11 @@ export async function atualizarUsuario(idUsuario: number, usuarioData: UsuarioDa
 
     if (!backendMessage) {
       try {
-        const data = await res.clone().json() as unknown
+        const data = await res.clone().json() as string | ApiErrorResponse
         if (typeof data === 'string') backendMessage = data
         else if (data && typeof data === 'object') {
-          const anyData = data as { message?: string; error?: string; detalhe?: string }
-          backendMessage = anyData.message || anyData.error || anyData.detalhe
+          const errorData = data as ApiErrorResponse
+          backendMessage = errorData.message || errorData.error || errorData.detalhe || errorData.erro
         }
       } catch (_) {}
     }
@@ -681,11 +745,11 @@ export async function atualizarLogin(idLogin: number, loginData: LoginUpdateData
 
     if (!backendMessage) {
       try {
-        const data = await res.clone().json() as unknown
+        const data = await res.clone().json() as string | ApiErrorResponse
         if (typeof data === 'string') backendMessage = data
         else if (data && typeof data === 'object') {
-          const anyData = data as { message?: string; error?: string; detalhe?: string }
-          backendMessage = anyData.message || anyData.error || anyData.detalhe
+          const errorData = data as ApiErrorResponse
+          backendMessage = errorData.message || errorData.error || errorData.detalhe || errorData.erro
         }
       } catch (_) {}
     }
@@ -738,11 +802,11 @@ export async function buscarUsuarioPorId(idUsuario: number): Promise<UsuarioResp
 
     if (!backendMessage) {
       try {
-        const data = await res.clone().json() as unknown
+        const data = await res.clone().json() as string | ApiErrorResponse
         if (typeof data === 'string') backendMessage = data
         else if (data && typeof data === 'object') {
-          const anyData = data as { message?: string; error?: string; detalhe?: string }
-          backendMessage = anyData.message || anyData.error || anyData.detalhe
+          const errorData = data as ApiErrorResponse
+          backendMessage = errorData.message || errorData.error || errorData.detalhe || errorData.erro
         }
       } catch (_) {}
     }
@@ -804,11 +868,11 @@ export async function listarUsuarios(): Promise<UsuarioResponse[]> {
 
     if (!backendMessage) {
       try {
-        const data = await res.clone().json() as unknown
+        const data = await res.clone().json() as string | ApiErrorResponse
         if (typeof data === 'string') backendMessage = data
         else if (data && typeof data === 'object') {
-          const anyData = data as { message?: string; error?: string; detalhe?: string }
-          backendMessage = anyData.message || anyData.error || anyData.detalhe
+          const errorData = data as ApiErrorResponse
+          backendMessage = errorData.message || errorData.error || errorData.detalhe || errorData.erro
         }
       } catch (_) {}
     }
@@ -863,11 +927,11 @@ export async function excluirUsuario(idUsuario: number): Promise<void> {
 
     if (!backendMessage) {
       try {
-        const data = await res.clone().json() as unknown
+        const data = await res.clone().json() as string | ApiErrorResponse
         if (typeof data === 'string') backendMessage = data
         else if (data && typeof data === 'object') {
-          const anyData = data as { message?: string; error?: string; detalhe?: string }
-          backendMessage = anyData.message || anyData.error || anyData.detalhe
+          const errorData = data as ApiErrorResponse
+          backendMessage = errorData.message || errorData.error || errorData.detalhe || errorData.erro
         }
       } catch (_) {}
     }
@@ -920,11 +984,11 @@ export async function excluirLogin(idLogin: number): Promise<void> {
 
     if (!backendMessage) {
       try {
-        const data = await res.clone().json() as unknown
+        const data = await res.clone().json() as string | ApiErrorResponse
         if (typeof data === 'string') backendMessage = data
         else if (data && typeof data === 'object') {
-          const anyData = data as { message?: string; error?: string; detalhe?: string }
-          backendMessage = anyData.message || anyData.error || anyData.detalhe
+          const errorData = data as ApiErrorResponse
+          backendMessage = errorData.message || errorData.error || errorData.detalhe || errorData.erro
         }
       } catch (_) {}
     }

@@ -5,6 +5,7 @@ import { useAuth } from '../../Contexto/AutenticacaoContexto'
 import Cabecalho from '../../Components/Cabecalho/Cabecalho'
 import Botao from '../../Components/Botao/Botao'
 import ListaSelecao from '../../Components/ListaSelecao/ListaSelecao'
+import Rodape from '../../Components/Rodape/Rodape'
 import { listarEmpresas, cadastrarEmpresa, editarEmpresa, excluirEmpresa, type EmpresaData, type UsuarioApiResponse } from '../../Types/Empresa'
 import { atualizarUsuario, getBaseUrl, type UsuarioData } from '../../Types/AutenticacaoLogin'
 
@@ -186,7 +187,6 @@ const GerenciarEmpresas = () => {
             idEmpresa: empresaSelecionada.idEmpresa,
             nomeUsuario: administrador.nomeUsuario || '',
             tipoUsuario: administrador.tipoUsuario || 'ADMINISTRADOR EMP',
-            areaAtuacao: administrador.areaAtuacao || null,
             nivelSenioridade: administrador.nivelSenioridade || null,
             competencias: administrador.competencias || null
           }
@@ -335,8 +335,8 @@ const GerenciarEmpresas = () => {
     <div className="min-h-screen flex flex-col">
       <Cabecalho isHomeAdmin={true} onLogout={handleLogout} />
       <main className="flex-grow bg-gray-50 dark:bg-gray-900 py-8 sm:py-12 md:py-16">
-        <section className="container mx-auto px-4 sm:px-6 md:px-8 relative">
-          <div className="max-w-6xl mx-auto">
+        <section className="container mx-auto px-2 sm:px-3 md:px-4 relative">
+          <div className="max-w-full mx-auto">
             <div className="mb-4 sm:mb-5 md:mb-6 lg:mb-8">
               <div className="flex justify-end mb-3 md:hidden">
                 <button
@@ -412,15 +412,15 @@ const GerenciarEmpresas = () => {
               </div>
             ) : (
               <div className="bg-white dark:bg-gray-800 rounded-lg border-2 border-gray-200 dark:border-gray-700 overflow-hidden">
-                <div className="overflow-x-auto -mx-4 sm:mx-0">
+                <div className="overflow-x-auto -mx-2 sm:-mx-3 md:-mx-4">
                   <div className="inline-block min-w-full align-middle">
                     <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                       <thead className="bg-gray-50 dark:bg-gray-700">
                         <tr>
                           <th className="px-3 sm:px-4 md:px-5 lg:px-6 py-2.5 sm:py-3 md:py-3.5 lg:py-4 text-center text-xs sm:text-sm md:text-base font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap">Razão Social</th>
                           <th className="px-3 sm:px-4 md:px-5 lg:px-6 py-2.5 sm:py-3 md:py-3.5 lg:py-4 text-center text-xs sm:text-sm md:text-base font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap">CNPJ</th>
-                          <th className="px-3 sm:px-4 md:px-5 lg:px-6 py-2.5 sm:py-3 md:py-3.5 lg:py-4 text-center text-xs sm:text-sm md:text-base font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap hidden md:table-cell">Setor</th>
-                          <th className="px-3 sm:px-4 md:px-5 lg:px-6 py-2.5 sm:py-3 md:py-3.5 lg:py-4 text-center text-xs sm:text-sm md:text-base font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap hidden md:table-cell">Administrador</th>
+                          <th className="px-3 sm:px-4 md:px-5 lg:px-6 py-2.5 sm:py-3 md:py-3.5 lg:py-4 text-center text-xs sm:text-sm md:text-base font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap">Setor</th>
+                          <th className="px-3 sm:px-4 md:px-5 lg:px-6 py-2.5 sm:py-3 md:py-3.5 lg:py-4 text-center text-xs sm:text-sm md:text-base font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap">Administrador</th>
                           <th className="px-3 sm:px-4 md:px-5 lg:px-6 py-2.5 sm:py-3 md:py-3.5 lg:py-4 text-center text-xs sm:text-sm md:text-base font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap">Ações</th>
                         </tr>
                       </thead>
@@ -435,10 +435,10 @@ const GerenciarEmpresas = () => {
                             <td className="px-3 sm:px-4 md:px-5 lg:px-6 py-2.5 sm:py-3 md:py-3.5 lg:py-4 text-center text-xs sm:text-sm md:text-base text-gray-600 dark:text-gray-400 whitespace-nowrap">
                               {formatCNPJ(empresa.cnpj)}
                             </td>
-                            <td className="px-3 sm:px-4 md:px-5 lg:px-6 py-2.5 sm:py-3 md:py-3.5 lg:py-4 text-center text-xs sm:text-sm md:text-base text-gray-600 dark:text-gray-400 break-words hidden md:table-cell">
+                            <td className="px-3 sm:px-4 md:px-5 lg:px-6 py-2.5 sm:py-3 md:py-3.5 lg:py-4 text-center text-xs sm:text-sm md:text-base text-gray-600 dark:text-gray-400 break-words">
                               {empresa.setor || '-'}
                             </td>
-                            <td className="px-3 sm:px-4 md:px-5 lg:px-6 py-2.5 sm:py-3 md:py-3.5 lg:py-4 text-center hidden md:table-cell">
+                            <td className="px-3 sm:px-4 md:px-5 lg:px-6 py-2.5 sm:py-3 md:py-3.5 lg:py-4 text-center">
                               {empresa.nomeAdministrador ? (
                                 <span className="text-xs sm:text-sm md:text-base text-gray-600 dark:text-gray-400">
                                   {empresa.nomeAdministrador}
@@ -456,7 +456,7 @@ const GerenciarEmpresas = () => {
                               )}
                             </td>
                             <td className="px-3 sm:px-4 md:px-5 lg:px-6 py-2.5 sm:py-3 md:py-3.5 lg:py-4 text-center">
-                              <div className="flex flex-col sm:flex-row justify-center gap-1.5 sm:gap-2 md:gap-2.5">
+                              <div className="flex flex-row justify-center items-center gap-1.5 sm:gap-2 md:gap-2.5">
                                 <button
                                   onClick={() => abrirModalEdicao(empresa)}
                                   className="p-2 sm:p-2.5 md:p-3 text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-colors"
@@ -475,21 +475,6 @@ const GerenciarEmpresas = () => {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                   </svg>
                                 </button>
-                              </div>
-                              <div className="md:hidden mt-1.5 text-xs sm:text-sm text-gray-500 dark:text-gray-400 space-y-1">
-                                <div>Setor: {empresa.setor || '-'}</div>
-                                <div>
-                                  Administrador: {empresa.nomeAdministrador ? (
-                                    <span>{empresa.nomeAdministrador}</span>
-                                  ) : (
-                                    <button
-                                      onClick={() => abrirModalAssociarAdmin(empresa)}
-                                      className="text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 font-semibold"
-                                    >
-                                      Associar
-                                    </button>
-                                  )}
-                                </div>
                               </div>
                             </td>
                           </tr>
@@ -962,6 +947,16 @@ const GerenciarEmpresas = () => {
           </div>
         </div>
       )}
+      <Rodape
+        linksRapidos={[
+          { label: 'Home', path: '/admin/home', onClick: () => handleNavigate('/admin/home') },
+          { label: 'Gerenciar Administradores', path: '/admin/administradores', onClick: () => handleNavigate('/admin/administradores') },
+          { label: 'Gerenciar Empresas', path: '/admin/empresas', onClick: () => handleNavigate('/admin/empresas') },
+          { label: 'Gerenciar Cursos', path: '/admin/cursos', onClick: () => handleNavigate('/admin/cursos') },
+          { label: 'Gerenciar Trilhas', path: '/admin/trilhas', onClick: () => handleNavigate('/admin/trilhas') }
+        ]}
+        onLinkClick={(path) => handleNavigate(path)}
+      />
     </div>
   )
 }

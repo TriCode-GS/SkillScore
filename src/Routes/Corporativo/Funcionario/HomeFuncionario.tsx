@@ -1,17 +1,17 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useAuth } from '../../Contexto/AutenticacaoContexto'
-import { buscarUsuarioPorId, getBaseUrl } from '../../Types/AutenticacaoLogin'
-import { listarTrilhas, type TrilhaResponse } from '../../Types/Trilha'
-import { listarCursosPorTrilha, type CursoComStatus } from '../../Types/TrilhaCurso'
-import type { DiagnosticoUsuario } from '../../Types/Diagnostico'
-import Cabecalho from '../../Components/Cabecalho/Cabecalho'
-import Rodape from '../../Components/Rodape/Rodape'
+import { useAuth } from '../../../Contexto/AutenticacaoContexto'
+import { buscarUsuarioPorId, getBaseUrl } from '../../../Types/AutenticacaoLogin'
+import { listarTrilhas, type TrilhaResponse } from '../../../Types/Trilha'
+import { listarCursosPorTrilha, type CursoComStatus } from '../../../Types/TrilhaCurso'
+import type { DiagnosticoUsuario } from '../../../Types/Diagnostico'
+import Cabecalho from '../../../Components/Cabecalho/Cabecalho'
+import Rodape from '../../../Components/Rodape/Rodape'
 
-const HomeFree = () => {
+const HomeFuncionario = () => {
   const navigate = useNavigate()
   const { user, logout, isAuthenticated } = useAuth()
-  const [nomeUsuario, setNomeUsuario] = useState<string>('')
+  const [nomeFuncionario, setNomeFuncionario] = useState<string>('')
   const [trilhasUsuario, setTrilhasUsuario] = useState<TrilhaResponse[]>([])
   const [carregandoTrilha, setCarregandoTrilha] = useState(true)
   const [trilhaCompleta, setTrilhaCompleta] = useState(false)
@@ -19,13 +19,13 @@ const HomeFree = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       if (!isAuthenticated) {
-        navigate('/login')
+        navigate('/login-corporativo')
         window.scrollTo({ top: 0, behavior: 'smooth' })
         return
       }
       
-      if (isAuthenticated && user?.tipoUsuario && user.tipoUsuario !== 'USUARIO') {
-        navigate('/login')
+      if (isAuthenticated && user?.tipoUsuario !== 'FUNCIONARIO') {
+        navigate('/login-corporativo')
         window.scrollTo({ top: 0, behavior: 'smooth' })
       }
     }, 300)
@@ -34,12 +34,12 @@ const HomeFree = () => {
   }, [isAuthenticated, user, navigate])
 
   useEffect(() => {
-    const buscarNomeUsuario = async () => {
+    const buscarNomeFuncionario = async () => {
       if (user?.idUsuario) {
         try {
           const usuarioCompleto = await buscarUsuarioPorId(user.idUsuario)
           if (usuarioCompleto.nomeUsuario) {
-            setNomeUsuario(usuarioCompleto.nomeUsuario)
+            setNomeFuncionario(usuarioCompleto.nomeUsuario)
           }
         } catch (error) {
         }
@@ -47,7 +47,7 @@ const HomeFree = () => {
     }
 
     if (isAuthenticated && user?.idUsuario) {
-      buscarNomeUsuario()
+      buscarNomeFuncionario()
     }
   }, [isAuthenticated, user])
 
@@ -128,24 +128,19 @@ const HomeFree = () => {
                   let todasTrilhasCompletas = true
                   
                   for (const trilha of trilhasEncontradas) {
-                    try {
-                      const cursosDaTrilha = await listarCursosPorTrilha(trilha.idTrilha, user.idUsuario)
+                    const cursosDaTrilha = await listarCursosPorTrilha(trilha.idTrilha, user.idUsuario)
+                    
+                    if (cursosDaTrilha && cursosDaTrilha.length > 0) {
+                      const todosConcluidos = cursosDaTrilha.every((curso: CursoComStatus) => {
+                        const status = curso.statusFase?.toUpperCase().trim() || ''
+                        return status === 'CONCLUIDA' || status === 'CONCLUÍDA' || status === 'CONCLUIDO'
+                      })
                       
-                      if (cursosDaTrilha && cursosDaTrilha.length > 0) {
-                        const todosConcluidos = cursosDaTrilha.every((curso: CursoComStatus) => {
-                          const status = curso.statusFase?.toUpperCase().trim() || ''
-                          return status === 'CONCLUIDA' || status === 'CONCLUÍDA' || status === 'CONCLUIDO'
-                        })
-                        
-                        if (!todosConcluidos) {
-                          todasTrilhasCompletas = false
-                          break
-                        }
-                      } else {
+                      if (!todosConcluidos) {
                         todasTrilhasCompletas = false
                         break
                       }
-                    } catch (error) {
+                    } else {
                       todasTrilhasCompletas = false
                       break
                     }
@@ -186,11 +181,11 @@ const HomeFree = () => {
 
   const handleLogout = () => {
     logout()
-    navigate('/')
+    navigate('/login-corporativo')
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  if (!isAuthenticated || user?.tipoUsuario !== 'USUARIO') {
+  if (!isAuthenticated || user?.tipoUsuario !== 'FUNCIONARIO') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
         <div className="text-center">
@@ -201,29 +196,29 @@ const HomeFree = () => {
   }
 
   const getPrimeiroNome = () => {
-    if (nomeUsuario) {
-      const primeiroNome = nomeUsuario.trim().split(' ')[0]
-      return primeiroNome || 'Usuário'
+    if (nomeFuncionario) {
+      const primeiroNome = nomeFuncionario.trim().split(' ')[0]
+      return primeiroNome || 'Funcionário'
     }
     if (user?.nomeUsuario) {
       const primeiroNome = user.nomeUsuario.trim().split(' ')[0]
-      return primeiroNome || 'Usuário'
+      return primeiroNome || 'Funcionário'
     }
     if (user?.nome) {
       const primeiroNome = user.nome.trim().split(' ')[0]
-      return primeiroNome || 'Usuário'
+      return primeiroNome || 'Funcionário'
     }
     if (user?.email) {
       const emailPart = user.email.split('@')[0]
       const nomePart = emailPart.split('.')[0]
       return nomePart.charAt(0).toUpperCase() + nomePart.slice(1).toLowerCase()
     }
-    return 'Usuário'
+    return 'Funcionário'
   }
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Cabecalho isHomeFree={true} formularioDesabilitado={trilhasUsuario.length > 0 && !trilhaCompleta} onLogout={handleLogout} />
+      <Cabecalho isHomeFuncionario={true} formularioDesabilitado={trilhasUsuario.length > 0 && !trilhaCompleta} onLogout={handleLogout} />
       <main className="flex-grow bg-gray-50 dark:bg-gray-900 py-6 sm:py-8 md:py-12 lg:py-16">
         <section className="container mx-auto px-3 sm:px-4 md:px-6">
           <div className="max-w-4xl mx-auto">
@@ -241,7 +236,7 @@ const HomeFree = () => {
                 onClick={() => {
                   if (carregandoTrilha) return
                   if (trilhasUsuario.length === 0 || trilhaCompleta) {
-                    navigate('/usuario/definir-trilha')
+                    navigate('/funcionario/definir-trilha')
                     window.scrollTo({ top: 0, behavior: 'smooth' })
                   }
                 }}
@@ -266,13 +261,13 @@ const HomeFree = () => {
                   onClick={() => {
                     const nomeTrilhaLower = trilhaUsuario.nomeTrilha.toLowerCase()
                     if (nomeTrilhaLower.includes('administração') || nomeTrilhaLower.includes('administracao') || nomeTrilhaLower.includes('admin')) {
-                      navigate('/usuario/trilha-administracao')
+                      navigate('/funcionario/trilha-administracao')
                     } else if (nomeTrilhaLower.includes('tecnologia') || nomeTrilhaLower.includes('tech') || nomeTrilhaLower.includes('tecn')) {
-                      navigate('/usuario/trilha-tecnologia')
+                      navigate('/funcionario/trilha-tecnologia')
                     } else if (nomeTrilhaLower.includes('recursos humanos') || nomeTrilhaLower.includes('recursos human') || nomeTrilhaLower.includes('rh')) {
-                      navigate('/usuario/trilha-recursos-humanos')
+                      navigate('/funcionario/trilha-recursos-humanos')
                     } else {
-                      navigate(`/usuario/trilha/${trilhaUsuario.idTrilha}`)
+                      navigate(`/funcionario/trilha/${trilhaUsuario.idTrilha}`)
                     }
                     window.scrollTo({ top: 0, behavior: 'smooth' })
                   }}
@@ -298,8 +293,8 @@ const HomeFree = () => {
       </main>
       <Rodape
         linksRapidos={[
-          { label: 'Home', path: '/home-free', onClick: () => { navigate('/home-free'); window.scrollTo({ top: 0, behavior: 'smooth' }) } },
-          { label: 'Formulário para Definição de Trilha', path: '/usuario/definir-trilha', onClick: () => { navigate('/usuario/definir-trilha'); window.scrollTo({ top: 0, behavior: 'smooth' }) }, disabled: trilhasUsuario.length > 0 && !trilhaCompleta }
+          { label: 'Home', path: '/funcionario/home', onClick: () => { navigate('/funcionario/home'); window.scrollTo({ top: 0, behavior: 'smooth' }) } },
+          { label: 'Formulário para Definição de Trilha', path: '/funcionario/definir-trilha', onClick: () => { navigate('/funcionario/definir-trilha'); window.scrollTo({ top: 0, behavior: 'smooth' }) }, disabled: trilhasUsuario.length > 0 && !trilhaCompleta }
         ]}
         onLinkClick={(path) => { navigate(path); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
       />
@@ -307,4 +302,5 @@ const HomeFree = () => {
   )
 }
 
-export default HomeFree
+export default HomeFuncionario
+

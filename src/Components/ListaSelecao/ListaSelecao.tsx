@@ -9,6 +9,7 @@ interface ListaSelecaoProps {
   required?: boolean
   id?: string
   className?: string
+  disabled?: boolean
 }
 
 const ListaSelecao = ({ 
@@ -19,7 +20,8 @@ const ListaSelecao = ({
   label,
   required = false,
   id,
-  className = ''
+  className = '',
+  disabled = false
 }: ListaSelecaoProps) => {
   const [isOpen, setIsOpen] = useState(false)
   const listaSelecaoRef = useRef<HTMLDivElement>(null)
@@ -58,8 +60,9 @@ const ListaSelecao = ({
         {required && <input type="hidden" value={value} required />}
         <button
           type="button"
-          onClick={() => setIsOpen(!isOpen)}
-          className="w-full px-4 pr-8 py-2 sm:py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400 bg-white dark:bg-gray-700 text-left text-gray-900 dark:text-white text-sm sm:text-base"
+          onClick={() => !disabled && setIsOpen(!isOpen)}
+          disabled={disabled}
+          className={`w-full px-4 pr-8 py-2 sm:py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400 bg-white dark:bg-gray-700 text-left text-gray-900 dark:text-white text-sm sm:text-base ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
           {value || placeholder}
         </button>

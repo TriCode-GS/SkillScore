@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import type { ReactNode } from 'react'
+import type { TipoUsuario } from '../Types/AutenticacaoLogin'
 
 interface User {
   id?: string
@@ -7,7 +8,7 @@ interface User {
   nome?: string
   nomeUsuario?: string
   email?: string
-  tipoUsuario?: string
+  tipoUsuario?: TipoUsuario | string
   isAdmin?: boolean
 }
 

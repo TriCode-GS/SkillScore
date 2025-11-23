@@ -1,25 +1,23 @@
 import { getBaseUrl } from './AutenticacaoLogin'
 import type { ApiErrorResponse } from './Diagnostico'
 
-export type DepartamentoData = {
-  idDepartamento?: number
-  idEmpresa: number
-  nomeDepartamento: string
-  descricao?: string | null
+export interface TrilhaData {
+  idTrilha?: number
+  nomeTrilha: string
+  numFases?: number | null
   dataCriacao?: string
 }
 
-export interface DepartamentoResponse {
-  idDepartamento?: number
-  idEmpresa?: number
-  nomeDepartamento?: string
-  descricao?: string | null
+export interface TrilhaResponse {
+  idTrilha: number
+  nomeTrilha: string
+  numFases: number
   dataCriacao?: string
 }
 
-export async function listarDepartamentos(idEmpresa: number): Promise<DepartamentoResponse[]> {
+export async function listarTrilhas(): Promise<TrilhaResponse[]> {
   const baseUrl = getBaseUrl()
-  const urlString = `${baseUrl}/departamentos/empresa/${idEmpresa}`
+  const urlString = `${baseUrl}/trilhas`
   
   let url: URL
   try {
@@ -40,10 +38,7 @@ export async function listarDepartamentos(idEmpresa: number): Promise<Departamen
     })
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido'
-    if (errorMessage.includes('Failed to fetch') || errorMessage.includes('CORS')) {
-      throw new Error('Erro de CORS: O servidor não está configurado corretamente para aceitar requisições deste domínio.')
-    }
-    throw new Error(`Não foi possível conectar à API. URL: ${url.toString()}. Erro: ${errorMessage}`)
+    throw new Error(`Não foi possível conectar à API. Detalhes: ${errorMessage}`)
   }
 
   if (!res.ok) {
@@ -68,7 +63,7 @@ export async function listarDepartamentos(idEmpresa: number): Promise<Departamen
     }
 
     const statusText = res.statusText || 'Erro'
-    const message = backendMessage || `Falha ao listar departamentos (status ${res.status} ${statusText})`
+    const message = backendMessage || `Falha ao listar trilhas (status ${res.status} ${statusText})`
 
     throw new Error(message)
   }
@@ -76,9 +71,9 @@ export async function listarDepartamentos(idEmpresa: number): Promise<Departamen
   return res.json()
 }
 
-export async function cadastrarDepartamento(departamentoData: DepartamentoData): Promise<DepartamentoResponse> {
+export async function cadastrarTrilha(trilhaData: TrilhaData): Promise<TrilhaResponse> {
   const baseUrl = getBaseUrl()
-  const urlString = `${baseUrl}/departamentos`
+  const urlString = `${baseUrl}/trilhas`
   
   let url: URL
   try {
@@ -87,24 +82,48 @@ export async function cadastrarDepartamento(departamentoData: DepartamentoData):
     throw new Error(`URL inválida: ${urlString}`)
   }
 
+  const agora = new Date()
+  const ano = agora.getFullYear()
+  const mes = String(agora.getMonth() + 1).padStart(2, '0')
+  const dia = String(agora.getDate()).padStart(2, '0')
+  const dataAtual = `${ano}-${mes}-${dia}`
+
+  let numFases: number = 5
+  if (trilhaData.numFases !== undefined && 
+      trilhaData.numFases !== null && 
+      typeof trilhaData.numFases === 'number' && 
+      !isNaN(trilhaData.numFases) &&
+      trilhaData.numFases > 0) {
+    numFases = trilhaData.numFases
+  }
+
+  const numFasesFinal = Number.isInteger(numFases) && numFases > 0 ? numFases : 5
+  
+  const trilhaDataComData = {
+    nomeTrilha: trilhaData.nomeTrilha,
+    numFases: numFasesFinal,
+    dataCriacao: trilhaData.dataCriacao || dataAtual
+  }
+  
+  if (trilhaDataComData.numFases === null || trilhaDataComData.numFases === undefined) {
+    trilhaDataComData.numFases = 5
+  }
+
   let res: Response
 
   try {
     res = await fetch(url.toString(), {
       method: 'POST',
       headers: {
-        'Accept': 'application/json',
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
       },
-      body: JSON.stringify(departamentoData),
       mode: 'cors',
+      body: JSON.stringify(trilhaDataComData),
     })
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido'
-    if (errorMessage.includes('Failed to fetch') || errorMessage.includes('CORS')) {
-      throw new Error('Erro de CORS: O servidor não está configurado corretamente para aceitar requisições deste domínio.')
-    }
-    throw new Error(`Não foi possível conectar à API. URL: ${url.toString()}. Erro: ${errorMessage}`)
+    throw new Error(`Não foi possível conectar à API. Detalhes: ${errorMessage}`)
   }
 
   if (!res.ok) {
@@ -129,7 +148,7 @@ export async function cadastrarDepartamento(departamentoData: DepartamentoData):
     }
 
     const statusText = res.statusText || 'Erro'
-    const message = backendMessage || `Falha ao cadastrar departamento (status ${res.status} ${statusText})`
+    const message = backendMessage || `Falha ao cadastrar trilha (status ${res.status} ${statusText})`
 
     throw new Error(message)
   }
@@ -137,9 +156,9 @@ export async function cadastrarDepartamento(departamentoData: DepartamentoData):
   return res.json()
 }
 
-export async function editarDepartamento(idDepartamento: number, departamentoData: DepartamentoData): Promise<DepartamentoResponse> {
+export async function editarTrilha(idTrilha: number, trilhaData: TrilhaData): Promise<TrilhaResponse> {
   const baseUrl = getBaseUrl()
-  const urlString = `${baseUrl}/departamentos/${idDepartamento}`
+  const urlString = `${baseUrl}/trilhas/${idTrilha}`
   
   let url: URL
   try {
@@ -154,18 +173,15 @@ export async function editarDepartamento(idDepartamento: number, departamentoDat
     res = await fetch(url.toString(), {
       method: 'PUT',
       headers: {
-        'Accept': 'application/json',
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
       },
-      body: JSON.stringify(departamentoData),
       mode: 'cors',
+      body: JSON.stringify(trilhaData),
     })
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido'
-    if (errorMessage.includes('Failed to fetch') || errorMessage.includes('CORS')) {
-      throw new Error('Erro de CORS: O servidor não está configurado corretamente para aceitar requisições deste domínio.')
-    }
-    throw new Error(`Não foi possível conectar à API. URL: ${url.toString()}. Erro: ${errorMessage}`)
+    throw new Error(`Não foi possível conectar à API. Detalhes: ${errorMessage}`)
   }
 
   if (!res.ok) {
@@ -190,7 +206,7 @@ export async function editarDepartamento(idDepartamento: number, departamentoDat
     }
 
     const statusText = res.statusText || 'Erro'
-    const message = backendMessage || `Falha ao editar departamento (status ${res.status} ${statusText})`
+    const message = backendMessage || `Falha ao editar trilha (status ${res.status} ${statusText})`
 
     throw new Error(message)
   }
@@ -198,9 +214,9 @@ export async function editarDepartamento(idDepartamento: number, departamentoDat
   return res.json()
 }
 
-export async function excluirDepartamento(idDepartamento: number): Promise<void> {
+export async function excluirTrilha(idTrilha: number): Promise<void> {
   const baseUrl = getBaseUrl()
-  const urlString = `${baseUrl}/departamentos/${idDepartamento}`
+  const urlString = `${baseUrl}/trilhas/${idTrilha}`
   
   let url: URL
   try {
@@ -221,10 +237,7 @@ export async function excluirDepartamento(idDepartamento: number): Promise<void>
     })
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido'
-    if (errorMessage.includes('Failed to fetch') || errorMessage.includes('CORS')) {
-      throw new Error('Erro de CORS: O servidor não está configurado corretamente para aceitar requisições deste domínio.')
-    }
-    throw new Error(`Não foi possível conectar à API. URL: ${url.toString()}. Erro: ${errorMessage}`)
+    throw new Error(`Não foi possível conectar à API. Detalhes: ${errorMessage}`)
   }
 
   if (!res.ok) {
@@ -248,12 +261,9 @@ export async function excluirDepartamento(idDepartamento: number): Promise<void>
       } catch (_) {}
     }
 
-    let message = backendMessage || `Falha ao excluir departamento (status ${res.status} ${res.statusText || 'Erro'})`
-    
-    if (backendMessage && (backendMessage.includes('Existem usuários vinculados') || backendMessage.includes('usuários vinculados a este departamento'))) {
-      message = 'Não é possível deletar o departamento pois existe um gestor vinculado.'
-    }
-    
+    const statusText = res.statusText || 'Erro'
+    const message = backendMessage || `Falha ao excluir trilha (status ${res.status} ${statusText})`
+
     throw new Error(message)
   }
 }

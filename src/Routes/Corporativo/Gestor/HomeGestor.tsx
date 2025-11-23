@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../../Contexto/AutenticacaoContexto'
 import { buscarUsuarioPorId } from '../../../Types/AutenticacaoLogin'
 import Cabecalho from '../../../Components/Cabecalho/Cabecalho'
+import Rodape from '../../../Components/Rodape/Rodape'
 
 const HomeGestor = () => {
   const navigate = useNavigate()
@@ -101,10 +102,10 @@ const HomeGestor = () => {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+            <div className="flex justify-center">
               <button 
                 onClick={() => handleNavigate('/gestor/funcionarios')}
-                className="p-6 bg-white dark:bg-gray-800 rounded-lg border-2 border-indigo-200 dark:border-indigo-800 hover:border-indigo-400 dark:hover:border-indigo-600 transition-all duration-200 text-left hover:shadow-lg"
+                className="p-6 bg-white dark:bg-gray-800 rounded-lg border-2 border-indigo-200 dark:border-indigo-800 hover:border-indigo-400 dark:hover:border-indigo-600 transition-all duration-200 text-left hover:shadow-lg max-w-md w-full"
               >
                 <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-2">
                   Gerenciar Funcionários
@@ -113,22 +114,17 @@ const HomeGestor = () => {
                   Faça o cadastro de novos funcionários para vinculação ao seu departamento
                 </p>
               </button>
-
-              <button 
-                disabled
-                className="p-6 bg-white dark:bg-gray-800 rounded-lg border-2 border-gray-200 dark:border-gray-600 opacity-60 cursor-not-allowed transition-all duration-200 text-left"
-              >
-                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                  Gerenciar Departamento
-                </h3>
-                <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
-                  Administre seu departamento
-                </p>
-              </button>
             </div>
           </div>
         </section>
       </main>
+      <Rodape
+        linksRapidos={[
+          { label: 'Home', path: '/gestor/home', onClick: () => handleNavigate('/gestor/home') },
+          { label: 'Gerenciar Funcionários', path: '/gestor/funcionarios', onClick: () => handleNavigate('/gestor/funcionarios') }
+        ]}
+        onLinkClick={(path) => handleNavigate(path)}
+      />
     </div>
   )
 }
