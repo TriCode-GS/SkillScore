@@ -239,7 +239,6 @@ const DefinirTrilhaFree = () => {
     setErroEnvio('')
     setSucessoEnvio(false)
 
-    // Bloqueia navegação durante o salvamento
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       e.preventDefault()
       e.returnValue = 'O diagnóstico está sendo salvo. Tem certeza que deseja sair?'
@@ -321,7 +320,6 @@ const DefinirTrilhaFree = () => {
       return false
     } finally {
       setEnviando(false)
-      // Remove o bloqueio de navegação após o salvamento
       window.removeEventListener('beforeunload', handleBeforeUnload)
     }
   }
@@ -387,7 +385,6 @@ const DefinirTrilhaFree = () => {
 
   return (
     <div className={`min-h-screen flex flex-col relative ${enviando ? 'pointer-events-none' : ''}`}>
-      {/* Overlay de bloqueio durante salvamento */}
       {enviando && (
         <div className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm z-[9999] flex items-center justify-center pointer-events-auto">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 sm:p-8 md:p-10 max-w-md mx-4 border-2 border-indigo-200 dark:border-indigo-800">

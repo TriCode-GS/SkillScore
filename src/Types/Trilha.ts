@@ -82,16 +82,13 @@ export async function cadastrarTrilha(trilhaData: TrilhaData): Promise<TrilhaRes
     throw new Error(`URL inválida: ${urlString}`)
   }
 
-  // Garantir que dataCriacao seja a data atual se não fornecida
-  // Usar timezone local para evitar problemas de fuso horário
   const agora = new Date()
   const ano = agora.getFullYear()
   const mes = String(agora.getMonth() + 1).padStart(2, '0')
   const dia = String(agora.getDate()).padStart(2, '0')
-  const dataAtual = `${ano}-${mes}-${dia}` // Formato YYYY-MM-DD
-  
-  // SEMPRE garantir que numFases seja 5 se não fornecido, null, undefined ou 0
-  let numFases: number = 5 // Valor padrão SEMPRE 5
+  const dataAtual = `${ano}-${mes}-${dia}`
+
+  let numFases: number = 5
   if (trilhaData.numFases !== undefined && 
       trilhaData.numFases !== null && 
       typeof trilhaData.numFases === 'number' && 
@@ -99,14 +96,12 @@ export async function cadastrarTrilha(trilhaData: TrilhaData): Promise<TrilhaRes
       trilhaData.numFases > 0) {
     numFases = trilhaData.numFases
   }
-  
-  // Criar objeto garantindo que numFases seja SEMPRE um número válido (5)
-  // Garantir que numFases seja um número inteiro válido
+
   const numFasesFinal = Number.isInteger(numFases) && numFases > 0 ? numFases : 5
   
   const trilhaDataComData = {
     nomeTrilha: trilhaData.nomeTrilha,
-    numFases: numFasesFinal, // SEMPRE será 5 ou um número válido > 0 (camelCase para o backend)
+    numFases: numFasesFinal,
     dataCriacao: trilhaData.dataCriacao || dataAtual
   }
   

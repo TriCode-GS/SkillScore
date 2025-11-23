@@ -352,7 +352,6 @@ const DefinirTrilha = () => {
     setTrilhaRecomendada(trilhaRecomendada)
     setMostrarResultado(true)
 
-    // Enviar diagnóstico ao backend
     const idTrilha = mapearNomeParaIdTrilha(trilhaRecomendada)
     if (idTrilha) {
       await enviarDiagnostico(idTrilha, contagem)

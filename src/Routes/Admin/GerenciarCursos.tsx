@@ -77,7 +77,6 @@ const GerenciarCursos = () => {
       const trilhasListadas = await listarTrilhas()
       setTrilhas(trilhasListadas)
     } catch (error) {
-      // Silenciosamente falha ao carregar trilhas
     }
   }
 
