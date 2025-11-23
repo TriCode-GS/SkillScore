@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../../Contexto/AutenticacaoContexto'
-import { buscarUsuarioPorId } from '../../../Types/AutenticacaoLogin'
+import { buscarUsuarioPorId, getBaseUrl } from '../../../Types/AutenticacaoLogin'
+import { listarTrilhas, type TrilhaResponse } from '../../../Types/Trilha'
+import { listarCursosPorTrilha, type CursoComStatus } from '../../../Types/TrilhaCurso'
+import type { DiagnosticoUsuario } from '../../../Types/Diagnostico'
 import Cabecalho from '../../../Components/Cabecalho/Cabecalho'
 import Rodape from '../../../Components/Rodape/Rodape'
 
@@ -9,6 +12,9 @@ const HomeFuncionario = () => {
   const navigate = useNavigate()
   const { user, logout, isAuthenticated } = useAuth()
   const [nomeFuncionario, setNomeFuncionario] = useState<string>('')
+  const [trilhasUsuario, setTrilhasUsuario] = useState<TrilhaResponse[]>([])
+  const [carregandoTrilha, setCarregandoTrilha] = useState(true)
+  const [trilhaCompleta, setTrilhaCompleta] = useState(false)
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -42,6 +48,134 @@ const HomeFuncionario = () => {
 
     if (isAuthenticated && user?.idUsuario) {
       buscarNomeFuncionario()
+    }
+  }, [isAuthenticated, user])
+
+  useEffect(() => {
+    const buscarTrilhaDoUsuario = async () => {
+      if (!user?.idUsuario) return
+
+      setCarregandoTrilha(true)
+      try {
+        const baseUrl = getBaseUrl()
+        let diagnosticoResponse: Response | null = null
+
+        try {
+          diagnosticoResponse = await fetch(`${baseUrl}/diagnosticos-usuario/usuario/${user.idUsuario}`, {
+            method: 'GET',
+            headers: { 'Accept': 'application/json' },
+            mode: 'cors',
+          })
+        } catch (error) {
+          try {
+            diagnosticoResponse = await fetch(`${baseUrl}/diagnosticos-usuario?usuario=${user.idUsuario}`, {
+              method: 'GET',
+              headers: { 'Accept': 'application/json' },
+              mode: 'cors',
+            })
+          } catch (error2) {
+            try {
+              diagnosticoResponse = await fetch(`${baseUrl}/diagnosticos-usuario`, {
+                method: 'GET',
+                headers: { 'Accept': 'application/json' },
+                mode: 'cors',
+              })
+            } catch (error3) {
+              setCarregandoTrilha(false)
+              return
+            }
+          }
+        }
+
+        if (diagnosticoResponse && diagnosticoResponse.ok) {
+          const diagnosticos = await diagnosticoResponse.json() as DiagnosticoUsuario | DiagnosticoUsuario[]
+          let diagnosticosDoUsuario: DiagnosticoUsuario[] = []
+          
+          if (Array.isArray(diagnosticos)) {
+            diagnosticosDoUsuario = diagnosticos.filter((d: DiagnosticoUsuario) => 
+              d.idUsuario === user.idUsuario
+            )
+          } else if (diagnosticos && diagnosticos.idUsuario === user.idUsuario) {
+            diagnosticosDoUsuario = [diagnosticos]
+          }
+
+          if (diagnosticosDoUsuario.length > 0) {
+            const trilhasListadas = await listarTrilhas()
+            
+            const diagnosticosComTrilha = diagnosticosDoUsuario.filter(d => 
+              d.idTrilha
+            )
+            
+            if (diagnosticosComTrilha.length > 0) {
+              const idsTrilhasUnicos = new Set<number>()
+              const trilhasEncontradas: TrilhaResponse[] = []
+              
+              diagnosticosComTrilha.forEach((diagnostico) => {
+                const idTrilha = diagnostico.idTrilha
+                if (idTrilha && !idsTrilhasUnicos.has(idTrilha)) {
+                  idsTrilhasUnicos.add(idTrilha)
+                  const trilhaEncontrada = trilhasListadas.find(t => t.idTrilha === idTrilha)
+                  if (trilhaEncontrada) {
+                    trilhasEncontradas.push(trilhaEncontrada)
+                  }
+                }
+              })
+              
+              if (trilhasEncontradas.length > 0) {
+                setTrilhasUsuario(trilhasEncontradas)
+              
+                try {
+                  let todasTrilhasCompletas = true
+                  
+                  for (const trilha of trilhasEncontradas) {
+                    const cursosDaTrilha = await listarCursosPorTrilha(trilha.idTrilha, user.idUsuario)
+                    
+                    if (cursosDaTrilha && cursosDaTrilha.length > 0) {
+                      const todosConcluidos = cursosDaTrilha.every((curso: CursoComStatus) => {
+                        const status = curso.statusFase?.toUpperCase().trim() || ''
+                        return status === 'CONCLUIDA' || status === 'CONCLUÍDA' || status === 'CONCLUIDO'
+                      })
+                      
+                      if (!todosConcluidos) {
+                        todasTrilhasCompletas = false
+                        break
+                      }
+                    } else {
+                      todasTrilhasCompletas = false
+                      break
+                    }
+                  }
+                  
+                  setTrilhaCompleta(todasTrilhasCompletas)
+                } catch (error) {
+                  setTrilhaCompleta(false)
+                }
+              } else {
+                setTrilhasUsuario([])
+                setTrilhaCompleta(true)
+              }
+            } else {
+              setTrilhasUsuario([])
+              setTrilhaCompleta(true)
+            }
+          } else {
+            setTrilhasUsuario([])
+            setTrilhaCompleta(true)
+          }
+        } else {
+          setTrilhasUsuario([])
+          setTrilhaCompleta(true)
+        }
+      } catch (error) {
+        setTrilhasUsuario([])
+        setTrilhaCompleta(true)
+      } finally {
+        setCarregandoTrilha(false)
+      }
+    }
+
+    if (isAuthenticated && user?.idUsuario) {
+      buscarTrilhaDoUsuario()
     }
   }, [isAuthenticated, user])
 
@@ -84,7 +218,7 @@ const HomeFuncionario = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Cabecalho isHomeFuncionario={true} onLogout={handleLogout} />
+      <Cabecalho isHomeFuncionario={true} formularioDesabilitado={trilhasUsuario.length > 0 && !trilhaCompleta} onLogout={handleLogout} />
       <main className="flex-grow bg-gray-50 dark:bg-gray-900 py-6 sm:py-8 md:py-12 lg:py-16">
         <section className="container mx-auto px-3 sm:px-4 md:px-6">
           <div className="max-w-4xl mx-auto">
@@ -99,8 +233,19 @@ const HomeFuncionario = () => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
               <button 
-                disabled
-                className="p-4 sm:p-5 md:p-6 bg-white dark:bg-gray-800 rounded-lg border-2 border-gray-200 dark:border-gray-600 opacity-60 cursor-not-allowed transition-all duration-200 text-left hover:opacity-70"
+                onClick={() => {
+                  if (carregandoTrilha) return
+                  if (trilhasUsuario.length === 0 || trilhaCompleta) {
+                    navigate('/funcionario/definir-trilha')
+                    window.scrollTo({ top: 0, behavior: 'smooth' })
+                  }
+                }}
+                disabled={carregandoTrilha || (trilhasUsuario.length > 0 && !trilhaCompleta)}
+                className={`p-4 sm:p-5 md:p-6 rounded-lg border-2 transition-all duration-200 text-left ${
+                  (carregandoTrilha || (trilhasUsuario.length > 0 && !trilhaCompleta))
+                    ? 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 opacity-60 cursor-not-allowed pointer-events-none'
+                    : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 hover:border-indigo-400 dark:hover:border-indigo-600 hover:shadow-lg'
+                }`}
               >
                 <h3 className="text-base sm:text-lg md:text-xl font-semibold text-gray-900 dark:text-white mb-2 break-words">
                   Formulário para Definição de Trilha
@@ -110,48 +255,46 @@ const HomeFuncionario = () => {
                 </p>
               </button>
 
-              <button 
-                disabled
-                className="p-4 sm:p-5 md:p-6 bg-white dark:bg-gray-800 rounded-lg border-2 border-gray-200 dark:border-gray-600 opacity-60 cursor-not-allowed transition-all duration-200 text-left hover:opacity-70"
-              >
-                <h3 className="text-base sm:text-lg md:text-xl font-semibold text-gray-900 dark:text-white mb-2 break-words">
-                  Trilha de Administração
-                </h3>
-                <p className="text-xs sm:text-sm md:text-base text-gray-600 dark:text-gray-400 break-words">
-                  Explore conteúdos e desafios da área administrativa
-                </p>
-              </button>
-
-              <button 
-                disabled
-                className="p-4 sm:p-5 md:p-6 bg-white dark:bg-gray-800 rounded-lg border-2 border-gray-200 dark:border-gray-600 opacity-60 cursor-not-allowed transition-all duration-200 text-left hover:opacity-70"
-              >
-                <h3 className="text-base sm:text-lg md:text-xl font-semibold text-gray-900 dark:text-white mb-2 break-words">
-                  Trilha de Tecnologia
-                </h3>
-                <p className="text-xs sm:text-sm md:text-base text-gray-600 dark:text-gray-400 break-words">
-                  Desenvolva suas habilidades técnicas e tecnológicas
-                </p>
-              </button>
-
-              <button 
-                disabled
-                className="p-4 sm:p-5 md:p-6 bg-white dark:bg-gray-800 rounded-lg border-2 border-gray-200 dark:border-gray-600 opacity-60 cursor-not-allowed transition-all duration-200 text-left hover:opacity-70"
-              >
-                <h3 className="text-base sm:text-lg md:text-xl font-semibold text-gray-900 dark:text-white mb-2 break-words">
-                  Trilha de Recursos Humanos
-                </h3>
-                <p className="text-xs sm:text-sm md:text-base text-gray-600 dark:text-gray-400 break-words">
-                  Aprenda sobre gestão de pessoas e RH
-                </p>
-              </button>
+              {trilhasUsuario.map((trilhaUsuario) => (
+                <button 
+                  key={trilhaUsuario.idTrilha}
+                  onClick={() => {
+                    const nomeTrilhaLower = trilhaUsuario.nomeTrilha.toLowerCase()
+                    if (nomeTrilhaLower.includes('administração') || nomeTrilhaLower.includes('administracao') || nomeTrilhaLower.includes('admin')) {
+                      navigate('/funcionario/trilha-administracao')
+                    } else if (nomeTrilhaLower.includes('tecnologia') || nomeTrilhaLower.includes('tech') || nomeTrilhaLower.includes('tecn')) {
+                      navigate('/funcionario/trilha-tecnologia')
+                    } else if (nomeTrilhaLower.includes('recursos humanos') || nomeTrilhaLower.includes('recursos human') || nomeTrilhaLower.includes('rh')) {
+                      navigate('/funcionario/trilha-recursos-humanos')
+                    } else {
+                      navigate(`/funcionario/trilha/${trilhaUsuario.idTrilha}`)
+                    }
+                    window.scrollTo({ top: 0, behavior: 'smooth' })
+                  }}
+                  className="p-4 sm:p-5 md:p-6 bg-white dark:bg-gray-800 rounded-lg border-2 border-indigo-200 dark:border-indigo-800 hover:border-indigo-400 dark:hover:border-indigo-600 transition-all duration-200 text-left hover:shadow-lg"
+                >
+                  <h3 className="text-base sm:text-lg md:text-xl font-semibold text-gray-900 dark:text-white mb-2 break-words">
+                    {trilhaUsuario.nomeTrilha}
+                  </h3>
+                  <p className="text-xs sm:text-sm md:text-base text-gray-600 dark:text-gray-400 break-words">
+                    {trilhaUsuario.nomeTrilha.toLowerCase().includes('administração') || trilhaUsuario.nomeTrilha.toLowerCase().includes('administracao') || trilhaUsuario.nomeTrilha.toLowerCase().includes('admin')
+                      ? 'Explore conteúdos e desafios da área administrativa'
+                      : trilhaUsuario.nomeTrilha.toLowerCase().includes('tecnologia') || trilhaUsuario.nomeTrilha.toLowerCase().includes('tech')
+                      ? 'Desenvolva suas habilidades técnicas e tecnológicas'
+                      : trilhaUsuario.nomeTrilha.toLowerCase().includes('recursos humanos') || trilhaUsuario.nomeTrilha.toLowerCase().includes('rh')
+                      ? 'Aprenda sobre gestão de pessoas e RH'
+                      : 'Acesse sua trilha de desenvolvimento profissional'}
+                  </p>
+                </button>
+              ))}
             </div>
           </div>
         </section>
       </main>
       <Rodape
         linksRapidos={[
-          { label: 'Home', path: '/funcionario/home', onClick: () => { navigate('/funcionario/home'); window.scrollTo({ top: 0, behavior: 'smooth' }) } }
+          { label: 'Home', path: '/funcionario/home', onClick: () => { navigate('/funcionario/home'); window.scrollTo({ top: 0, behavior: 'smooth' }) } },
+          { label: 'Formulário para Definição de Trilha', path: '/funcionario/definir-trilha', onClick: () => { navigate('/funcionario/definir-trilha'); window.scrollTo({ top: 0, behavior: 'smooth' }) }, disabled: trilhasUsuario.length > 0 && !trilhaCompleta }
         ]}
         onLinkClick={(path) => { navigate(path); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
       />

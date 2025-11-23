@@ -10,10 +10,13 @@ interface CabecalhoProps {
   isHomeAdminEmp?: boolean
   isHomeGestor?: boolean
   isHomeFuncionario?: boolean
+  isDefinirTrilha?: boolean
+  ocultarFormulario?: boolean
+  formularioDesabilitado?: boolean
   onLogout?: () => void
 }
 
-const Cabecalho = ({ isHomeFree = false, isHomeAdmin = false, isHomeAdminEmp = false, isHomeGestor = false, isHomeFuncionario = false, onLogout }: CabecalhoProps) => {
+const Cabecalho = ({ isHomeFree = false, isHomeAdmin = false, isHomeAdminEmp = false, isHomeGestor = false, isHomeFuncionario = false, isDefinirTrilha = false, ocultarFormulario = false, formularioDesabilitado = false, onLogout }: CabecalhoProps) => {
   const [menuAberto, setMenuAberto] = useState(false)
   const { theme, toggleTheme } = useTheme()
   const { user } = useAuth()
@@ -118,9 +121,6 @@ const Cabecalho = ({ isHomeFree = false, isHomeAdmin = false, isHomeAdminEmp = f
                     >
                       Gerenciar Funcionários
                     </Link>
-                    <span className="text-sm lg:text-base font-semibold text-gray-400 dark:text-gray-500 px-3 lg:px-4 py-2 rounded-lg whitespace-nowrap cursor-not-allowed opacity-60">
-                      Gerenciar Departamento
-                    </span>
                   </>
                 ) : isHomeFuncionario ? (
                   <>
@@ -131,9 +131,37 @@ const Cabecalho = ({ isHomeFree = false, isHomeAdmin = false, isHomeAdminEmp = f
                     >
                       Home
                     </Link>
-                    <span className="hidden lg:inline-block text-xs sm:text-sm lg:text-base font-semibold text-gray-400 dark:text-gray-500 px-2 sm:px-3 lg:px-4 py-2 rounded-lg whitespace-nowrap cursor-not-allowed opacity-60">
-                      Formulário para Definição de Trilha
-                    </span>
+                    {!ocultarFormulario && (
+                      <>
+                        {isDefinirTrilha ? (
+                          <span className="hidden lg:inline-block text-xs sm:text-sm lg:text-base font-semibold text-indigo-600 dark:text-indigo-400 px-2 sm:px-3 lg:px-4 py-2 rounded-lg whitespace-nowrap bg-indigo-50 dark:bg-indigo-900/30">
+                            Formulário para Definição de Trilha
+                          </span>
+                        ) : formularioDesabilitado ? (
+                          <span className="hidden lg:inline-block text-xs sm:text-sm lg:text-base font-semibold text-gray-400 dark:text-gray-500 px-2 sm:px-3 lg:px-4 py-2 rounded-lg whitespace-nowrap opacity-60 cursor-not-allowed pointer-events-none">
+                            Formulário para Definição de Trilha
+                          </span>
+                        ) : (
+                          <Link
+                            to="/funcionario/definir-trilha"
+                            onClick={(e) => {
+                              if (formularioDesabilitado) {
+                                e.preventDefault()
+                                return
+                              }
+                              window.scrollTo({ top: 0, behavior: 'smooth' })
+                            }}
+                            className={`hidden lg:inline-block text-xs sm:text-sm lg:text-base font-semibold transition-colors px-2 sm:px-3 lg:px-4 py-2 rounded-lg whitespace-nowrap ${
+                              formularioDesabilitado
+                                ? 'text-gray-400 dark:text-gray-500 opacity-60 cursor-not-allowed pointer-events-none'
+                                : 'text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-gray-800'
+                            }`}
+                          >
+                            Formulário para Definição de Trilha
+                          </Link>
+                        )}
+                      </>
+                    )}
                   </>
                 ) : (
                   <>
@@ -212,7 +240,7 @@ const Cabecalho = ({ isHomeFree = false, isHomeAdmin = false, isHomeAdminEmp = f
                   </Botao>
                 )}
               </div>
-              <div className="hidden xl:flex items-center gap-3 lg:gap-4">
+              <div className="hidden 2xl:flex items-center gap-3 lg:gap-4">
                 <Link
                   to="/login"
                   onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
@@ -273,10 +301,17 @@ const Cabecalho = ({ isHomeFree = false, isHomeAdmin = false, isHomeAdminEmp = f
                 >
                   Gerenciar Trilhas
                 </Link>
+                <Link
+                  to="/admin/usuarios-por-trilha"
+                  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                  className="text-sm lg:text-base font-semibold text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors px-3 lg:px-4 py-2 rounded-lg hover:bg-indigo-50 dark:hover:bg-gray-800 whitespace-nowrap"
+                >
+                  Usuários por Trilha
+                </Link>
               </div>
               <button
                 onClick={() => setMenuAberto(!menuAberto)}
-                className="xl:hidden text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors p-2 rounded-lg hover:bg-indigo-50 dark:hover:bg-gray-800"
+                className="2xl:hidden text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors p-2 rounded-lg hover:bg-indigo-50 dark:hover:bg-gray-800"
                 aria-label="Menu"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -356,17 +391,41 @@ const Cabecalho = ({ isHomeFree = false, isHomeAdmin = false, isHomeAdminEmp = f
                 <Link
                   to="/home-free"
                   onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                  className="text-sm lg:text-base font-semibold text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors px-3 lg:px-4 py-2 rounded-lg hover:bg-indigo-50 dark:hover:bg-gray-800 whitespace-nowrap"
+                  className="text-xs sm:text-sm lg:text-base font-semibold text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors px-2 sm:px-3 lg:px-4 py-2 rounded-lg hover:bg-indigo-50 dark:hover:bg-gray-800 whitespace-nowrap"
                 >
                   Home
                 </Link>
-                <Link
-                  to="/trilhas"
-                  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                  className="text-sm lg:text-base font-semibold text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors px-3 lg:px-4 py-2 rounded-lg hover:bg-indigo-50 dark:hover:bg-gray-800 whitespace-nowrap"
-                >
-                  Minhas Trilhas
-                </Link>
+                {!ocultarFormulario && (
+                  <>
+                    {isDefinirTrilha ? (
+                      <span className="hidden lg:inline-block text-xs sm:text-sm lg:text-base font-semibold text-indigo-600 dark:text-indigo-400 px-2 sm:px-3 lg:px-4 py-2 rounded-lg whitespace-nowrap bg-indigo-50 dark:bg-indigo-900/30">
+                        Formulário para Definição de Trilha
+                      </span>
+                    ) : formularioDesabilitado ? (
+                      <span className="hidden lg:inline-block text-xs sm:text-sm lg:text-base font-semibold text-gray-400 dark:text-gray-500 px-2 sm:px-3 lg:px-4 py-2 rounded-lg whitespace-nowrap opacity-60 cursor-not-allowed pointer-events-none">
+                        Formulário para Definição de Trilha
+                      </span>
+                    ) : (
+                      <Link
+                        to="/usuario/definir-trilha"
+                        onClick={(e) => {
+                          if (formularioDesabilitado) {
+                            e.preventDefault()
+                            return
+                          }
+                          window.scrollTo({ top: 0, behavior: 'smooth' })
+                        }}
+                        className={`hidden lg:inline-block text-xs sm:text-sm lg:text-base font-semibold transition-colors px-2 sm:px-3 lg:px-4 py-2 rounded-lg whitespace-nowrap ${
+                          formularioDesabilitado
+                            ? 'text-gray-400 dark:text-gray-500 opacity-60 cursor-not-allowed pointer-events-none'
+                            : 'text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-gray-800'
+                        }`}
+                      >
+                        Formulário para Definição de Trilha
+                      </Link>
+                    )}
+                  </>
+                )}
               </div>
               <button
                 onClick={() => setMenuAberto(!menuAberto)}
@@ -539,9 +598,6 @@ const Cabecalho = ({ isHomeFree = false, isHomeAdmin = false, isHomeAdminEmp = f
                   >
                     Gerenciar Funcionários
                   </Link>
-                  <span className="px-4 py-4 text-left text-gray-400 dark:text-gray-500 cursor-not-allowed opacity-60">
-                    Gerenciar Departamento
-                  </span>
                 </>
               ) : isHomeFuncionario ? (
                 <>
@@ -555,9 +611,38 @@ const Cabecalho = ({ isHomeFree = false, isHomeAdmin = false, isHomeAdminEmp = f
                   >
                     Home
                   </Link>
-                  <span className="px-4 py-4 text-left text-gray-400 dark:text-gray-500 cursor-not-allowed opacity-60">
-                    Formulário para Definição de Trilha
-                  </span>
+                  {!ocultarFormulario && (
+                    <>
+                      {isDefinirTrilha ? (
+                        <span className="px-4 py-4 text-left text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 font-medium border-b-2 border-gray-200 dark:border-gray-700">
+                          Formulário para Definição de Trilha
+                        </span>
+                      ) : formularioDesabilitado ? (
+                        <span className="px-4 py-4 text-left text-gray-400 dark:text-gray-500 opacity-60 cursor-not-allowed pointer-events-none font-medium border-b-2 border-gray-200 dark:border-gray-700">
+                          Formulário para Definição de Trilha
+                        </span>
+                      ) : (
+                        <Link
+                          to="/funcionario/definir-trilha"
+                          onClick={(e) => {
+                            if (formularioDesabilitado) {
+                              e.preventDefault()
+                              return
+                            }
+                            window.scrollTo({ top: 0, behavior: 'smooth' })
+                            setMenuAberto(false)
+                          }}
+                          className={`px-4 py-4 text-left transition-all duration-200 font-medium border-b-2 border-gray-200 dark:border-gray-700 ${
+                            formularioDesabilitado
+                              ? 'text-gray-400 dark:text-gray-500 opacity-60 cursor-not-allowed pointer-events-none'
+                              : 'text-gray-700 dark:text-gray-300 hover:text-white hover:bg-indigo-600 dark:hover:bg-indigo-600 active:bg-indigo-700 active:text-white'
+                          }`}
+                        >
+                          Formulário para Definição de Trilha
+                        </Link>
+                      )}
+                    </>
+                  )}
                 </>
               ) : (
                 <>
@@ -597,7 +682,7 @@ const Cabecalho = ({ isHomeFree = false, isHomeAdmin = false, isHomeAdminEmp = f
           </div>
         )}
         {menuAberto && isHomeAdmin && (
-          <div className="xl:hidden mt-4 border-t-2 border-gray-300 dark:border-gray-700 pt-4">
+          <div className="2xl:hidden mt-4 border-t-2 border-gray-300 dark:border-gray-700 pt-4">
             <div className="flex flex-col bg-white dark:bg-gray-800 rounded-lg shadow-xl border-2 border-gray-200 dark:border-gray-700 overflow-hidden">
               <Link
                 to="/login"
@@ -676,9 +761,19 @@ const Cabecalho = ({ isHomeFree = false, isHomeAdmin = false, isHomeAdminEmp = f
                   window.scrollTo({ top: 0, behavior: 'smooth' })
                   setMenuAberto(false)
                 }}
-                className="px-4 py-4 text-left text-gray-700 dark:text-gray-300 hover:text-white hover:bg-indigo-600 dark:hover:bg-indigo-600 active:bg-indigo-700 active:text-white transition-all duration-200 font-medium"
+                className="px-4 py-4 text-left text-gray-700 dark:text-gray-300 hover:text-white hover:bg-indigo-600 dark:hover:bg-indigo-600 active:bg-indigo-700 active:text-white transition-all duration-200 font-medium border-b-2 border-gray-200 dark:border-gray-700"
               >
                 Gerenciar Trilhas
+              </Link>
+              <Link
+                to="/admin/usuarios-por-trilha"
+                onClick={() => {
+                  window.scrollTo({ top: 0, behavior: 'smooth' })
+                  setMenuAberto(false)
+                }}
+                className="px-4 py-4 text-left text-gray-700 dark:text-gray-300 hover:text-white hover:bg-indigo-600 dark:hover:bg-indigo-600 active:bg-indigo-700 active:text-white transition-all duration-200 font-medium"
+              >
+                Usuários por Trilha
               </Link>
             </div>
           </div>
@@ -723,20 +818,42 @@ const Cabecalho = ({ isHomeFree = false, isHomeAdmin = false, isHomeAdminEmp = f
                   window.scrollTo({ top: 0, behavior: 'smooth' })
                   setMenuAberto(false)
                 }}
-                className="px-4 py-4 text-left text-gray-700 dark:text-gray-300 hover:text-white hover:bg-indigo-600 dark:hover:bg-indigo-600 active:bg-indigo-700 active:text-white transition-all duration-200 font-medium border-b-2 border-gray-200 dark:border-gray-700"
+                className="px-4 py-4 text-left text-gray-700 dark:text-gray-300 hover:text-white hover:bg-indigo-600 dark:hover:bg-indigo-600 active:bg-indigo-700 active:text-white transition-all duration-200 font-medium"
               >
                 Home
               </Link>
-              <Link
-                to="/trilhas"
-                onClick={() => {
-                  window.scrollTo({ top: 0, behavior: 'smooth' })
-                  setMenuAberto(false)
-                }}
-                className="px-4 py-4 text-left text-gray-700 dark:text-gray-300 hover:text-white hover:bg-indigo-600 dark:hover:bg-indigo-600 active:bg-indigo-700 active:text-white transition-all duration-200 font-medium"
-              >
-                Minhas Trilhas
-              </Link>
+              {!ocultarFormulario && (
+                <>
+                  {isDefinirTrilha ? (
+                    <span className="px-4 py-4 text-left text-indigo-600 dark:text-indigo-400 font-medium border-b-2 border-gray-200 dark:border-gray-700 bg-indigo-50 dark:bg-indigo-900/30">
+                      Formulário para Definição de Trilha
+                    </span>
+                  ) : formularioDesabilitado ? (
+                    <span className="px-4 py-4 text-left text-gray-400 dark:text-gray-500 font-medium border-b-2 border-gray-200 dark:border-gray-700 opacity-60 cursor-not-allowed pointer-events-none">
+                      Formulário para Definição de Trilha
+                    </span>
+                  ) : (
+                    <Link
+                      to="/usuario/definir-trilha"
+                      onClick={(e) => {
+                        if (formularioDesabilitado) {
+                          e.preventDefault()
+                          return
+                        }
+                        window.scrollTo({ top: 0, behavior: 'smooth' })
+                        setMenuAberto(false)
+                      }}
+                      className={`px-4 py-4 text-left font-medium border-b-2 border-gray-200 dark:border-gray-700 transition-all duration-200 ${
+                        formularioDesabilitado
+                          ? 'text-gray-400 dark:text-gray-500 opacity-60 cursor-not-allowed pointer-events-none'
+                          : 'text-gray-700 dark:text-gray-300 hover:text-white hover:bg-indigo-600 dark:hover:text-indigo-600 active:bg-indigo-700 active:text-white'
+                      }`}
+                    >
+                      Formulário para Definição de Trilha
+                    </Link>
+                  )}
+                </>
+              )}
             </div>
           </div>
         )}

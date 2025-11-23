@@ -116,6 +116,18 @@ const HomeAdmin = () => {
                 </p>
               </button>
 
+              <button 
+                onClick={() => handleNavigate('/admin/usuarios-por-trilha')}
+                className="p-6 bg-white dark:bg-gray-800 rounded-lg border-2 border-gray-200 dark:border-gray-600 hover:border-indigo-400 dark:hover:border-indigo-600 hover:shadow-lg transition-all duration-200 text-left"
+              >
+                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                  Usuários
+                </h3>
+                <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
+                  Visualize usuários e funcionários cadastrados e suas trilhas
+                </p>
+              </button>
+
             </div>
           </div>
         </section>
@@ -126,7 +138,8 @@ const HomeAdmin = () => {
           { label: 'Gerenciar Administradores', path: '/admin/administradores', onClick: () => handleNavigate('/admin/administradores') },
           { label: 'Gerenciar Empresas', path: '/admin/empresas', onClick: () => handleNavigate('/admin/empresas') },
           { label: 'Gerenciar Cursos', path: '/admin/cursos', onClick: () => handleNavigate('/admin/cursos') },
-          { label: 'Gerenciar Trilhas', path: '/admin/trilhas', onClick: () => handleNavigate('/admin/trilhas') }
+          { label: 'Gerenciar Trilhas', path: '/admin/trilhas', onClick: () => handleNavigate('/admin/trilhas') },
+          { label: 'Usuários por Trilha', path: '/admin/usuarios-por-trilha', onClick: () => handleNavigate('/admin/usuarios-por-trilha') }
         ]}
         onLinkClick={(path) => handleNavigate(path)}
       />

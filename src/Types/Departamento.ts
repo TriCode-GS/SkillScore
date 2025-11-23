@@ -1,4 +1,5 @@
 import { getBaseUrl } from './AutenticacaoLogin'
+import type { ApiErrorResponse } from './Diagnostico'
 
 export type DepartamentoData = {
   idDepartamento?: number
@@ -60,8 +61,8 @@ export async function listarDepartamentos(idEmpresa: number): Promise<Departamen
         const data = await res.clone().json() as unknown
         if (typeof data === 'string') backendMessage = data
         else if (data && typeof data === 'object') {
-          const anyData = data as { message?: string; error?: string; detalhe?: string }
-          backendMessage = anyData.message || anyData.error || anyData.detalhe
+          const errorData = data as ApiErrorResponse
+          backendMessage = errorData.message || errorData.error || errorData.detalhe || errorData.erro
         }
       } catch (_) {}
     }
@@ -121,8 +122,8 @@ export async function cadastrarDepartamento(departamentoData: DepartamentoData):
         const data = await res.clone().json() as unknown
         if (typeof data === 'string') backendMessage = data
         else if (data && typeof data === 'object') {
-          const anyData = data as { message?: string; error?: string; detalhe?: string }
-          backendMessage = anyData.message || anyData.error || anyData.detalhe
+          const errorData = data as ApiErrorResponse
+          backendMessage = errorData.message || errorData.error || errorData.detalhe || errorData.erro
         }
       } catch (_) {}
     }
@@ -182,8 +183,8 @@ export async function editarDepartamento(idDepartamento: number, departamentoDat
         const data = await res.clone().json() as unknown
         if (typeof data === 'string') backendMessage = data
         else if (data && typeof data === 'object') {
-          const anyData = data as { message?: string; error?: string; detalhe?: string }
-          backendMessage = anyData.message || anyData.error || anyData.detalhe
+          const errorData = data as ApiErrorResponse
+          backendMessage = errorData.message || errorData.error || errorData.detalhe || errorData.erro
         }
       } catch (_) {}
     }
@@ -241,8 +242,8 @@ export async function excluirDepartamento(idDepartamento: number): Promise<void>
         const data = await res.clone().json() as unknown
         if (typeof data === 'string') backendMessage = data
         else if (data && typeof data === 'object') {
-          const anyData = data as { message?: string; error?: string; detalhe?: string }
-          backendMessage = anyData.message || anyData.error || anyData.detalhe
+          const errorData = data as ApiErrorResponse
+          backendMessage = errorData.message || errorData.error || errorData.detalhe || errorData.erro
         }
       } catch (_) {}
     }

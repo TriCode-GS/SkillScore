@@ -4,6 +4,7 @@ interface LinkRapido {
   label: string
   path: string
   onClick?: () => void
+  disabled?: boolean
 }
 
 interface RodapeProps {
@@ -54,18 +55,41 @@ const Rodape = ({ linksRapidos, onLinkClick }: RodapeProps) => {
             <ul className="space-y-2">
               {linksParaUsar.map((link, index) => (
                 <li key={index}>
-                  {onLinkClick || link.onClick ? (
+                  {link.disabled ? (
+                    <span className="text-gray-400 dark:text-gray-600 opacity-60 cursor-not-allowed text-left">
+                      {link.label}
+                    </span>
+                  ) : onLinkClick || link.onClick ? (
                     <button
-                      onClick={() => handleLink(link)}
-                      className="text-gray-400 dark:text-gray-600 hover:text-indigo-400 dark:hover:text-indigo-600 transition-colors text-left"
+                      onClick={() => {
+                        if (!link.disabled) {
+                          handleLink(link)
+                        }
+                      }}
+                      disabled={link.disabled}
+                      className={`text-left transition-colors ${
+                        link.disabled
+                          ? 'text-gray-400 dark:text-gray-600 opacity-60 cursor-not-allowed pointer-events-none'
+                          : 'text-gray-400 dark:text-gray-600 hover:text-indigo-400 dark:hover:text-indigo-600'
+                      }`}
                     >
                       {link.label}
                     </button>
                   ) : (
                     <Link 
                       to={link.path} 
-                      onClick={handleLinkClick}
-                      className="text-gray-400 dark:text-gray-600 hover:text-indigo-400 dark:hover:text-indigo-600 transition-colors"
+                      onClick={(e) => {
+                        if (link.disabled) {
+                          e.preventDefault()
+                          return
+                        }
+                        handleLinkClick()
+                      }}
+                      className={`transition-colors ${
+                        link.disabled
+                          ? 'text-gray-400 dark:text-gray-600 opacity-60 cursor-not-allowed pointer-events-none'
+                          : 'text-gray-400 dark:text-gray-600 hover:text-indigo-400 dark:hover:text-indigo-600'
+                      }`}
                     >
                       {link.label}
                     </Link>

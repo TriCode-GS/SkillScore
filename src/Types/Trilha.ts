@@ -1,16 +1,17 @@
 import { getBaseUrl } from './AutenticacaoLogin'
+import type { ApiErrorResponse } from './Diagnostico'
 
 export interface TrilhaData {
   idTrilha?: number
   nomeTrilha: string
-  status: string | null
+  numFases?: number | null
   dataCriacao?: string
 }
 
 export interface TrilhaResponse {
   idTrilha: number
   nomeTrilha: string
-  status: string
+  numFases: number
   dataCriacao?: string
 }
 
@@ -55,8 +56,8 @@ export async function listarTrilhas(): Promise<TrilhaResponse[]> {
         const data = await res.clone().json() as unknown
         if (typeof data === 'string') backendMessage = data
         else if (data && typeof data === 'object') {
-          const anyData = data as { message?: string; error?: string; detalhe?: string }
-          backendMessage = anyData.message || anyData.error || anyData.detalhe
+          const errorData = data as ApiErrorResponse
+          backendMessage = errorData.message || errorData.error || errorData.detalhe || errorData.erro
         }
       } catch (_) {}
     }
@@ -81,6 +82,38 @@ export async function cadastrarTrilha(trilhaData: TrilhaData): Promise<TrilhaRes
     throw new Error(`URL inválida: ${urlString}`)
   }
 
+  // Garantir que dataCriacao seja a data atual se não fornecida
+  // Usar timezone local para evitar problemas de fuso horário
+  const agora = new Date()
+  const ano = agora.getFullYear()
+  const mes = String(agora.getMonth() + 1).padStart(2, '0')
+  const dia = String(agora.getDate()).padStart(2, '0')
+  const dataAtual = `${ano}-${mes}-${dia}` // Formato YYYY-MM-DD
+  
+  // SEMPRE garantir que numFases seja 5 se não fornecido, null, undefined ou 0
+  let numFases: number = 5 // Valor padrão SEMPRE 5
+  if (trilhaData.numFases !== undefined && 
+      trilhaData.numFases !== null && 
+      typeof trilhaData.numFases === 'number' && 
+      !isNaN(trilhaData.numFases) &&
+      trilhaData.numFases > 0) {
+    numFases = trilhaData.numFases
+  }
+  
+  // Criar objeto garantindo que numFases seja SEMPRE um número válido (5)
+  // Garantir que numFases seja um número inteiro válido
+  const numFasesFinal = Number.isInteger(numFases) && numFases > 0 ? numFases : 5
+  
+  const trilhaDataComData = {
+    nomeTrilha: trilhaData.nomeTrilha,
+    numFases: numFasesFinal, // SEMPRE será 5 ou um número válido > 0 (camelCase para o backend)
+    dataCriacao: trilhaData.dataCriacao || dataAtual
+  }
+  
+  if (trilhaDataComData.numFases === null || trilhaDataComData.numFases === undefined) {
+    trilhaDataComData.numFases = 5
+  }
+
   let res: Response
 
   try {
@@ -91,7 +124,7 @@ export async function cadastrarTrilha(trilhaData: TrilhaData): Promise<TrilhaRes
         'Accept': 'application/json',
       },
       mode: 'cors',
-      body: JSON.stringify(trilhaData),
+      body: JSON.stringify(trilhaDataComData),
     })
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido'
@@ -113,8 +146,8 @@ export async function cadastrarTrilha(trilhaData: TrilhaData): Promise<TrilhaRes
         const data = await res.clone().json() as unknown
         if (typeof data === 'string') backendMessage = data
         else if (data && typeof data === 'object') {
-          const anyData = data as { message?: string; error?: string; detalhe?: string }
-          backendMessage = anyData.message || anyData.error || anyData.detalhe
+          const errorData = data as ApiErrorResponse
+          backendMessage = errorData.message || errorData.error || errorData.detalhe || errorData.erro
         }
       } catch (_) {}
     }
@@ -171,8 +204,8 @@ export async function editarTrilha(idTrilha: number, trilhaData: TrilhaData): Pr
         const data = await res.clone().json() as unknown
         if (typeof data === 'string') backendMessage = data
         else if (data && typeof data === 'object') {
-          const anyData = data as { message?: string; error?: string; detalhe?: string }
-          backendMessage = anyData.message || anyData.error || anyData.detalhe
+          const errorData = data as ApiErrorResponse
+          backendMessage = errorData.message || errorData.error || errorData.detalhe || errorData.erro
         }
       } catch (_) {}
     }
@@ -227,8 +260,8 @@ export async function excluirTrilha(idTrilha: number): Promise<void> {
         const data = await res.clone().json() as unknown
         if (typeof data === 'string') backendMessage = data
         else if (data && typeof data === 'object') {
-          const anyData = data as { message?: string; error?: string; detalhe?: string }
-          backendMessage = anyData.message || anyData.error || anyData.detalhe
+          const errorData = data as ApiErrorResponse
+          backendMessage = errorData.message || errorData.error || errorData.detalhe || errorData.erro
         }
       } catch (_) {}
     }

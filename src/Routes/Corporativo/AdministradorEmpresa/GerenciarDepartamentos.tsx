@@ -8,6 +8,7 @@ import ListaSelecao from '../../../Components/ListaSelecao/ListaSelecao'
 import Rodape from '../../../Components/Rodape/Rodape'
 import { cadastrarDepartamento, listarDepartamentos, editarDepartamento, excluirDepartamento, type DepartamentoData, type DepartamentoResponse } from '../../../Types/Departamento'
 import { buscarUsuarioPorId, getBaseUrl, type UsuarioResponse } from '../../../Types/AutenticacaoLogin'
+import type { ApiErrorResponse } from '../../../Types/Diagnostico'
 
 interface DepartamentoFormData {
   nomeDepartamento: string
@@ -237,8 +238,8 @@ const GerenciarDepartamentos = () => {
             const data = await res.clone().json() as unknown
             if (typeof data === 'string') backendMessage = data
             else if (data && typeof data === 'object') {
-              const anyData = data as { message?: string; error?: string; detalhe?: string }
-              backendMessage = anyData.message || anyData.error || anyData.detalhe
+              const errorData = data as ApiErrorResponse
+              backendMessage = errorData.message || errorData.error || errorData.detalhe || errorData.erro
             }
           } catch (_) {}
         }
@@ -301,8 +302,8 @@ const GerenciarDepartamentos = () => {
             const data = await res.clone().json() as unknown
             if (typeof data === 'string') backendMessage = data
             else if (data && typeof data === 'object') {
-              const anyData = data as { message?: string; error?: string; detalhe?: string }
-              backendMessage = anyData.message || anyData.error || anyData.detalhe
+              const errorData = data as ApiErrorResponse
+              backendMessage = errorData.message || errorData.error || errorData.detalhe || errorData.erro
             }
           } catch (_) {}
         }

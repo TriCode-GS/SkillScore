@@ -1,5 +1,6 @@
 import { getBaseUrl } from './AutenticacaoLogin'
-import type { UsuarioData } from './AutenticacaoLogin'
+import type { UsuarioData, TipoUsuario } from './AutenticacaoLogin'
+import type { ApiErrorResponse } from './Diagnostico'
 
 export type EmpresaData = {
   idEmpresa?: number
@@ -15,7 +16,7 @@ export type EmpresaData = {
 export interface UsuarioApiResponse {
   idUsuario?: number
   nomeUsuario?: string
-  tipoUsuario?: string
+  tipoUsuario?: TipoUsuario | string
   idEmpresa?: number | null
   idDepartamento?: number | null
   nivelSenioridade?: string | null
@@ -79,8 +80,8 @@ export async function listarEmpresas(): Promise<EmpresaResponse[]> {
         const data = await res.clone().json() as unknown
         if (typeof data === 'string') backendMessage = data
         else if (data && typeof data === 'object') {
-          const anyData = data as { message?: string; error?: string; detalhe?: string }
-          backendMessage = anyData.message || anyData.error || anyData.detalhe
+          const errorData = data as ApiErrorResponse
+          backendMessage = errorData.message || errorData.error || errorData.detalhe || errorData.erro
         }
       } catch (_) {}
     }
@@ -190,8 +191,8 @@ export async function cadastrarEmpresa(empresaData: EmpresaData): Promise<Empres
         const data = await res.clone().json() as unknown
         if (typeof data === 'string') backendMessage = data
         else if (data && typeof data === 'object') {
-          const anyData = data as { message?: string; error?: string; detalhe?: string }
-          backendMessage = anyData.message || anyData.error || anyData.detalhe
+          const errorData = data as ApiErrorResponse
+          backendMessage = errorData.message || errorData.error || errorData.detalhe || errorData.erro
         }
       } catch (_) {}
     }
@@ -251,8 +252,8 @@ export async function editarEmpresa(idEmpresa: number, empresaData: EmpresaData)
         const data = await res.clone().json() as unknown
         if (typeof data === 'string') backendMessage = data
         else if (data && typeof data === 'object') {
-          const anyData = data as { message?: string; error?: string; detalhe?: string }
-          backendMessage = anyData.message || anyData.error || anyData.detalhe
+          const errorData = data as ApiErrorResponse
+          backendMessage = errorData.message || errorData.error || errorData.detalhe || errorData.erro
         }
       } catch (_) {}
     }
@@ -310,8 +311,8 @@ export async function excluirEmpresa(idEmpresa: number): Promise<void> {
         const data = await res.clone().json() as unknown
         if (typeof data === 'string') backendMessage = data
         else if (data && typeof data === 'object') {
-          const anyData = data as { message?: string; error?: string; detalhe?: string }
-          backendMessage = anyData.message || anyData.error || anyData.detalhe
+          const errorData = data as ApiErrorResponse
+          backendMessage = errorData.message || errorData.error || errorData.detalhe || errorData.erro
         }
       } catch (_) {}
     }
@@ -368,8 +369,8 @@ export async function buscarEmpresaPorCNPJ(cnpj: string): Promise<EmpresaData> {
         const data = await res.clone().json() as unknown
         if (typeof data === 'string') backendMessage = data
         else if (data && typeof data === 'object') {
-          const anyData = data as { message?: string; error?: string; detalhe?: string }
-          backendMessage = anyData.message || anyData.error || anyData.detalhe
+          const errorData = data as ApiErrorResponse
+          backendMessage = errorData.message || errorData.error || errorData.detalhe || errorData.erro
         }
       } catch (_) {}
     }

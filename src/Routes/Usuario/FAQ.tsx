@@ -51,6 +51,12 @@ const FAQ = () => {
 
   const handleSim = () => {
     setBotaoClicado('sim')
+    navigate('/contato')
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const handleNao = () => {
+    setBotaoClicado('nao')
     setMostrarMensagem(true)
   }
 
@@ -63,12 +69,6 @@ const FAQ = () => {
       return () => clearTimeout(timer)
     }
   }, [mostrarMensagem])
-
-  const handleNao = () => {
-    setBotaoClicado('nao')
-    navigate('/contato')
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
 
   return (
     <div className="min-h-screen flex flex-col">

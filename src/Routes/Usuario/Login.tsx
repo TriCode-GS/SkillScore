@@ -39,10 +39,12 @@ const Login = () => {
       const idUsuarioNum = response.idUsuario || 0
       
       let nomeUsuarioCompleto = response.nomeUsuario || response.nome || emailTrimmed.split('@')[0]
+      let tipoUsuario = response.tipoUsuario || 'USUARIO'
       
       try {
         const usuarioCompleto = await buscarUsuarioPorId(idUsuarioNum)
         nomeUsuarioCompleto = usuarioCompleto.nomeUsuario
+        tipoUsuario = usuarioCompleto.tipoUsuario || 'USUARIO'
       } catch (error) {
       }
       
@@ -51,7 +53,8 @@ const Login = () => {
         idUsuario: idUsuarioNum,
         nome: nomeUsuarioCompleto,
         nomeUsuario: nomeUsuarioCompleto,
-        email: response.email || emailTrimmed
+        email: response.email || emailTrimmed,
+        tipoUsuario: tipoUsuario
       }
       
       login(userData)

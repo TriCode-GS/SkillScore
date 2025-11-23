@@ -282,7 +282,7 @@ const GerenciarCursos = () => {
                           <th className="pl-4 sm:pl-5 md:pl-6 lg:pl-7 pr-3 sm:pr-4 md:pr-5 lg:pr-6 py-2.5 sm:py-3 md:py-3.5 lg:py-4 text-center text-xs sm:text-sm md:text-base font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap">Título</th>
                           <th className="px-3 sm:px-4 md:px-5 lg:px-6 py-2.5 sm:py-3 md:py-3.5 lg:py-4 text-center text-xs sm:text-sm md:text-base font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap">Descrição</th>
                           <th className="px-3 sm:px-4 md:px-5 lg:px-6 py-2.5 sm:py-3 md:py-3.5 lg:py-4 text-center text-xs sm:text-sm md:text-base font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap">Link do Curso</th>
-                          <th className="px-3 sm:px-4 md:px-5 lg:px-6 py-2.5 sm:py-3 md:py-3.5 lg:py-4 text-center text-xs sm:text-sm md:text-base font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap">Trilha Relacionada</th>
+                          <th className="px-3 sm:px-4 md:px-5 lg:px-6 py-2.5 sm:py-3 md:py-3.5 lg:py-4 text-center text-xs sm:text-sm md:text-base font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap">Área Relacionada</th>
                           <th className="px-3 sm:px-4 md:px-5 lg:px-6 py-2.5 sm:py-3 md:py-3.5 lg:py-4 text-center text-xs sm:text-sm md:text-base font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap">Nível Recomendado</th>
                           <th className="px-3 sm:px-4 md:px-5 lg:px-6 py-2.5 sm:py-3 md:py-3.5 lg:py-4 text-center text-xs sm:text-sm md:text-base font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap">Duração</th>
                           <th className="pl-3 sm:pl-4 md:pl-5 lg:pl-6 pr-4 sm:pr-5 md:pr-6 lg:pr-7 py-2.5 sm:py-3 md:py-3.5 lg:py-4 text-center text-xs sm:text-sm md:text-base font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap">Ações</th>
@@ -431,11 +431,12 @@ const GerenciarCursos = () => {
                   </label>
                   <textarea
                     id="descricao"
+                    maxLength={600}
                     {...registerCadastro('descricao', {
                       required: 'Descrição é obrigatória',
                       maxLength: {
-                        value: 300,
-                        message: 'Descrição deve ter no máximo 300 caracteres'
+                        value: 600,
+                        message: 'Descrição deve ter no máximo 600 caracteres'
                       }
                     })}
                     disabled={carregandoCadastro}
@@ -460,11 +461,12 @@ const GerenciarCursos = () => {
                   <input
                     type="url"
                     id="linkCurso"
+                    maxLength={200}
                     {...registerCadastro('linkCurso', {
                       required: 'Link do curso é obrigatório',
                       maxLength: {
-                        value: 100,
-                        message: 'Link deve ter no máximo 100 caracteres'
+                        value: 200,
+                        message: 'Link deve ter no máximo 200 caracteres'
                       }
                     })}
                     disabled={carregandoCadastro}
@@ -483,24 +485,23 @@ const GerenciarCursos = () => {
                     htmlFor="areaRelacionada" 
                     className="block text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2"
                   >
-                    Trilha Relacionada <span className="text-red-500">*</span>
+                    Área Relacionada <span className="text-red-500">*</span>
                   </label>
                   <Controller
                     name="areaRelacionada"
                     control={controlCadastro}
                     rules={{
-                      required: 'Trilha relacionada é obrigatória'
+                      required: 'Área relacionada é obrigatória'
                     }}
                     render={({ field }) => {
-                      const nomesTrilhas = trilhas.map(trilha => trilha.nomeTrilha)
                       return (
                         <ListaSelecao
-                          options={nomesTrilhas}
+                          options={['Administração', 'Tecnologia', 'Recursos Humanos']}
                           value={field.value || ''}
                           onChange={(nomeSelecionado) => {
                             field.onChange(nomeSelecionado)
                           }}
-                          placeholder="Selecione uma trilha"
+                          placeholder="Selecione uma área"
                           required
                           id="areaRelacionada"
                         />
@@ -670,11 +671,12 @@ const GerenciarCursos = () => {
                   </label>
                   <textarea
                     id="descricaoEdicao"
+                    maxLength={600}
                     {...registerEdicao('descricao', {
                       required: 'Descrição é obrigatória',
                       maxLength: {
-                        value: 300,
-                        message: 'Descrição deve ter no máximo 300 caracteres'
+                        value: 600,
+                        message: 'Descrição deve ter no máximo 600 caracteres'
                       }
                     })}
                     disabled={carregandoEdicao}
@@ -699,11 +701,12 @@ const GerenciarCursos = () => {
                   <input
                     type="url"
                     id="linkCursoEdicao"
+                    maxLength={200}
                     {...registerEdicao('linkCurso', {
                       required: 'Link do curso é obrigatório',
                       maxLength: {
-                        value: 100,
-                        message: 'Link deve ter no máximo 100 caracteres'
+                        value: 200,
+                        message: 'Link deve ter no máximo 200 caracteres'
                       }
                     })}
                     disabled={carregandoEdicao}
@@ -722,13 +725,13 @@ const GerenciarCursos = () => {
                     htmlFor="areaRelacionadaEdicao" 
                     className="block text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2"
                   >
-                    Trilha Relacionada <span className="text-red-500">*</span>
+                    Área Relacionada <span className="text-red-500">*</span>
                   </label>
                   <Controller
                     name="areaRelacionada"
                     control={controlEdicao}
                     rules={{
-                      required: 'Trilha relacionada é obrigatória'
+                      required: 'Área relacionada é obrigatória'
                     }}
                     render={({ field }) => {
                       const nomesTrilhas = trilhas.map(trilha => trilha.nomeTrilha)

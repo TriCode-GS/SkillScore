@@ -1,15 +1,23 @@
 import { useState, useEffect } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../Contexto/AutenticacaoContexto'
 import Cabecalho from '../../Components/Cabecalho/Cabecalho'
 import Botao from '../../Components/Botao/Botao'
 import Rodape from '../../Components/Rodape/Rodape'
+import ListaSelecao from '../../Components/ListaSelecao/ListaSelecao'
 import { listarTrilhas, cadastrarTrilha, editarTrilha, excluirTrilha, type TrilhaData, type TrilhaResponse } from '../../Types/Trilha'
+import { listarCursosPorArea, type CursoResponse } from '../../Types/Curso'
+import { cadastrarTrilhaCurso, listarCursosPorTrilha, removerCursoDaTrilha } from '../../Types/TrilhaCurso'
 
 interface TrilhaFormData {
   nomeTrilha: string
-  status?: string
+  numFases?: number
+  curso1?: string
+  curso2?: string
+  curso3?: string
+  curso4?: string
+  curso5?: string
 }
 
 const GerenciarTrilhas = () => {
@@ -31,9 +39,28 @@ const GerenciarTrilhas = () => {
   const [carregandoCadastro, setCarregandoCadastro] = useState(false)
   const [carregandoEdicao, setCarregandoEdicao] = useState(false)
   const [carregandoExclusao, setCarregandoExclusao] = useState(false)
+  const [cursosDisponiveis, setCursosDisponiveis] = useState<CursoResponse[]>([])
+  const [carregandoCursos, setCarregandoCursos] = useState(false)
+  const [cursosDisponiveisEdicao, setCursosDisponiveisEdicao] = useState<CursoResponse[]>([])
+  const [carregandoCursosEdicao, setCarregandoCursosEdicao] = useState(false)
+  const [cursosExistentesEdicao, setCursosExistentesEdicao] = useState<{ titulo: string; ordemFase: number }[]>([])
 
-  const { register: registerCadastro, handleSubmit: handleSubmitCadastro, reset: resetCadastro, formState: { errors: errorsCadastro } } = useForm<TrilhaFormData>()
-  const { register: registerEdicao, handleSubmit: handleSubmitEdicao, reset: resetEdicao, formState: { errors: errorsEdicao } } = useForm<TrilhaFormData>()
+  const { register: registerCadastro, handleSubmit: handleSubmitCadastro, reset: resetCadastro, control: controlCadastro, watch: watchCadastro, formState: { errors: errorsCadastro } } = useForm<TrilhaFormData>()
+  const { register: registerEdicao, handleSubmit: handleSubmitEdicao, reset: resetEdicao, control: controlEdicao, watch: watchEdicao, formState: { errors: errorsEdicao } } = useForm<TrilhaFormData>()
+  
+  const nomeTrilhaWatch = watchCadastro('nomeTrilha')
+  const curso1Watch = watchCadastro('curso1')
+  const curso2Watch = watchCadastro('curso2')
+  const curso3Watch = watchCadastro('curso3')
+  const curso4Watch = watchCadastro('curso4')
+  const curso5Watch = watchCadastro('curso5')
+  
+  const nomeTrilhaEdicaoWatch = watchEdicao('nomeTrilha')
+  const curso1EdicaoWatch = watchEdicao('curso1')
+  const curso2EdicaoWatch = watchEdicao('curso2')
+  const curso3EdicaoWatch = watchEdicao('curso3')
+  const curso4EdicaoWatch = watchEdicao('curso4')
+  const curso5EdicaoWatch = watchEdicao('curso5')
 
   useEffect(() => {
     if (!isAuthenticated || !user?.isAdmin) {
@@ -45,6 +72,7 @@ const GerenciarTrilhas = () => {
     }
     carregarTrilhas()
   }, [isAuthenticated, user, navigate])
+
 
   const carregarTrilhas = async () => {
     setCarregando(true)
@@ -60,20 +88,154 @@ const GerenciarTrilhas = () => {
     }
   }
 
+  useEffect(() => {
+    const carregarCursosPorNomeTrilha = async () => {
+      if (nomeTrilhaWatch && nomeTrilhaWatch.trim().length > 0 && mostrarModalCadastro) {
+        const nomeTrilhaNormalizado = nomeTrilhaWatch.trim().toLowerCase()
+        
+        let area: string | null = null
+        
+        if (nomeTrilhaNormalizado.includes('tecnologia') || nomeTrilhaNormalizado.includes('tech')) {
+          area = 'Tecnologia'
+        } else if (nomeTrilhaNormalizado.includes('administração') || nomeTrilhaNormalizado.includes('administracao') || nomeTrilhaNormalizado.includes('admin')) {
+          area = 'Administração'
+        } else if (nomeTrilhaNormalizado.includes('recursos humanos') || nomeTrilhaNormalizado.includes('rh')) {
+          area = 'Recursos Humanos'
+        }
+        
+        if (area) {
+          setCarregandoCursos(true)
+          try {
+            const cursos = await listarCursosPorArea(area)
+            setCursosDisponiveis(cursos)
+          } catch (error) {
+            setCursosDisponiveis([])
+          } finally {
+            setCarregandoCursos(false)
+          }
+        } else {
+          setCursosDisponiveis([])
+        }
+      } else {
+        setCursosDisponiveis([])
+      }
+    }
+
+    const timeoutId = setTimeout(() => {
+      carregarCursosPorNomeTrilha()
+    }, 500)
+
+    return () => clearTimeout(timeoutId)
+  }, [nomeTrilhaWatch, mostrarModalCadastro])
+
+  useEffect(() => {
+    const carregarCursosPorNomeTrilhaEdicao = async () => {
+      if (nomeTrilhaEdicaoWatch && nomeTrilhaEdicaoWatch.trim().length > 0 && mostrarModalEdicao) {
+        const nomeTrilhaNormalizado = nomeTrilhaEdicaoWatch.trim().toLowerCase()
+        
+        let area: string | null = null
+        
+        if (nomeTrilhaNormalizado.includes('tecnologia') || nomeTrilhaNormalizado.includes('tech')) {
+          area = 'Tecnologia'
+        } else if (nomeTrilhaNormalizado.includes('administração') || nomeTrilhaNormalizado.includes('administracao') || nomeTrilhaNormalizado.includes('admin')) {
+          area = 'Administração'
+        } else if (nomeTrilhaNormalizado.includes('recursos humanos') || nomeTrilhaNormalizado.includes('rh')) {
+          area = 'Recursos Humanos'
+        }
+        
+        if (area) {
+          setCarregandoCursosEdicao(true)
+          try {
+            const cursos = await listarCursosPorArea(area)
+            setCursosDisponiveisEdicao(cursos)
+          } catch (error) {
+            setCursosDisponiveisEdicao([])
+          } finally {
+            setCarregandoCursosEdicao(false)
+          }
+        } else {
+          setCursosDisponiveisEdicao([])
+        }
+      } else {
+        setCursosDisponiveisEdicao([])
+      }
+    }
+
+    const timeoutId = setTimeout(() => {
+      carregarCursosPorNomeTrilhaEdicao()
+    }, 500)
+
+    return () => clearTimeout(timeoutId)
+  }, [nomeTrilhaEdicaoWatch, mostrarModalEdicao])
+
   const onSubmitCadastro = async (data: TrilhaFormData) => {
     setErro('')
     setCarregandoCadastro(true)
     
     try {
+      let numFases: number = 5
+      if (data.numFases !== undefined && 
+          data.numFases !== null && 
+          typeof data.numFases === 'number' && 
+          !isNaN(data.numFases) &&
+          data.numFases > 0) {
+        numFases = data.numFases
+      }
+      
+      if (!data.nomeTrilha || data.nomeTrilha.trim().length === 0) {
+        setErro('Nome da trilha é obrigatório')
+        setCarregandoCadastro(false)
+        return
+      }
+
       const trilhaData: TrilhaData = {
         nomeTrilha: data.nomeTrilha.trim(),
-        status: 'NAO INICIADA'
+        numFases: numFases
       }
       
       await cadastrarTrilha(trilhaData)
       
+      await new Promise(resolve => setTimeout(resolve, 500))
+      
+      const todasTrilhas = await listarTrilhas()
+      const trilhaCriada = todasTrilhas.find(t => t.nomeTrilha.trim() === data.nomeTrilha.trim())
+      
+      if (!trilhaCriada || !trilhaCriada.idTrilha) {
+        setErro('Erro ao cadastrar trilha: Não foi possível encontrar a trilha criada')
+        setCarregandoCadastro(false)
+        return
+      }
+
+      const idTrilha = trilhaCriada.idTrilha
+
+      const cursosSelecionados = [
+        data.curso1,
+        data.curso2,
+        data.curso3,
+        data.curso4,
+        data.curso5
+      ].filter((curso): curso is string => curso !== undefined && curso !== null && curso.trim().length > 0)
+
+      if (cursosSelecionados.length > 0) {
+        for (let i = 0; i < cursosSelecionados.length; i++) {
+          const nomeCurso = cursosSelecionados[i]
+          const cursoEncontrado = cursosDisponiveis.find(c => c.titulo === nomeCurso)
+          
+          if (cursoEncontrado && cursoEncontrado.idCurso) {
+            await cadastrarTrilhaCurso({
+              idTrilha: idTrilha,
+              idCurso: cursoEncontrado.idCurso,
+              ordemFase: i + 1,
+              statusFase: 'NAO INICIADA',
+              dataConclusao: null
+            })
+          }
+        }
+      }
+      
       resetCadastro()
       setErro('')
+      setCursosDisponiveis([])
       await carregarTrilhas()
       setMostrarModalCadastro(false)
     } catch (error) {
@@ -91,12 +253,66 @@ const GerenciarTrilhas = () => {
     setCarregandoEdicao(true)
     
     try {
+      if (!data.nomeTrilha || data.nomeTrilha.trim().length === 0) {
+        setErro('Nome da trilha é obrigatório')
+        setCarregandoEdicao(false)
+        return
+      }
+
+      let numFases: number = 5
+      if (data.numFases !== undefined && 
+          data.numFases !== null && 
+          typeof data.numFases === 'number' && 
+          !isNaN(data.numFases) &&
+          data.numFases > 0) {
+        numFases = data.numFases
+      }
+      
       const trilhaData: TrilhaData = {
         nomeTrilha: data.nomeTrilha.trim(),
-        status: null
+        numFases: numFases
       }
       
       await editarTrilha(trilhaSelecionada.idTrilha, trilhaData)
+      
+      const idTrilha = trilhaSelecionada.idTrilha
+      
+      const titulosCursosSelecionados = [
+        data.curso1,
+        data.curso2,
+        data.curso3,
+        data.curso4,
+        data.curso5
+      ].filter((titulo): titulo is string => !!titulo && titulo.trim().length > 0)
+      
+      if (titulosCursosSelecionados.length > 0) {
+        const cursosExistentes = await listarCursosPorTrilha(idTrilha)
+        
+        for (const cursoExistente of cursosExistentes) {
+          try {
+            await removerCursoDaTrilha(idTrilha, cursoExistente.idCurso)
+          } catch (error) {
+          }
+        }
+        
+        for (let i = 0; i < titulosCursosSelecionados.length; i++) {
+          const tituloCurso = titulosCursosSelecionados[i]
+          const cursoEncontrado = cursosDisponiveisEdicao.find(c => c.titulo === tituloCurso)
+          
+          if (cursoEncontrado && cursoEncontrado.idCurso) {
+            try {
+              await cadastrarTrilhaCurso({
+                idTrilha: idTrilha,
+                idCurso: cursoEncontrado.idCurso,
+                ordemFase: i + 1,
+                statusFase: 'NAO INICIADA',
+                dataConclusao: null
+              })
+            } catch (error) {
+            }
+          }
+        }
+      }
       
       resetEdicao()
       setTrilhaSelecionada(null)
@@ -129,12 +345,51 @@ const GerenciarTrilhas = () => {
     }
   }
 
-  const abrirModalEdicao = (trilha: TrilhaResponse) => {
+  const abrirModalEdicao = async (trilha: TrilhaResponse) => {
     setTrilhaSelecionada(trilha)
-    resetEdicao({
-      nomeTrilha: trilha.nomeTrilha || ''
-    })
     setMostrarModalEdicao(true)
+    setCarregandoCursosEdicao(true)
+    
+    try {
+      const nomeTrilhaNormalizado = trilha.nomeTrilha.trim().toLowerCase()
+      let area: string | null = null
+      
+      if (nomeTrilhaNormalizado.includes('tecnologia') || nomeTrilhaNormalizado.includes('tech')) {
+        area = 'Tecnologia'
+      } else if (nomeTrilhaNormalizado.includes('administração') || nomeTrilhaNormalizado.includes('administracao') || nomeTrilhaNormalizado.includes('admin')) {
+        area = 'Administração'
+      } else if (nomeTrilhaNormalizado.includes('recursos humanos') || nomeTrilhaNormalizado.includes('rh')) {
+        area = 'Recursos Humanos'
+      }
+      
+      const [cursosExistentes, cursosDisponiveis] = await Promise.all([
+        listarCursosPorTrilha(trilha.idTrilha),
+        area ? listarCursosPorArea(area) : Promise.resolve([])
+      ])
+      
+      setCursosDisponiveisEdicao(cursosDisponiveis)
+      
+      const cursosOrdenados = [...cursosExistentes].sort((a, b) => a.ordemFase - b.ordemFase)
+      
+      setCursosExistentesEdicao(cursosOrdenados.map(c => ({ titulo: c.titulo, ordemFase: c.ordemFase })))
+      
+      resetEdicao({
+        nomeTrilha: trilha.nomeTrilha || '',
+        curso1: cursosOrdenados[0]?.titulo || '',
+        curso2: cursosOrdenados[1]?.titulo || '',
+        curso3: cursosOrdenados[2]?.titulo || '',
+        curso4: cursosOrdenados[3]?.titulo || '',
+        curso5: cursosOrdenados[4]?.titulo || ''
+      })
+      } catch (error) {
+      resetEdicao({
+        nomeTrilha: trilha.nomeTrilha || ''
+      })
+      setCursosDisponiveisEdicao([])
+      setCursosExistentesEdicao([])
+    } finally {
+      setCarregandoCursosEdicao(false)
+    }
   }
 
   const abrirModalExclusao = (trilha: TrilhaResponse) => {
@@ -244,8 +499,8 @@ const GerenciarTrilhas = () => {
                     <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                       <thead className="bg-gray-50 dark:bg-gray-700">
                         <tr>
-                          <th className="px-3 sm:px-4 md:px-5 lg:px-6 py-2.5 sm:py-3 md:py-3.5 lg:py-4 text-center text-xs sm:text-sm md:text-base font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap">Nome da Trilha</th>
-                          <th className="px-3 sm:px-4 md:px-5 lg:px-6 py-2.5 sm:py-3 md:py-3.5 lg:py-4 text-center text-xs sm:text-sm md:text-base font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap">Status</th>
+                          <th className="px-3 sm:px-4 md:px-5 lg:px-6 py-2.5 sm:py-3 md:py-3.5 lg:py-4 text-center text-xs sm:text-sm md:text-base font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap">Área da Trilha</th>
+                          <th className="px-3 sm:px-4 md:px-5 lg:px-6 py-2.5 sm:py-3 md:py-3.5 lg:py-4 text-center text-xs sm:text-sm md:text-base font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap">Nº de Fases</th>
                           <th className="px-3 sm:px-4 md:px-5 lg:px-6 py-2.5 sm:py-3 md:py-3.5 lg:py-4 text-center text-xs sm:text-sm md:text-base font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap">Ações</th>
                         </tr>
                       </thead>
@@ -258,7 +513,7 @@ const GerenciarTrilhas = () => {
                               </div>
                             </td>
                             <td className="px-3 sm:px-4 md:px-5 lg:px-6 py-2.5 sm:py-3 md:py-3.5 lg:py-4 text-center text-xs sm:text-sm md:text-base text-gray-600 dark:text-gray-400 break-words">
-                              {trilha.status || 'NAO INICIADA'}
+                              {trilha.numFases ?? 0}
                             </td>
                             <td className="px-3 sm:px-4 md:px-5 lg:px-6 py-2.5 sm:py-3 md:py-3.5 lg:py-4 text-center">
                               <div className="flex flex-row justify-center items-center gap-1.5 sm:gap-2 md:gap-2.5">
@@ -307,6 +562,7 @@ const GerenciarTrilhas = () => {
                     setMostrarModalCadastro(false)
                     resetCadastro()
                     setErro('')
+                    setCursosDisponiveis([])
                   }
                 }}
                 disabled={carregandoCadastro}
@@ -336,7 +592,7 @@ const GerenciarTrilhas = () => {
                     {...registerCadastro('nomeTrilha', { required: 'Nome da trilha é obrigatório' })}
                     disabled={carregandoCadastro}
                     className="w-full px-4 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                    placeholder="Nome da trilha"
+                    placeholder="Digite o nome da trilha"
                   />
                   {errorsCadastro.nomeTrilha && (
                     <p className="mt-1 text-xs text-red-600 dark:text-red-400">
@@ -345,6 +601,70 @@ const GerenciarTrilhas = () => {
                   )}
                 </div>
 
+                {nomeTrilhaWatch && nomeTrilhaWatch.trim().length > 0 && (
+                  <div className="space-y-3 sm:space-y-4">
+                    <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                      Selecione os 5 cursos da trilha:
+                    </p>
+                    {[1, 2, 3, 4, 5].map((numero) => {
+                      const cursoAtual = numero === 1 ? curso1Watch :
+                                       numero === 2 ? curso2Watch :
+                                       numero === 3 ? curso3Watch :
+                                       numero === 4 ? curso4Watch :
+                                       curso5Watch
+
+                      const cursosSelecionados = [
+                        numero !== 1 ? curso1Watch : null,
+                        numero !== 2 ? curso2Watch : null,
+                        numero !== 3 ? curso3Watch : null,
+                        numero !== 4 ? curso4Watch : null,
+                        numero !== 5 ? curso5Watch : null
+                      ].filter((curso): curso is string => curso !== undefined && curso !== null && curso.trim().length > 0)
+
+                      const cursosFiltrados = cursosDisponiveis
+                        .map(c => c.titulo)
+                        .filter(titulo => !cursosSelecionados.includes(titulo) || titulo === cursoAtual)
+
+                    return (
+                      <div key={numero}>
+                        <Controller
+                          name={`curso${numero}` as keyof TrilhaFormData}
+                          control={controlCadastro}
+                          rules={{
+                            required: `Curso ${numero} é obrigatório`
+                          }}
+                          render={({ field }) => (
+                            <>
+                              <ListaSelecao
+                                options={cursosFiltrados}
+                                value={typeof field.value === 'string' ? field.value : ''}
+                                onChange={field.onChange}
+                                placeholder={carregandoCursos ? 'Carregando cursos...' : nomeTrilhaWatch && nomeTrilhaWatch.trim().length > 0 ? `Selecione o curso ${numero}` : 'Preencha o nome da trilha primeiro'}
+                                label={`Curso ${numero} *`}
+                                id={`curso${numero}`}
+                                disabled={!nomeTrilhaWatch || nomeTrilhaWatch.trim().length === 0 || carregandoCadastro}
+                                required={true}
+                              />
+                              {(() => {
+                                const error = numero === 1 ? errorsCadastro.curso1 :
+                                             numero === 2 ? errorsCadastro.curso2 :
+                                             numero === 3 ? errorsCadastro.curso3 :
+                                             numero === 4 ? errorsCadastro.curso4 :
+                                             errorsCadastro.curso5
+                                return error && (
+                                  <p className="mt-1 text-xs text-red-600 dark:text-red-400">
+                                    {error.message}
+                                  </p>
+                                )
+                              })()}
+                            </>
+                          )}
+                        />
+                      </div>
+                    )
+                  })}
+                  </div>
+                )}
 
               </form>
             </div>
@@ -361,6 +681,7 @@ const GerenciarTrilhas = () => {
                       setMostrarModalCadastro(false)
                       resetCadastro()
                       setErro('')
+                      setCursosDisponiveis([])
                     }
                   }}
                   disabled={carregandoCadastro}
@@ -408,17 +729,24 @@ const GerenciarTrilhas = () => {
             </div>
 
             <div className="overflow-y-auto flex-1 px-4 sm:px-5 md:px-6 py-3 sm:py-4 md:py-5">
+              {erro && (
+                <div className="mb-3 sm:mb-4 md:mb-5 p-3 sm:p-4 md:p-5 bg-red-50 dark:bg-red-900/20 border-2 border-red-300 dark:border-red-700 rounded-lg">
+                  <p className="text-xs sm:text-sm md:text-base text-red-600 dark:text-red-400 font-semibold break-words">
+                    {erro}
+                  </p>
+                </div>
+              )}
               <form onSubmit={handleSubmitEdicao(onSubmitEdicao)} className="space-y-3 sm:space-y-4 md:space-y-5">
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    Nome da Trilha *
+                    Nome da Trilha *.
                   </label>
                   <input
                     type="text"
                     {...registerEdicao('nomeTrilha', { required: 'Nome da trilha é obrigatório' })}
                     disabled={carregandoEdicao}
                     className="w-full px-4 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                    placeholder="Nome da trilha"
+                    placeholder="Digite o nome da trilha"
                   />
                   {errorsEdicao.nomeTrilha && (
                     <p className="mt-1 text-xs text-red-600 dark:text-red-400">
@@ -426,6 +754,74 @@ const GerenciarTrilhas = () => {
                     </p>
                   )}
                 </div>
+
+                {((nomeTrilhaEdicaoWatch && nomeTrilhaEdicaoWatch.trim().length > 0) || (trilhaSelecionada && trilhaSelecionada.nomeTrilha && trilhaSelecionada.nomeTrilha.trim().length > 0)) && (
+                  <div className="space-y-3 sm:space-y-4">
+                    <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                      Selecione os 5 cursos da trilha:
+                    </p>
+                    {[1, 2, 3, 4, 5].map((numero) => {
+                      const cursoAtual = numero === 1 ? curso1EdicaoWatch :
+                                       numero === 2 ? curso2EdicaoWatch :
+                                       numero === 3 ? curso3EdicaoWatch :
+                                       numero === 4 ? curso4EdicaoWatch :
+                                       curso5EdicaoWatch
+
+                      const cursosSelecionados = [
+                        numero !== 1 ? curso1EdicaoWatch : null,
+                        numero !== 2 ? curso2EdicaoWatch : null,
+                        numero !== 3 ? curso3EdicaoWatch : null,
+                        numero !== 4 ? curso4EdicaoWatch : null,
+                        numero !== 5 ? curso5EdicaoWatch : null
+                      ].filter((curso): curso is string => curso !== undefined && curso !== null && curso.trim().length > 0)
+
+                      const titulosDisponiveis = cursosDisponiveisEdicao.map(c => c.titulo)
+                      const titulosExistentes = cursosExistentesEdicao.map(c => c.titulo)
+                      const todosTitulos = [...new Set([...titulosDisponiveis, ...titulosExistentes])]
+                      
+                      const cursosFiltrados = todosTitulos
+                        .filter(titulo => !cursosSelecionados.includes(titulo) || titulo === cursoAtual)
+
+                      return (
+                        <div key={numero}>
+                          <Controller
+                            name={`curso${numero}` as keyof TrilhaFormData}
+                            control={controlEdicao}
+                            rules={{
+                              required: `Curso ${numero} é obrigatório`
+                            }}
+                            render={({ field }) => (
+                              <>
+                                <ListaSelecao
+                                  options={cursosFiltrados.length > 0 ? cursosFiltrados : (cursosDisponiveisEdicao.length > 0 ? cursosDisponiveisEdicao.map(c => c.titulo) : cursosExistentesEdicao.map(c => c.titulo))}
+                                  value={typeof field.value === 'string' ? field.value : ''}
+                                  onChange={field.onChange}
+                                  placeholder={carregandoCursosEdicao ? 'Carregando cursos...' : `Selecione o curso ${numero}`}
+                                  label={`Curso ${numero} *`}
+                                  id={`curso${numero}Edicao`}
+                                  disabled={carregandoEdicao}
+                                  required={true}
+                                />
+                                {(() => {
+                                  const error = numero === 1 ? errorsEdicao.curso1 :
+                                               numero === 2 ? errorsEdicao.curso2 :
+                                               numero === 3 ? errorsEdicao.curso3 :
+                                               numero === 4 ? errorsEdicao.curso4 :
+                                               errorsEdicao.curso5
+                                  return error ? (
+                                    <p className="mt-1 text-xs text-red-600 dark:text-red-400">
+                                      {error.message}
+                                    </p>
+                                  ) : null
+                                })()}
+                              </>
+                            )}
+                          />
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
               </form>
             </div>
             
@@ -441,6 +837,9 @@ const GerenciarTrilhas = () => {
                       setMostrarModalEdicao(false)
                       setTrilhaSelecionada(null)
                       resetEdicao()
+                      setErro('')
+                      setCursosDisponiveisEdicao([])
+                      setCursosExistentesEdicao([])
                     }
                   }}
                   disabled={carregandoEdicao}
