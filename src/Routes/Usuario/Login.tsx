@@ -141,15 +141,6 @@ const Login = () => {
                   )}
                 </div>
                 
-                <div className="flex items-center justify-end">
-                  <a
-                    href="#"
-                    className="text-sm sm:text-base text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
-                  >
-                    Esqueceu a senha?
-                  </a>
-                </div>
-                
                 <Botao
                   type="submit"
                   variant="primary"
