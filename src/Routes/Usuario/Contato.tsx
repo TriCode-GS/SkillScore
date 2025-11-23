@@ -72,6 +72,20 @@ const Contato = () => {
                       08h às 18h
                     </p>
                   </div>
+                  <div>
+                    <h4 className="text-sm sm:text-base font-semibold text-indigo-600 dark:text-indigo-400 mb-1">
+                      E-mail
+                    </h4>
+                    <p className="text-sm sm:text-base text-gray-700 dark:text-gray-300">
+                      Você também pode entrar em contato conosco pelo e-mail:{' '}
+                      <a
+                        href="mailto:suporte.tricode@gmail.com"
+                        className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 underline"
+                      >
+                        suporte.tricode@gmail.com
+                      </a>
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
